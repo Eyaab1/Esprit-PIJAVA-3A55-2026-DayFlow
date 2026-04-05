@@ -2,6 +2,7 @@ package controllers;
 
 import model.User;
 import services.UserService;
+import utils.DbConnexion;
 
 import java.sql.SQLException;
 import java.util.Optional;
@@ -15,9 +16,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    /**
-     * Boucle menu console : connexion / inscription.
-     */
+
     public void startConsole() {
         Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -32,6 +31,7 @@ public class UserController {
                 case "2" -> runSignUp(scanner);
                 case "0" -> {
                     System.out.println("Au revoir.");
+                    DbConnexion.shutdown();
                     return;
                 }
                 default -> System.out.println("Option invalide.");

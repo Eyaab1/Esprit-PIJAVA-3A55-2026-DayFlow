@@ -10,7 +10,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-public class UserService {
+public class UserService implements CRUD<User, Integer> {
 
     private static final Pattern EMAIL_SIMPLE = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
@@ -20,11 +20,6 @@ public class UserService {
         this.userDao = userDao;
     }
 
-    /**
-     * Inscription : email unique, mot de passe hashé (BCrypt), rôle ROLE_USER, statut {@code active}.
-     *
-     * @return l’utilisateur créé (sans mot de passe en mémoire)
-     */
     public User signUp(String firstName, String lastName, String email, String rawPassword) throws SQLException {
         validateSignUp(firstName, lastName, email, rawPassword);
         String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
@@ -51,11 +46,6 @@ public class UserService {
         return user;
     }
 
-    /**
-     * Connexion par email + mot de passe. Comptes sans mot de passe (ex. Google uniquement) sont refusés.
-     *
-     * @return l’utilisateur sans mot de passe, ou vide si identifiants invalides
-     */
     public Optional<User> login(String email, String rawPassword) throws SQLException {
         if (email == null || email.isBlank() || rawPassword == null) {
             return Optional.empty();
@@ -89,5 +79,31 @@ public class UserService {
         if (rawPassword == null || rawPassword.length() < 8) {
             throw new IllegalArgumentException("Le mot de passe doit contenir au moins 8 caractères.");
         }
+    }
+
+    @Override
+    public void create(User entity) throws SQLException {
+        insert(entity);
+    }
+
+    @Override
+    public void insert(User entity) throws SQLException {
+        userDao.insert(entity);
+    }
+
+    @Override
+    public void update(User entity) throws SQLException {
+        if (entity.getId() == null) {
+            throw new IllegalArgumentException("id obligatoire pour update");
+        }
+        userDao.update(entity);
+    }
+
+    @Override
+    public void delete(Integer id) throws SQLException {
+        if (id == null) {
+            throw new IllegalArgumentException("id obligatoire pour delete");
+        }
+        userDao.delete(id);
     }
 }

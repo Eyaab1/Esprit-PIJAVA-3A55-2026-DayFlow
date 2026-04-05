@@ -12,11 +12,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class UserDao {
+public class UserDao implements CRUD<User, Integer> {
 
     private static final ObjectMapper JSON = new ObjectMapper();
 
@@ -34,6 +35,20 @@ public class UserDao {
             ) VALUES (?, ?, ?, ?, ?, ?, ?)
             """;
 
+    private static final String UPDATE_USER = """
+            UPDATE "user" SET
+                first_name = ?, last_name = ?, email = ?, password = ?, google_id = ?,
+                roles = ?, phone_number = ?, age = ?, status = ?, speciality = ?,
+                specialities = ?, availability = ?, rating = ?, review_count = ?,
+                price_per_session = ?, bio = ?, photo_url = ?,
+                profile_picture_name = ?, profile_picture_size = ?
+            WHERE id = ?
+            """;
+
+    private static final String DELETE_USER = """
+            DELETE FROM "user" WHERE id = ?
+            """;
+
     public Optional<User> findByEmail(String email) throws SQLException {
         try (Connection c = DbConnexion.getConnection();
              PreparedStatement ps = c.prepareStatement(SELECT_BY_EMAIL)) {
@@ -47,6 +62,12 @@ public class UserDao {
         return Optional.empty();
     }
 
+    @Override
+    public void create(User user) throws SQLException {
+        insert(user);
+    }
+
+    @Override
     public void insert(User user) throws SQLException {
         try (Connection c = DbConnexion.getConnection();
              PreparedStatement ps = c.prepareStatement(INSERT_USER, Statement.RETURN_GENERATED_KEYS)) {
@@ -54,14 +75,7 @@ public class UserDao {
             ps.setString(2, user.getLastName());
             ps.setString(3, user.getEmail());
             ps.setString(4, user.getPassword());
-            PGobject jsonRoles = new PGobject();
-            jsonRoles.setType("json");
-            try {
-                jsonRoles.setValue(JSON.writeValueAsString(user.getRoles()));
-            } catch (JsonProcessingException e) {
-                throw new SQLException("Sérialisation roles JSON impossible", e);
-            }
-            ps.setObject(5, jsonRoles);
+            ps.setObject(5, toJsonRoles(user.getRoles()));
             ps.setString(6, user.getStatus());
             int reviewCount = user.getReviewCount() != null ? user.getReviewCount() : 0;
             ps.setInt(7, reviewCount);
@@ -72,6 +86,124 @@ public class UserDao {
                 }
             }
         }
+    }
+
+    @Override
+    public void update(User user) throws SQLException {
+        if (user.getId() == null) {
+            throw new SQLException("id obligatoire pour UPDATE");
+        }
+        try (Connection c = DbConnexion.getConnection();
+             PreparedStatement ps = c.prepareStatement(UPDATE_USER)) {
+            int i = 1;
+            ps.setString(i++, user.getFirstName());
+            ps.setString(i++, user.getLastName());
+            ps.setString(i++, user.getEmail());
+            ps.setString(i++, user.getPassword());
+            if (user.getGoogleId() == null) {
+                ps.setNull(i++, Types.VARCHAR);
+            } else {
+                ps.setString(i++, user.getGoogleId());
+            }
+            ps.setObject(i++, toJsonRoles(user.getRoles()));
+            if (user.getPhoneNumber() == null) {
+                ps.setNull(i++, Types.VARCHAR);
+            } else {
+                ps.setString(i++, user.getPhoneNumber());
+            }
+            if (user.getAge() == null) {
+                ps.setNull(i++, Types.INTEGER);
+            } else {
+                ps.setInt(i++, user.getAge());
+            }
+            ps.setString(i++, user.getStatus());
+            if (user.getSpeciality() == null) {
+                ps.setNull(i++, Types.VARCHAR);
+            } else {
+                ps.setString(i++, user.getSpeciality());
+            }
+            if (user.getSpecialities() == null) {
+                ps.setNull(i++, Types.OTHER);
+            } else {
+                ps.setObject(i++, toJsonList(user.getSpecialities()));
+            }
+            if (user.getAvailability() == null) {
+                ps.setNull(i++, Types.VARCHAR);
+            } else {
+                ps.setString(i++, user.getAvailability());
+            }
+            if (user.getRating() == null) {
+                ps.setNull(i++, Types.DOUBLE);
+            } else {
+                ps.setDouble(i++, user.getRating());
+            }
+            if (user.getReviewCount() == null) {
+                ps.setNull(i++, Types.INTEGER);
+            } else {
+                ps.setInt(i++, user.getReviewCount());
+            }
+            if (user.getPricePerSession() == null) {
+                ps.setNull(i++, Types.DOUBLE);
+            } else {
+                ps.setDouble(i++, user.getPricePerSession());
+            }
+            if (user.getBio() == null) {
+                ps.setNull(i++, Types.VARCHAR);
+            } else {
+                ps.setString(i++, user.getBio());
+            }
+            if (user.getPhotoUrl() == null) {
+                ps.setNull(i++, Types.VARCHAR);
+            } else {
+                ps.setString(i++, user.getPhotoUrl());
+            }
+            if (user.getProfilePictureName() == null) {
+                ps.setNull(i++, Types.VARCHAR);
+            } else {
+                ps.setString(i++, user.getProfilePictureName());
+            }
+            if (user.getProfilePictureSize() == null) {
+                ps.setNull(i++, Types.INTEGER);
+            } else {
+                ps.setInt(i++, user.getProfilePictureSize());
+            }
+            ps.setInt(i, user.getId());
+            ps.executeUpdate();
+        }
+    }
+
+    @Override
+    public void delete(Integer id) throws SQLException {
+        if (id == null) {
+            throw new SQLException("id obligatoire pour DELETE");
+        }
+        try (Connection c = DbConnexion.getConnection();
+             PreparedStatement ps = c.prepareStatement(DELETE_USER)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
+    }
+
+    private PGobject toJsonRoles(List<String> roles) throws SQLException {
+        PGobject json = new PGobject();
+        json.setType("json");
+        try {
+            json.setValue(JSON.writeValueAsString(roles != null ? roles : List.of()));
+        } catch (JsonProcessingException e) {
+            throw new SQLException("Sérialisation roles JSON impossible", e);
+        }
+        return json;
+    }
+
+    private PGobject toJsonList(List<String> values) throws SQLException {
+        PGobject json = new PGobject();
+        json.setType("json");
+        try {
+            json.setValue(JSON.writeValueAsString(values));
+        } catch (JsonProcessingException e) {
+            throw new SQLException("Sérialisation JSON impossible", e);
+        }
+        return json;
     }
 
     private User mapRow(ResultSet rs) throws SQLException {
