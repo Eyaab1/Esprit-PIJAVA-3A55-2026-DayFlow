@@ -1,4 +1,4 @@
-package model;
+package model.goals_activity_management;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

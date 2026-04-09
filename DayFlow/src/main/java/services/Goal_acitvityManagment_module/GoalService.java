@@ -1,6 +1,6 @@
 package services.Goal_acitvityManagment_module;
 
-import model.Goal;
+import model.goals_activity_management.Goal;
 import services.CRUD;
 import utils.DbConnexion;
 

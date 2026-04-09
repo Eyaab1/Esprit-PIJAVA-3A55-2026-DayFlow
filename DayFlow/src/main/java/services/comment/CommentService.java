@@ -1,6 +1,6 @@
 package services.comment;
 
-import model.Comment;
+import model.interaction.Comment;
 import services.CRUD;
 import utils.DbConnexion;
 

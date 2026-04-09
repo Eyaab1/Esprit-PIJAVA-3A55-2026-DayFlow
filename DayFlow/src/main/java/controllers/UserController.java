@@ -1,6 +1,6 @@
 package controllers;
 
-import model.User;
+import model.user.User;
 import services.UserServices.UserService;
 import utils.DbConnexion;
 

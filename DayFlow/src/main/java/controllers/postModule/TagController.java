@@ -1,6 +1,6 @@
 package controllers.postModule;
 
-import model.Tag;
+import model.interaction.Tag;
 import services.tag.TagService;
 
 import java.sql.SQLException;

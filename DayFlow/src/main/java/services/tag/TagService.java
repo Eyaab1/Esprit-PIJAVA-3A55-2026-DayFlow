@@ -1,6 +1,6 @@
 package services.tag;
 
-import model.Tag;
+import model.interaction.Tag;
 import services.CRUD;
 import utils.DbConnexion;
 

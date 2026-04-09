@@ -1,6 +1,6 @@
 package services.coaching_session_module;
 
-import model.Session;
+import model.coaching_session.Session;
 import services.CRUD;
 import utils.DbConnexion;
 

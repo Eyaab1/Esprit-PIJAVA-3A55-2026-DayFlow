@@ -1,7 +1,8 @@
-package services;
+package services.chatroom_module;
 
-import model.GoalParticipation;
-import utils.MyConnection;
+import model.goals_activity_management.GoalParticipation;
+import services.CRUD;
+import utils.DbConnexion;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,10 +11,10 @@ import java.sql.Timestamp;
 
 public class GoalParticipationService implements CRUD<GoalParticipation, Integer> {
 
-    private Connection cnx;
+    private final Connection cnx;
 
     public GoalParticipationService() {
-        cnx = MyConnection.getInstance().getCnx();
+        cnx = DbConnexion.getInstance().getCnx();
     }
 
     @Override
@@ -33,8 +34,6 @@ public class GoalParticipationService implements CRUD<GoalParticipation, Integer
         ps.setString(5, gp.getStatus());
 
         ps.executeUpdate();
-
-        System.out.println("Participation added 👥");
     }
 
     @Override
@@ -47,8 +46,6 @@ public class GoalParticipationService implements CRUD<GoalParticipation, Integer
         ps.setInt(3, gp.getId());
 
         ps.executeUpdate();
-
-        System.out.println("Participation updated 🔄");
     }
 
     @Override
@@ -59,7 +56,5 @@ public class GoalParticipationService implements CRUD<GoalParticipation, Integer
         ps.setInt(1, id);
 
         ps.executeUpdate();
-
-        System.out.println("Participation removed ❌");
     }
 }

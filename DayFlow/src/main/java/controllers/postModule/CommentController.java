@@ -1,6 +1,6 @@
 package controllers.postModule;
 
-import model.Comment;
+import model.interaction.Comment;
 import services.comment.CommentService;
 
 import java.sql.SQLException;

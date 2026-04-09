@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import enums.PostStatus;
-import model.Post;
+import model.interaction.Post;
 import org.postgresql.util.PGobject;
 import services.CRUD;
 import utils.DbConnexion;

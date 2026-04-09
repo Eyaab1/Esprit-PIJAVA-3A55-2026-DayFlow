@@ -1,7 +1,7 @@
 
 package services.coaching_session_module;
 
-import model.CoachingRequest;
+import model.coaching_session.CoachingRequest;
 import services.CRUD;
 import utils.DbConnexion;
 

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import enums.UserRole;
-import model.User;
+import model.user.User;
 import org.postgresql.util.PGobject;
 import services.CRUD;
 import utils.DbConnexion;

@@ -1,4 +1,4 @@
-package model;
+package model.interaction;
 
 import enums.PostStatus;
 

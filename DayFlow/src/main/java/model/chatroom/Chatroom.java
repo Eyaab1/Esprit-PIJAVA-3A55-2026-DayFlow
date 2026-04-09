@@ -1,4 +1,4 @@
-package model;
+package model.chatroom;
 
 import java.time.LocalDateTime;
 
@@ -9,20 +9,17 @@ public class Chatroom {
     private int goalId;
     private String state;
 
-    // 🔹 constructeur par défaut
     public Chatroom() {
         this.createdAt = LocalDateTime.now();
         this.state = "active";
     }
 
-    // 🔹 constructeur avec paramètres
     public Chatroom(int goalId, String state) {
         setGoalId(goalId);
         setState(state);
         this.createdAt = LocalDateTime.now();
     }
 
-    // 🔒 validation
     public void setState(String state) {
         if (state == null || state.isEmpty()) {
             throw new IllegalArgumentException("State required");
@@ -40,7 +37,6 @@ public class Chatroom {
         this.goalId = goalId;
     }
 
-    // 🔹 getters (TRÈS IMPORTANT pour JDBC)
     public int getId() {
         return id;
     }
@@ -57,7 +53,6 @@ public class Chatroom {
         return createdAt;
     }
 
-    // 🔹 setters utiles
     public void setId(int id) {
         this.id = id;
     }

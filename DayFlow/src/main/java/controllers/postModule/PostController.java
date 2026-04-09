@@ -1,8 +1,8 @@
 package controllers.postModule;
 
-import model.Comment;
-import model.Post;
-import model.Tag;
+import model.interaction.Comment;
+import model.interaction.Post;
+import model.interaction.Tag;
 import services.comment.CommentService;
 import services.post.PostService;
 import services.tag.TagService;

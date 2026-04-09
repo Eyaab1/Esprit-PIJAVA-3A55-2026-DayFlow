@@ -1,4 +1,4 @@
-package model;
+package model.coaching_session;
 
 import java.util.Date;
 

@@ -1,6 +1,6 @@
 package tests;
 
-import model.User;
+import model.user.User;
 import org.junit.jupiter.api.Test;
 import services.UserServices.UserService;
 import utils.PasswordHasher;

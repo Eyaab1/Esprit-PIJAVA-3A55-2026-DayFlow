@@ -1,19 +1,19 @@
-package model;
+package model.interaction;
 
 import java.time.LocalDateTime;
 
-public class PostLike {
+public class CommentLike {
 
-    public static final String TABLE = "post_like";
+    public static final String TABLE = "comment_like";
 
     public Integer id;
-    public Integer postId;
+    public Integer commentId;
     public Integer userId;
     public LocalDateTime createdAt;
 
-    public PostLike(Integer id, Integer postId, Integer userId, LocalDateTime createdAt) {
+    public CommentLike(Integer id, Integer commentId, Integer userId, LocalDateTime createdAt) {
         this.id = id;
-        this.postId = postId;
+        this.commentId = commentId;
         this.userId = userId;
         this.createdAt = createdAt;
     }
@@ -26,12 +26,12 @@ public class PostLike {
         this.id = id;
     }
 
-    public Integer getPostId() {
-        return postId;
+    public Integer getCommentId() {
+        return commentId;
     }
 
-    public void setPostId(Integer postId) {
-        this.postId = postId;
+    public void setCommentId(Integer commentId) {
+        this.commentId = commentId;
     }
 
     public Integer getUserId() {

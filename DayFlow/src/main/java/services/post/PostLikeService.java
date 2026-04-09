@@ -1,6 +1,6 @@
 package services.post;
 
-import model.PostLike;
+import model.interaction.PostLike;
 import services.CRUD;
 import utils.DbConnexion;
 

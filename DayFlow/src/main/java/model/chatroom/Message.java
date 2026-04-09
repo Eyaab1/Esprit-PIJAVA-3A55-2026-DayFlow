@@ -1,4 +1,4 @@
-package model;
+package model.chatroom;
 
 import java.time.LocalDateTime;
 
@@ -13,14 +13,12 @@ public class Message {
     private int chatroomId;
     private int authorId;
 
-    // 🔹 constructeur par défaut
     public Message() {
         this.createdAt = LocalDateTime.now();
         this.isPinned = false;
         this.isEdited = false;
     }
 
-    // 🔹 constructeur avec paramètres
     public Message(String content, int chatroomId, int authorId) {
         setContent(content);
         setChatroomId(chatroomId);
@@ -30,7 +28,6 @@ public class Message {
         this.isEdited = false;
     }
 
-    // 🔒 validation
     public void setContent(String content) {
         if (content == null || content.trim().isEmpty()) {
             throw new IllegalArgumentException("Content required");
@@ -55,7 +52,6 @@ public class Message {
         this.authorId = authorId;
     }
 
-    // 🔹 getters (OBLIGATOIRE pour service)
     public int getId() {
         return id;
     }
@@ -84,7 +80,6 @@ public class Message {
         return isEdited;
     }
 
-    // 🔹 setters utiles
     public void setId(int id) {
         this.id = id;
     }

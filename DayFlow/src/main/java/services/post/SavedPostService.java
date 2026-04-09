@@ -1,6 +1,6 @@
 package services.post;
 
-import model.SavedPost;
+import model.interaction.SavedPost;
 import services.CRUD;
 import utils.DbConnexion;
 

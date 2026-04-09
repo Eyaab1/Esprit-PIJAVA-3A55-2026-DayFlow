@@ -1,7 +1,9 @@
 package tests;
 
 import enums.PostStatus;
-import model.*;
+import model.interaction.Comment;
+import model.interaction.Post;
+import model.interaction.Tag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

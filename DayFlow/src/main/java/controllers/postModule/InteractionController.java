@@ -1,8 +1,8 @@
 package controllers.postModule;
 
-import model.CommentLike;
-import model.PostLike;
-import model.SavedPost;
+import model.interaction.CommentLike;
+import model.interaction.PostLike;
+import model.interaction.SavedPost;
 import services.comment.CommentLikeService;
 import services.post.PostLikeService;
 import services.post.SavedPostService;

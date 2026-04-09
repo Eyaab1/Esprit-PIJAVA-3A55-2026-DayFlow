@@ -1,7 +1,8 @@
-package services;
+package services.chatroom_module;
 
-import model.Message;
-import utils.MyConnection;
+import model.chatroom.Message;
+import services.CRUD;
+import utils.DbConnexion;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,10 +11,10 @@ import java.sql.Timestamp;
 
 public class MessageService implements CRUD<Message, Integer> {
 
-    private Connection cnx;
+    private final Connection cnx;
 
     public MessageService() {
-        cnx = MyConnection.getInstance().getCnx();
+        cnx = DbConnexion.getInstance().getCnx();
     }
 
     @Override
@@ -34,8 +35,6 @@ public class MessageService implements CRUD<Message, Integer> {
         ps.setInt(6, message.getAuthorId());
 
         ps.executeUpdate();
-
-        System.out.println("Message sent 💬");
     }
 
     @Override
@@ -49,8 +48,6 @@ public class MessageService implements CRUD<Message, Integer> {
         ps.setInt(4, message.getId());
 
         ps.executeUpdate();
-
-        System.out.println("Message updated ✏️");
     }
 
     @Override
@@ -61,7 +58,5 @@ public class MessageService implements CRUD<Message, Integer> {
         ps.setInt(1, id);
 
         ps.executeUpdate();
-
-        System.out.println("Message deleted ❌");
     }
 }

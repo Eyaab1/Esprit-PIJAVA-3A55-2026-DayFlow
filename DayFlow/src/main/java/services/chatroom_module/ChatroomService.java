@@ -1,7 +1,8 @@
-package services;
+package services.chatroom_module;
 
-import model.Chatroom;
-import utils.MyConnection;
+import model.chatroom.Chatroom;
+import services.CRUD;
+import utils.DbConnexion;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,10 +11,10 @@ import java.sql.Timestamp;
 
 public class ChatroomService implements CRUD<Chatroom, Integer> {
 
-    private Connection cnx;
+    private final Connection cnx;
 
     public ChatroomService() {
-        cnx = MyConnection.getInstance().getCnx();
+        cnx = DbConnexion.getInstance().getCnx();
     }
 
     @Override
@@ -31,8 +32,6 @@ public class ChatroomService implements CRUD<Chatroom, Integer> {
         ps.setTimestamp(3, Timestamp.valueOf(chatroom.getCreatedAt()));
 
         ps.executeUpdate();
-
-        System.out.println("Chatroom created successfully 💬");
     }
 
     @Override
@@ -45,8 +44,6 @@ public class ChatroomService implements CRUD<Chatroom, Integer> {
         ps.setInt(3, chatroom.getId());
 
         ps.executeUpdate();
-
-        System.out.println("Chatroom updated 🔄");
     }
 
     @Override
@@ -57,7 +54,5 @@ public class ChatroomService implements CRUD<Chatroom, Integer> {
         ps.setInt(1, id);
 
         ps.executeUpdate();
-
-        System.out.println("Chatroom deleted ❌");
     }
 }

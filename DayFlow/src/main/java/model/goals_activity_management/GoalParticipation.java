@@ -1,15 +1,13 @@
-package model;
+package model.goals_activity_management;
 
 import java.time.LocalDateTime;
 
 public class GoalParticipation {
 
-    // 🔹 roles
     public static final String ROLE_MEMBER = "MEMBER";
     public static final String ROLE_ADMIN = "ADMIN";
     public static final String ROLE_OWNER = "OWNER";
 
-    // 🔹 status
     public static final String STATUS_PENDING = "PENDING";
     public static final String STATUS_APPROVED = "APPROVED";
     public static final String STATUS_REJECTED = "REJECTED";
@@ -21,14 +19,12 @@ public class GoalParticipation {
     private String role;
     private String status;
 
-    // 🔹 constructeur par défaut
     public GoalParticipation() {
         this.createdAt = LocalDateTime.now();
         this.role = ROLE_MEMBER;
         this.status = STATUS_APPROVED;
     }
 
-    // 🔹 constructeur avec paramètres
     public GoalParticipation(int userId, int goalId) {
         setUserId(userId);
         setGoalId(goalId);
@@ -37,7 +33,6 @@ public class GoalParticipation {
         this.status = STATUS_APPROVED;
     }
 
-    // 🔒 validation
     public void setUserId(int userId) {
         if (userId <= 0) {
             throw new IllegalArgumentException("Invalid user ID");
@@ -70,7 +65,6 @@ public class GoalParticipation {
         this.status = status;
     }
 
-    // 🔹 getters (OBLIGATOIRE pour service)
     public int getId() {
         return id;
     }
@@ -95,7 +89,6 @@ public class GoalParticipation {
         return status;
     }
 
-    // 🔹 setters utiles
     public void setId(int id) {
         this.id = id;
     }
