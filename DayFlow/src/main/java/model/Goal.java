@@ -1,3 +1,5 @@
+package model;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -156,6 +158,10 @@ public class Goal {
     public void setUpdatedAt(LocalDateTime t)   { this.updatedAt = t; }
 
     // ─── Getters ──────────────────────────────────────────────
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public int            getId()            { return id; }
     public String         getTitle()         { return title; }

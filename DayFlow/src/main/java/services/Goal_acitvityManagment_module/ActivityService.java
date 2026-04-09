@@ -1,6 +1,7 @@
-package services;
+package services.Goal_acitvityManagment_module;
 
 import model.Activity;
+import services.CRUD;
 import utils.DbConnexion;
 
 import java.sql.*;
