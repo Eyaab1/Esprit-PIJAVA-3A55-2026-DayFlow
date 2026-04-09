@@ -37,8 +37,9 @@ public class UserService implements CRUD<User, Integer> {
 
     private static final String INSERT_USER = """
             INSERT INTO "user" (
-                first_name, last_name, email, password, roles, status, review_count
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                first_name, last_name, email, password, roles, status, review_count,
+                created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             """;
 
     private static final String UPDATE_USER = """
@@ -56,6 +57,13 @@ public class UserService implements CRUD<User, Integer> {
             """;
 
     public User signUp(String firstName, String lastName, String email, String rawPassword) throws SQLException {
+        return signUp(firstName, lastName, email, rawPassword, UserRole.USER);
+    }
+
+    /**
+     * Inscription avec rôle demandé (ex. interface graphique). Le rôle {@code ADMIN} n'est pas attribuable à l'inscription.
+     */
+    public User signUp(String firstName, String lastName, String email, String rawPassword, UserRole role) throws SQLException {
         validateSignUp(firstName, lastName, email, rawPassword);
         String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
         if (findByEmail(normalizedEmail).isPresent()) {
@@ -66,7 +74,11 @@ public class UserService implements CRUD<User, Integer> {
         user.setLastName(lastName.trim());
         user.setEmail(normalizedEmail);
         user.setPassword(PasswordHasher.hash(rawPassword));
-        user.setRoles(List.of(UserRole.USER.getValue()));
+        UserRole assigned = role != null ? role : UserRole.USER;
+        if (assigned == UserRole.ADMIN) {
+            assigned = UserRole.USER;
+        }
+        user.setRoles(List.of(assigned.getValue()));
         user.setStatus("active");
         user.setReviewCount(0);
         try {

@@ -2,8 +2,8 @@ package controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import model.Chatroom;
-import services.chatroom.ChatroomService;
+import model.chatroom.Chatroom;
+import services.chatroom_module.ChatroomService;
 
 import java.sql.SQLException;
 

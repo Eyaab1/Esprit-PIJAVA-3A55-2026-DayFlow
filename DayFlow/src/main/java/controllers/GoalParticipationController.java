@@ -2,8 +2,8 @@ package controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import model.GoalParticipation;
-import services.chatroom.GoalParticipationService;
+import model.goals_activity_management.GoalParticipation;
+import services.chatroom_module.GoalParticipationService;
 
 import java.sql.SQLException;
 

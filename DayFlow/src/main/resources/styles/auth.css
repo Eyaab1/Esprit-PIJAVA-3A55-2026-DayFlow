@@ -1,0 +1,55 @@
+.root {
+    -fx-background-color: linear-gradient(to bottom right, #f4f7ff, #e9efff);
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+}
+
+.auth-card {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.12), 18, 0.2, 0, 6);
+}
+
+.auth-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1d2a4d;
+}
+
+.auth-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #5d6b8a;
+}
+
+.text-field,
+.password-field,
+.date-picker,
+.choice-box {
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #d3dbef;
+    -fx-padding: 8 12 8 12;
+}
+
+.primary-button {
+    -fx-background-color: #3e63dd;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+}
+
+.primary-button:hover {
+    -fx-background-color: #3554bc;
+}
+
+.secondary-button {
+    -fx-background-color: #eef2ff;
+    -fx-text-fill: #2f4fb7;
+    -fx-background-radius: 10;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #e2e9ff;
+}
