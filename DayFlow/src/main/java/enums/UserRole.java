@@ -1,8 +1,6 @@
 package enums;
 
-/**
- * Équivalent de {@code App\Enum\UserRole} (Symfony / PHP backed enum string).
- */
+
 public enum UserRole {
 
     USER("ROLE_USER"),
@@ -15,16 +13,11 @@ public enum UserRole {
         this.value = value;
     }
 
-    /** Valeur persistée en base / Symfony ({@code ROLE_*}). */
     public String getValue() {
         return value;
     }
 
-    /**
-     * Résout une valeur {@code ROLE_*} venant de la base ou de l’API.
-     *
-     * @throws IllegalArgumentException si la chaîne ne correspond à aucun rôle
-     */
+ 
     public static UserRole fromValue(String role) {
         if (role == null || role.isBlank()) {
             throw new IllegalArgumentException("Rôle null ou vide");

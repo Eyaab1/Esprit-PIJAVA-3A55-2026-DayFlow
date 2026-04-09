@@ -6,10 +6,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-/**
- * Pool de connexions JDBC : la configuration et le pool HikariCP sont créés une seule fois.
- * Chaque {@link #getConnection()} emprunte une connexion ; la fermer (ex. try-with-resources) la rend au pool.
- */
+
 public final class DbConnexion {
 
     private static final String URL = "jdbc:postgresql://localhost:5432/pidev_db";
@@ -43,7 +40,6 @@ public final class DbConnexion {
         return getOrCreateDataSource().getConnection();
     }
 
-    /** Ferme le pool (à appeler à l’arrêt de l’application). */
     public static void shutdown() {
         synchronized (DbConnexion.class) {
             if (dataSource != null) {
