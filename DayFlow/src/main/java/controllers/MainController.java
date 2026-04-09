@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.navigation.NavigationManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -25,6 +26,10 @@ public class MainController {
     }
 
     private void openWindow(String fxmlPath, String title) throws IOException {
+        if (NavigationManager.isInitialized()) {
+            NavigationManager.show(fxmlPath, title);
+            return;
+        }
         FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
         Stage stage = new Stage();
         stage.setTitle(title);

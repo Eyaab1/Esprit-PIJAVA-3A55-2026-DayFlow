@@ -6,10 +6,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 import model.user.User;
+import controllers.components.NavbarController;
+import controllers.navigation.NavigationManager;
 import services.UserServices.UserService;
+import session.AppSession;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Optional;
 
@@ -40,9 +43,13 @@ public class LoginController {
             Optional<User> user = userService.login(emailField.getText(), passwordField.getText());
             if (user.isPresent()) {
                 User u = user.get();
-                new Alert(Alert.AlertType.INFORMATION,
-                        "Bienvenue, " + u.getFirstName() + " " + u.getLastName()
-                                + "\n" + u.getEmail() + "\nRôles : " + u.getRoles()).showAndWait();
+                AppSession.setCurrentUser(u);
+                NavbarController.refreshFromSession();
+                try {
+                    NavigationManager.show("/views/home_dashboard.fxml", "DayFlow — Accueil");
+                } catch (IOException io) {
+                    new Alert(Alert.AlertType.ERROR, io.getMessage()).showAndWait();
+                }
             } else {
                 new Alert(Alert.AlertType.ERROR, "Email ou mot de passe incorrect.").showAndWait();
             }
@@ -53,9 +60,8 @@ public class LoginController {
 
     private void navigateToSignup() {
         try {
-            Stage stage = (Stage) loginButton.getScene().getWindow();
-            AuthNavigation.showSignup(stage);
-        } catch (Exception ex) {
+            AuthNavigation.showSignup();
+        } catch (IOException ex) {
             new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
         }
     }

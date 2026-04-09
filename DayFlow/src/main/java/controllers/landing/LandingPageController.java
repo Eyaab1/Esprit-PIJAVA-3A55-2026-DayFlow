@@ -6,7 +6,8 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class LandingPageController {
 
@@ -24,13 +25,13 @@ public class LandingPageController {
     private VBox anchorTestimonials;
 
     @FXML
-    private void onConnexion(ActionEvent e) throws Exception {
-        AuthNavigation.showLogin(stageFrom(e));
+    private void onConnexion(ActionEvent e) throws IOException {
+        AuthNavigation.showLogin();
     }
 
     @FXML
-    private void onSignup(ActionEvent e) throws Exception {
-        AuthNavigation.showSignup(stageFrom(e));
+    private void onSignup(ActionEvent e) throws IOException {
+        AuthNavigation.showSignup();
     }
 
     @FXML
@@ -84,22 +85,18 @@ public class LandingPageController {
     }
 
     @FXML
-    private void onFooterConnexion(ActionEvent e) throws Exception {
-        AuthNavigation.showLogin(stageFrom(e));
+    private void onFooterConnexion(ActionEvent e) throws IOException {
+        AuthNavigation.showLogin();
     }
 
     @FXML
-    private void onFooterInscription(ActionEvent e) throws Exception {
-        AuthNavigation.showSignup(stageFrom(e));
+    private void onFooterInscription(ActionEvent e) throws IOException {
+        AuthNavigation.showSignup();
     }
 
     @FXML
     private void onFooterGoogle(@SuppressWarnings("unused") ActionEvent e) {
         /* OAuth Google — à brancher */
-    }
-
-    private static Stage stageFrom(ActionEvent e) {
-        return (Stage) ((Node) e.getSource()).getScene().getWindow();
     }
 
     private void scrollTo(Node node) {

@@ -8,10 +8,10 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 import model.user.User;
 import services.UserServices.UserService;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 public class SignupController {
@@ -83,9 +83,8 @@ public class SignupController {
 
     private void navigateToLogin() {
         try {
-            Stage stage = (Stage) signupButton.getScene().getWindow();
-            AuthNavigation.showLogin(stage);
-        } catch (Exception ex) {
+            AuthNavigation.showLogin();
+        } catch (IOException ex) {
             new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
         }
     }
