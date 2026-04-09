@@ -2,6 +2,7 @@ package model.reclamation;
 
 import enums.ReclamationStatus;
 import enums.ReclamationType;
+import model.user.User;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,8 +20,10 @@ public class Reclamation {
     private ReclamationStatus status;
     private LocalDateTime createdAt;
     private String photoPath;
-    /** Référence logique à {@code model.user.User} (colonne {@code user_id}). */
+    /** Colonne {@code user_id} (JDBC). */
     private Integer userId;
+    /** ManyToOne {@code user} (Symfony). */
+    private User user;
     private final List<Response> responses = new ArrayList<>();
 
     public Reclamation() {
@@ -100,10 +103,42 @@ public class Reclamation {
     }
 
     public void setUserId(Integer userId) {
-        if (userId == null || userId <= 0) {
+        if (userId == null) {
+            this.userId = null;
+            this.user = null;
+            return;
+        }
+        if (userId <= 0) {
             throw new IllegalArgumentException("L'utilisateur est obligatoire.");
         }
         this.userId = userId;
+        if (this.user != null && this.user.getId() != null && !this.user.getId().equals(userId)) {
+            this.user = null;
+        }
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        if (this.user == user) {
+            return;
+        }
+        if (this.user != null) {
+            this.user.getReclamations().remove(this);
+        }
+        this.user = user;
+        if (user != null) {
+            if (user.getId() != null) {
+                this.userId = user.getId();
+            }
+            if (!user.getReclamations().contains(this)) {
+                user.getReclamations().add(this);
+            }
+        } else {
+            this.userId = null;
+        }
     }
 
     public List<Response> getResponses() {

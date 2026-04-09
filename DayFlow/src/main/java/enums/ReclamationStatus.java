@@ -4,10 +4,11 @@ package enums;
  * Équivalent de {@code ReclamationStatusEnum} côté Symfony / Doctrine.
  */
 public enum ReclamationStatus {
-    PENDING("pending"),
-    IN_PROGRESS("in_progress"),
-    RESOLVED("resolved"),
-    REJECTED("rejected");
+    PENDING("PENDING"),
+    IN_PROGRESS("IN_PROGRESS"),
+    ANSWERED("ANSWERED"),
+    RESOLVED("RESOLVED"),
+    REJECTED("REJECTED");
 
     public final String value;
 

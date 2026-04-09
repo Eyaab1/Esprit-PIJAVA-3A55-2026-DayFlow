@@ -116,7 +116,18 @@ public class Routine {
 
     public void setDeadline(LocalDate deadline)     { this.deadline   = deadline; }
     public void setFavorite(boolean isFavorite)     { this.isFavorite = isFavorite; }
-    public void setGoal(Goal goal)                  { this.goal       = goal; }
+    public void setGoal(Goal goal) {
+        if (this.goal == goal) {
+            return;
+        }
+        if (this.goal != null) {
+            this.goal.getRoutines().remove(this);
+        }
+        this.goal = goal;
+        if (goal != null && !goal.getRoutines().contains(this)) {
+            goal.getRoutines().add(this);
+        }
+    }
     public void setUpdatedAt(LocalDateTime t)       { this.updatedAt  = t; }
 
     // ─── Getters ──────────────────────────────────────────────
@@ -138,6 +149,23 @@ public class Routine {
 
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void addActivity(Activity activity) {
+        if (activity == null || activities.contains(activity)) {
+            return;
+        }
+        activities.add(activity);
+        activity.setRoutine(this);
+    }
+
+    public void removeActivity(Activity activity) {
+        if (activity == null) {
+            return;
+        }
+        if (activities.remove(activity) && activity.getRoutine() == this) {
+            activity.setRoutine(null);
+        }
     }
 
     // ─── Business helpers ─────────────────────────────────────

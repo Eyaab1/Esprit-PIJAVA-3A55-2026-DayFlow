@@ -1,5 +1,7 @@
 package model.interaction;
 
+import model.user.User;
+
 import java.time.LocalDateTime;
 
 public class Comment {
@@ -12,8 +14,12 @@ public class Comment {
 
     public Integer postId;
     public Integer commenterId;
+    private User commenter;
 
     public Integer parentCommentId;
+
+    public Comment() {
+    }
 
     public Comment(Integer id, String content, LocalDateTime createdAt, Integer postId, Integer commenterId, Integer parentCommentId) {
         this.id = id;
@@ -62,6 +68,33 @@ public class Comment {
 
     public void setCommenterId(Integer commenterId) {
         this.commenterId = commenterId;
+        if (commenter != null && commenter.getId() != null && !commenter.getId().equals(commenterId)) {
+            this.commenter = null;
+        }
+    }
+
+    public User getCommenter() {
+        return commenter;
+    }
+
+    public void setCommenter(User user) {
+        if (this.commenter == user) {
+            return;
+        }
+        if (this.commenter != null) {
+            this.commenter.getComments().remove(this);
+        }
+        this.commenter = user;
+        if (user != null) {
+            if (user.getId() != null) {
+                this.commenterId = user.getId();
+            }
+            if (!user.getComments().contains(this)) {
+                user.getComments().add(this);
+            }
+        } else {
+            this.commenterId = null;
+        }
     }
 
     public Integer getParentCommentId() {

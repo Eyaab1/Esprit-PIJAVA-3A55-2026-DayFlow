@@ -1,5 +1,7 @@
 package model.goals_activity_management;
 
+import model.user.User;
+
 import java.time.LocalDateTime;
 
 public class GoalParticipation {
@@ -18,6 +20,11 @@ public class GoalParticipation {
     private LocalDateTime createdAt;
     private String role;
     private String status;
+
+    /** ManyToOne user (Symfony) — les IDs restent utilisés par JDBC. */
+    private User user;
+    /** ManyToOne goal (Symfony) — les IDs restent utilisés par JDBC. */
+    private Goal goal;
 
     public GoalParticipation() {
         this.createdAt = LocalDateTime.now();
@@ -38,6 +45,9 @@ public class GoalParticipation {
             throw new IllegalArgumentException("Invalid user ID");
         }
         this.userId = userId;
+        if (this.user != null && this.user.getId() != null && this.user.getId() != userId) {
+            this.user = null;
+        }
     }
 
     public void setGoalId(int goalId) {
@@ -45,6 +55,63 @@ public class GoalParticipation {
             throw new IllegalArgumentException("Invalid goal ID");
         }
         this.goalId = goalId;
+        if (this.goal != null && this.goal.getId() != goalId) {
+            this.goal = null;
+        }
+    }
+
+    public void setUser(User user) {
+        if (this.user == user) {
+            return;
+        }
+        if (this.user != null) {
+            this.user.getGoalParticipations().remove(this);
+        }
+        this.user = user;
+        if (user != null) {
+            if (user.getId() != null) {
+                this.userId = user.getId();
+            }
+            if (!user.getGoalParticipations().contains(this)) {
+                user.getGoalParticipations().add(this);
+            }
+        }
+    }
+
+    public void setGoal(Goal goal) {
+        if (this.goal == goal) {
+            return;
+        }
+        if (this.goal != null) {
+            this.goal.getGoalParticipations().remove(this);
+        }
+        this.goal = goal;
+        if (goal != null) {
+            this.goalId = goal.getId();
+            if (!goal.getGoalParticipations().contains(this)) {
+                goal.getGoalParticipations().add(this);
+            }
+        }
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public Goal getGoal() {
+        return goal;
+    }
+
+    public boolean isOwner() {
+        return ROLE_OWNER.equals(role);
+    }
+
+    public boolean isAdmin() {
+        return ROLE_ADMIN.equals(role) || isOwner();
+    }
+
+    public boolean isPending() {
+        return STATUS_PENDING.equals(status);
     }
 
     public void setRole(String role) {

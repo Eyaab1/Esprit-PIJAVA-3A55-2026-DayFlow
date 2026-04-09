@@ -1,10 +1,14 @@
 package model.goals_activity_management;
 
+import model.chatroom.Chatroom;
+import model.user.User;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Goal {
 
@@ -30,6 +34,16 @@ public class Goal {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    /** ManyToOne user — obligatoire côté Symfony (nullable: false). */
+    private User user;
+
+    /** OneToOne mappedBy goal — inverse du côté {@link Chatroom}. */
+    private Chatroom chatroom;
+
+    /** OneToMany goalParticipations. */
+    private List<GoalParticipation> goalParticipations = new ArrayList<>();
+
+    /** OneToMany routines (orphanRemoval côté Symfony). */
     private List<Routine> routines = new ArrayList<>();
 
     // Valid values
@@ -157,6 +171,26 @@ public class Goal {
     public void setTrelloBoardId(String id)     { this.trelloBoardId = id; }
     public void setUpdatedAt(LocalDateTime t)   { this.updatedAt = t; }
 
+    public void setUser(User user) {
+        if (this.user == user) {
+            return;
+        }
+        if (this.user != null) {
+            this.user.getGoals().remove(this);
+        }
+        this.user = user;
+        if (user != null && !user.getGoals().contains(this)) {
+            user.getGoals().add(this);
+        }
+    }
+
+    public void setChatroom(Chatroom chatroom) {
+        this.chatroom = chatroom;
+        if (chatroom != null && chatroom.getGoal() != this) {
+            chatroom.setGoal(this);
+        }
+    }
+
     // ─── Getters ──────────────────────────────────────────────
 
     public void setId(int id) {
@@ -177,7 +211,44 @@ public class Goal {
     public String         getTrelloBoardId() { return trelloBoardId; }
     public LocalDateTime  getCreatedAt()     { return createdAt; }
     public LocalDateTime  getUpdatedAt()     { return updatedAt; }
+    public User           getUser()          { return user; }
+    public Chatroom       getChatroom()      { return chatroom; }
+    public List<GoalParticipation> getGoalParticipations() { return goalParticipations; }
     public List<Routine>  getRoutines()      { return routines; }
+
+    public void addRoutine(Routine routine) {
+        if (routine == null || routines.contains(routine)) {
+            return;
+        }
+        routines.add(routine);
+        routine.setGoal(this);
+    }
+
+    public void removeRoutine(Routine routine) {
+        if (routine == null) {
+            return;
+        }
+        if (routines.remove(routine) && routine.getGoal() == this) {
+            routine.setGoal(null);
+        }
+    }
+
+    public void addGoalParticipation(GoalParticipation participation) {
+        if (participation == null || goalParticipations.contains(participation)) {
+            return;
+        }
+        goalParticipations.add(participation);
+        participation.setGoal(this);
+    }
+
+    public void removeGoalParticipation(GoalParticipation participation) {
+        if (participation == null) {
+            return;
+        }
+        if (goalParticipations.remove(participation) && participation.getGoal() == this) {
+            participation.setGoal(null);
+        }
+    }
 
     // ─── Lifecycle ────────────────────────────────────────────
 
@@ -236,5 +307,90 @@ public class Goal {
 
     public boolean isAtRisk() {
         return isDeadlineNear() && getProgressPercentage() < 40;
+    }
+
+    public boolean isUserParticipating(User user) {
+        if (user == null || user.getId() == null) {
+            return false;
+        }
+        for (GoalParticipation p : goalParticipations) {
+            if (p.getUser() != null && user.getId().equals(p.getUser().getId())) {
+                return true;
+            }
+            if (p.getUser() == null && p.getUserId() == user.getId().intValue()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public GoalParticipation getUserParticipation(User user) {
+        if (user == null || user.getId() == null) {
+            return null;
+        }
+        for (GoalParticipation p : goalParticipations) {
+            if (p.getUser() != null && user.getId().equals(p.getUser().getId())) {
+                return p;
+            }
+            if (p.getUser() == null && p.getUserId() == user.getId().intValue()) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    public boolean canUserModifyGoal(User user) {
+        GoalParticipation p = getUserParticipation(user);
+        return p != null && (p.isOwner() || p.isAdmin());
+    }
+
+    public boolean canUserDeleteGoal(User user) {
+        GoalParticipation p = getUserParticipation(user);
+        return p != null && p.isOwner();
+    }
+
+    public boolean canUserRemoveMembers(User user) {
+        GoalParticipation p = getUserParticipation(user);
+        return p != null && (p.isOwner() || p.isAdmin());
+    }
+
+    public List<GoalParticipation> getPendingRequests() {
+        return goalParticipations.stream()
+                .filter(GoalParticipation::isPending)
+                .collect(Collectors.toList());
+    }
+
+    public int getPendingRequestsCount() {
+        return (int) goalParticipations.stream().filter(GoalParticipation::isPending).count();
+    }
+
+    public boolean hasUserRequestedAccess(User user) {
+        GoalParticipation p = getUserParticipation(user);
+        return p != null && p.isPending();
+    }
+
+    public void updateAutoStatus() {
+        if ("archived".equals(status)) {
+            return;
+        }
+        boolean hasRoutines = false;
+        boolean allRoutinesCompleted = true;
+        for (Routine r : routines) {
+            hasRoutines = true;
+            if (!"completed".equals(r.getStatus())) {
+                allRoutinesCompleted = false;
+                break;
+            }
+        }
+        if (hasRoutines && allRoutinesCompleted && !"completed".equals(status)) {
+            status = "completed";
+            return;
+        }
+        LocalDate dateToCheck = deadline != null ? deadline : endDate;
+        if (dateToCheck != null && !"completed".equals(status)) {
+            if (LocalDate.now().isAfter(dateToCheck) && getProgressPercentage() < 50) {
+                status = "failed";
+            }
+        }
     }
 }

@@ -145,7 +145,18 @@ public class Activity {
     public void setCompletedAt(LocalDateTime completedAt)           { this.completedAt            = completedAt; }
     public void setActualDurationMinutes(Integer minutes)           { this.actualDurationMinutes  = minutes; }
     public void setPlannedDurationMinutes(Integer minutes)          { this.plannedDurationMinutes = minutes; }
-    public void setRoutine(Routine routine)                         { this.routine                = routine; }
+    public void setRoutine(Routine routine) {
+        if (this.routine == routine) {
+            return;
+        }
+        if (this.routine != null) {
+            this.routine.getActivities().remove(this);
+        }
+        this.routine = routine;
+        if (routine != null && !routine.getActivities().contains(this)) {
+            routine.getActivities().add(this);
+        }
+    }
     public void setUpdatedAt(LocalDateTime t)                       { this.updatedAt              = t; }
 
     // ─── Getters ──────────────────────────────────────────────

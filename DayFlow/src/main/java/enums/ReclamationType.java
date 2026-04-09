@@ -4,11 +4,11 @@ package enums;
  * Équivalent de {@code ReclamationTypeEnum} côté Symfony / Doctrine.
  */
 public enum ReclamationType {
-    BUG("bug"),
-    FEATURE("feature"),
-    ACCOUNT("account"),
-    PAYMENT("payment"),
-    OTHER("other");
+    BUG("BUG"),
+    FEATURE("FEATURE"),
+    ACCOUNT("ACCOUNT"),
+    PAYMENT("PAYMENT"),
+    OTHER("OTHER");
 
     public final String value;
 

@@ -1,5 +1,7 @@
 package model.chatroom;
 
+import model.goals_activity_management.Goal;
+
 import java.time.LocalDateTime;
 
 public class Chatroom {
@@ -8,6 +10,9 @@ public class Chatroom {
     private LocalDateTime createdAt;
     private int goalId;
     private String state;
+
+    /** OneToOne côté propriétaire (FK goal_id sur chatroom), inverse de {@link Goal#getChatroom()}. */
+    private Goal goal;
 
     public Chatroom() {
         this.createdAt = LocalDateTime.now();
@@ -35,6 +40,23 @@ public class Chatroom {
             throw new IllegalArgumentException("Invalid goal ID");
         }
         this.goalId = goalId;
+        if (this.goal != null && this.goal.getId() != goalId) {
+            this.goal = null;
+        }
+    }
+
+    public Goal getGoal() {
+        return goal;
+    }
+
+    public void setGoal(Goal goal) {
+        this.goal = goal;
+        if (goal != null) {
+            this.goalId = goal.getId();
+            if (goal.getChatroom() != this) {
+                goal.setChatroom(this);
+            }
+        }
     }
 
     public int getId() {
