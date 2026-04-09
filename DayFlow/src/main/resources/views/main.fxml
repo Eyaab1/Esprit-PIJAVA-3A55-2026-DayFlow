@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="20" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="controllers.MainController"
+      prefWidth="400" prefHeight="300" alignment="CENTER">
+    <padding><Insets top="30" right="40" bottom="30" left="40"/></padding>
+
+    <Label text="DayFlow" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #3f51b5;"/>
+    <Label text="Choisissez un module" style="-fx-font-size: 14; -fx-text-fill: #666;"/>
+
+    <Button text="💬  Chatrooms" onAction="#openChatroom" prefWidth="200" prefHeight="40"
+            style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14;"/>
+    <Button text="✉️  Messages" onAction="#openMessage" prefWidth="200" prefHeight="40"
+            style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 14;"/>
+    <Button text="🎯  Participations" onAction="#openGoalParticipation" prefWidth="200" prefHeight="40"
+            style="-fx-background-color: #9C27B0; -fx-text-fill: white; -fx-font-size: 14;"/>
+</VBox>
