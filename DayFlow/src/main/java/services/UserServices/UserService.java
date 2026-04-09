@@ -1,11 +1,14 @@
-package services;
+package services.UserServices;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import enums.UserRole;
 import model.User;
 import org.postgresql.util.PGobject;
+import services.CRUD;
 import utils.DbConnexion;
+import utils.PasswordHasher;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,10 +18,13 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
-public class UserDao implements CRUD<User, Integer> {
+public class UserService implements CRUD<User, Integer> {
 
+    private static final Pattern EMAIL_SIMPLE = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
     private static final ObjectMapper JSON = new ObjectMapper();
 
     private static final String SELECT_BY_EMAIL = """
@@ -49,22 +55,70 @@ public class UserDao implements CRUD<User, Integer> {
             DELETE FROM "user" WHERE id = ?
             """;
 
-    public Optional<User> findByEmail(String email) throws SQLException {
-        Connection c = DbConnexion.getConnection();
-        try (PreparedStatement ps = c.prepareStatement(SELECT_BY_EMAIL)) {
-            ps.setString(1, email);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapRow(rs));
-                }
-            }
+    public User signUp(String firstName, String lastName, String email, String rawPassword) throws SQLException {
+        validateSignUp(firstName, lastName, email, rawPassword);
+        String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
+        if (findByEmail(normalizedEmail).isPresent()) {
+            throw new IllegalArgumentException("Cet email est déjà utilisé. Utilisez un autre email ou connectez-vous.");
         }
-        return Optional.empty();
+        User user = new User();
+        user.setFirstName(firstName.trim());
+        user.setLastName(lastName.trim());
+        user.setEmail(normalizedEmail);
+        user.setPassword(PasswordHasher.hash(rawPassword));
+        user.setRoles(List.of(UserRole.USER.getValue()));
+        user.setStatus("active");
+        user.setReviewCount(0);
+        try {
+            insert(user);
+        } catch (SQLException e) {
+            if ("23505".equals(e.getSQLState())) {
+                throw new IllegalArgumentException("Cet email est déjà utilisé.", e);
+            }
+            throw e;
+        }
+        user.setPassword(null);
+        return user;
+    }
+
+    public Optional<User> login(String email, String rawPassword) throws SQLException {
+        if (email == null || email.isBlank() || rawPassword == null) {
+            return Optional.empty();
+        }
+        Optional<User> found = findByEmail(email.trim().toLowerCase(Locale.ROOT));
+        if (found.isEmpty()) {
+            return Optional.empty();
+        }
+        User user = found.get();
+        String hash = user.getPassword();
+        if (hash == null || hash.isBlank() || !PasswordHasher.matches(rawPassword, hash)) {
+            return Optional.empty();
+        }
+        user.setPassword(null);
+        return Optional.of(user);
+    }
+
+    private static void validateSignUp(String firstName, String lastName, String email, String rawPassword) {
+        if (firstName == null || firstName.isBlank()) {
+            throw new IllegalArgumentException("Le prénom est obligatoire.");
+        }
+        if (lastName == null || lastName.isBlank()) {
+            throw new IllegalArgumentException("Le nom est obligatoire.");
+        }
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("L'email est obligatoire.");
+        }
+        if (!EMAIL_SIMPLE.matcher(email.trim()).matches()) {
+            throw new IllegalArgumentException("L'email n'est pas valide.");
+        }
+        if (rawPassword == null || rawPassword.length() < 8) {
+            throw new IllegalArgumentException("Le mot de passe doit contenir au moins 8 caractères.");
+        }
     }
 
     @Override
-    public void create(User user) throws SQLException {
-        insert(user);
+    public void create(User entity) throws SQLException {
+        insert(entity);
     }
 
     @Override
@@ -182,6 +236,19 @@ public class UserDao implements CRUD<User, Integer> {
             ps.setInt(1, id);
             ps.executeUpdate();
         }
+    }
+
+    public Optional<User> findByEmail(String email) throws SQLException {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_BY_EMAIL)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapRow(rs));
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     private PGobject toJsonRoles(List<String> roles) throws SQLException {

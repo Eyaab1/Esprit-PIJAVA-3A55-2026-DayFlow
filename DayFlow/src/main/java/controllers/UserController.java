@@ -1,7 +1,7 @@
 package controllers;
 
 import model.User;
-import services.UserService;
+import services.UserServices.UserService;
 import utils.DbConnexion;
 
 import java.sql.SQLException;

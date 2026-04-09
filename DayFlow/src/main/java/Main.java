@@ -1,5 +1,5 @@
 import controllers.UserController;
-import services.UserService;
+import services.UserServices.UserService;
 
 public class Main {
 
