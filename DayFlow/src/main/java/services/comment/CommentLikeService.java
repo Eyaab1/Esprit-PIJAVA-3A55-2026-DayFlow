@@ -1,0 +1,141 @@
+package services.comment;
+
+import model.CommentLike;
+import services.CRUD;
+import utils.DbConnexion;
+
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+public class CommentLikeService implements CRUD<CommentLike, Integer> {
+
+    private static final String INSERT_COMMENT_LIKE = """
+            INSERT INTO comment_like (comment_id, user_id, created_at)
+            VALUES (?, ?, ?)
+            """;
+
+    private static final String UPDATE_COMMENT_LIKE = """
+            UPDATE comment_like SET
+                comment_id = ?, user_id = ?, created_at = ?
+            WHERE id = ?
+            """;
+
+    private static final String DELETE_COMMENT_LIKE = """
+            DELETE FROM comment_like WHERE id = ?
+            """;
+
+    private static final String SELECT_BY_ID = """
+            SELECT id, comment_id, user_id, created_at
+            FROM comment_like WHERE id = ?
+            """;
+
+    private static final String SELECT_ALL = """
+            SELECT id, comment_id, user_id, created_at
+            FROM comment_like
+            """;
+
+    private static final String SELECT_BY_COMMENT_ID = """
+            SELECT id, comment_id, user_id, created_at
+            FROM comment_like WHERE comment_id = ?
+            """;
+
+    @Override
+    public void create(CommentLike commentLike) throws SQLException {
+        insert(commentLike);
+    }
+
+    @Override
+    public void insert(CommentLike commentLike) throws SQLException {
+        try (Connection c = DbConnexion.getConnection();
+             PreparedStatement ps = c.prepareStatement(INSERT_COMMENT_LIKE, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, commentLike.getCommentId());
+            ps.setInt(2, commentLike.getUserId());
+            ps.setTimestamp(3, commentLike.getCreatedAt() != null ? Timestamp.valueOf(commentLike.getCreatedAt()) : Timestamp.valueOf(LocalDateTime.now()));
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) {
+                    commentLike.setId(keys.getInt(1));
+                }
+            }
+        }
+    }
+
+    @Override
+    public void update(CommentLike commentLike) throws SQLException {
+        if (commentLike.getId() == null) {
+            throw new SQLException("id obligatoire pour UPDATE");
+        }
+        try (Connection c = DbConnexion.getConnection();
+             PreparedStatement ps = c.prepareStatement(UPDATE_COMMENT_LIKE)) {
+            ps.setInt(1, commentLike.getCommentId());
+            ps.setInt(2, commentLike.getUserId());
+            ps.setTimestamp(3, commentLike.getCreatedAt() != null ? Timestamp.valueOf(commentLike.getCreatedAt()) : null);
+            ps.setInt(4, commentLike.getId());
+            ps.executeUpdate();
+        }
+    }
+
+    @Override
+    public void delete(Integer id) throws SQLException {
+        if (id == null) {
+            throw new SQLException("id obligatoire pour DELETE");
+        }
+        try (Connection c = DbConnexion.getConnection();
+             PreparedStatement ps = c.prepareStatement(DELETE_COMMENT_LIKE)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
+    }
+
+    public CommentLike findById(Integer id) throws SQLException {
+        try (Connection c = DbConnexion.getConnection();
+             PreparedStatement ps = c.prepareStatement(SELECT_BY_ID)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<CommentLike> findAll() throws SQLException {
+        List<CommentLike> likes = new ArrayList<>();
+        try (Connection c = DbConnexion.getConnection();
+             PreparedStatement ps = c.prepareStatement(SELECT_ALL);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                likes.add(mapRow(rs));
+            }
+        }
+        return likes;
+    }
+
+    public List<CommentLike> findByCommentId(Integer commentId) throws SQLException {
+        List<CommentLike> likes = new ArrayList<>();
+        try (Connection c = DbConnexion.getConnection();
+             PreparedStatement ps = c.prepareStatement(SELECT_BY_COMMENT_ID)) {
+            ps.setInt(1, commentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    likes.add(mapRow(rs));
+                }
+            }
+        }
+        return likes;
+    }
+
+    // Helper methods
+    private CommentLike mapRow(ResultSet rs) throws SQLException {
+        CommentLike cl = new CommentLike(null, null, null, null);
+        cl.setId(rs.getInt("id"));
+        cl.setCommentId(rs.getInt("comment_id"));
+        cl.setUserId(rs.getInt("user_id"));
+        Timestamp createdTs = rs.getTimestamp("created_at");
+        cl.setCreatedAt(createdTs != null ? createdTs.toLocalDateTime() : null);
+        return cl;
+    }
+}
