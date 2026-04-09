@@ -48,8 +48,8 @@ public class PostLikeService implements CRUD<PostLike, Integer> {
 
     @Override
     public void insert(PostLike postLike) throws SQLException {
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(INSERT_POST_LIKE, Statement.RETURN_GENERATED_KEYS)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(INSERT_POST_LIKE, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, postLike.getPostId());
             ps.setInt(2, postLike.getUserId());
             ps.setTimestamp(3, postLike.getCreatedAt() != null ? Timestamp.valueOf(postLike.getCreatedAt()) : Timestamp.valueOf(LocalDateTime.now()));
@@ -67,8 +67,8 @@ public class PostLikeService implements CRUD<PostLike, Integer> {
         if (postLike.getId() == null) {
             throw new SQLException("id obligatoire pour UPDATE");
         }
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(UPDATE_POST_LIKE)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(UPDATE_POST_LIKE)) {
             ps.setInt(1, postLike.getPostId());
             ps.setInt(2, postLike.getUserId());
             ps.setTimestamp(3, postLike.getCreatedAt() != null ? Timestamp.valueOf(postLike.getCreatedAt()) : null);
@@ -82,16 +82,16 @@ public class PostLikeService implements CRUD<PostLike, Integer> {
         if (id == null) {
             throw new SQLException("id obligatoire pour DELETE");
         }
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(DELETE_POST_LIKE)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(DELETE_POST_LIKE)) {
             ps.setInt(1, id);
             ps.executeUpdate();
         }
     }
 
     public PostLike findById(Integer id) throws SQLException {
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_BY_ID)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_BY_ID)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -104,8 +104,8 @@ public class PostLikeService implements CRUD<PostLike, Integer> {
 
     public List<PostLike> findAll() throws SQLException {
         List<PostLike> likes = new ArrayList<>();
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_ALL);
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_ALL);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 likes.add(mapRow(rs));
@@ -116,8 +116,8 @@ public class PostLikeService implements CRUD<PostLike, Integer> {
 
     public List<PostLike> findByPostId(Integer postId) throws SQLException {
         List<PostLike> likes = new ArrayList<>();
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_BY_POST_ID)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_BY_POST_ID)) {
             ps.setInt(1, postId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {

@@ -48,8 +48,8 @@ public class CommentService implements CRUD<Comment, Integer> {
 
     @Override
     public void insert(Comment comment) throws SQLException {
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(INSERT_COMMENT, Statement.RETURN_GENERATED_KEYS)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(INSERT_COMMENT, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, comment.getContent());
             ps.setTimestamp(2, comment.getCreatedAt() != null ? Timestamp.valueOf(comment.getCreatedAt()) : Timestamp.valueOf(LocalDateTime.now()));
             ps.setInt(3, comment.getPostId());
@@ -73,8 +73,8 @@ public class CommentService implements CRUD<Comment, Integer> {
         if (comment.getId() == null) {
             throw new SQLException("id obligatoire pour UPDATE");
         }
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(UPDATE_COMMENT)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(UPDATE_COMMENT)) {
             ps.setString(1, comment.getContent());
             ps.setTimestamp(2, comment.getCreatedAt() != null ? Timestamp.valueOf(comment.getCreatedAt()) : null);
             ps.setInt(3, comment.getPostId());
@@ -94,16 +94,16 @@ public class CommentService implements CRUD<Comment, Integer> {
         if (id == null) {
             throw new SQLException("id obligatoire pour DELETE");
         }
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(DELETE_COMMENT)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(DELETE_COMMENT)) {
             ps.setInt(1, id);
             ps.executeUpdate();
         }
     }
 
     public Comment findById(Integer id) throws SQLException {
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_BY_ID)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_BY_ID)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -116,8 +116,8 @@ public class CommentService implements CRUD<Comment, Integer> {
 
     public List<Comment> findAll() throws SQLException {
         List<Comment> comments = new ArrayList<>();
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_ALL);
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_ALL);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 comments.add(mapRow(rs));
@@ -128,8 +128,8 @@ public class CommentService implements CRUD<Comment, Integer> {
 
     public List<Comment> findByPostId(Integer postId) throws SQLException {
         List<Comment> comments = new ArrayList<>();
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_BY_POST_ID)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_BY_POST_ID)) {
             ps.setInt(1, postId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {

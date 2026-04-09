@@ -50,8 +50,8 @@ public class UserDao implements CRUD<User, Integer> {
             """;
 
     public Optional<User> findByEmail(String email) throws SQLException {
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_BY_EMAIL)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_BY_EMAIL)) {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -69,8 +69,8 @@ public class UserDao implements CRUD<User, Integer> {
 
     @Override
     public void insert(User user) throws SQLException {
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(INSERT_USER, Statement.RETURN_GENERATED_KEYS)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(INSERT_USER, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, user.getFirstName());
             ps.setString(2, user.getLastName());
             ps.setString(3, user.getEmail());
@@ -93,8 +93,8 @@ public class UserDao implements CRUD<User, Integer> {
         if (user.getId() == null) {
             throw new SQLException("id obligatoire pour UPDATE");
         }
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(UPDATE_USER)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(UPDATE_USER)) {
             int i = 1;
             ps.setString(i++, user.getFirstName());
             ps.setString(i++, user.getLastName());
@@ -177,8 +177,8 @@ public class UserDao implements CRUD<User, Integer> {
         if (id == null) {
             throw new SQLException("id obligatoire pour DELETE");
         }
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(DELETE_USER)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(DELETE_USER)) {
             ps.setInt(1, id);
             ps.executeUpdate();
         }
