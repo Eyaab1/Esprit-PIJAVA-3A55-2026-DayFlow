@@ -48,8 +48,8 @@ public class SavedPostService implements CRUD<SavedPost, Integer> {
 
     @Override
     public void insert(SavedPost savedPost) throws SQLException {
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(INSERT_SAVED_POST, Statement.RETURN_GENERATED_KEYS)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(INSERT_SAVED_POST, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, savedPost.getUserId());
             ps.setInt(2, savedPost.getPostId());
             ps.setTimestamp(3, savedPost.getSavedAt() != null ? Timestamp.valueOf(savedPost.getSavedAt()) : Timestamp.valueOf(LocalDateTime.now()));
@@ -67,8 +67,8 @@ public class SavedPostService implements CRUD<SavedPost, Integer> {
         if (savedPost.getId() == null) {
             throw new SQLException("id obligatoire pour UPDATE");
         }
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(UPDATE_SAVED_POST)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(UPDATE_SAVED_POST)) {
             ps.setInt(1, savedPost.getUserId());
             ps.setInt(2, savedPost.getPostId());
             ps.setTimestamp(3, savedPost.getSavedAt() != null ? Timestamp.valueOf(savedPost.getSavedAt()) : null);
@@ -82,16 +82,16 @@ public class SavedPostService implements CRUD<SavedPost, Integer> {
         if (id == null) {
             throw new SQLException("id obligatoire pour DELETE");
         }
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(DELETE_SAVED_POST)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(DELETE_SAVED_POST)) {
             ps.setInt(1, id);
             ps.executeUpdate();
         }
     }
 
     public SavedPost findById(Integer id) throws SQLException {
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_BY_ID)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_BY_ID)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -104,8 +104,8 @@ public class SavedPostService implements CRUD<SavedPost, Integer> {
 
     public List<SavedPost> findAll() throws SQLException {
         List<SavedPost> savedPosts = new ArrayList<>();
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_ALL);
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_ALL);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 savedPosts.add(mapRow(rs));
@@ -116,8 +116,8 @@ public class SavedPostService implements CRUD<SavedPost, Integer> {
 
     public List<SavedPost> findByUserId(Integer userId) throws SQLException {
         List<SavedPost> savedPosts = new ArrayList<>();
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_BY_USER_ID)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_BY_USER_ID)) {
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
