@@ -48,8 +48,8 @@ public class CommentLikeService implements CRUD<CommentLike, Integer> {
 
     @Override
     public void insert(CommentLike commentLike) throws SQLException {
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(INSERT_COMMENT_LIKE, Statement.RETURN_GENERATED_KEYS)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(INSERT_COMMENT_LIKE, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, commentLike.getCommentId());
             ps.setInt(2, commentLike.getUserId());
             ps.setTimestamp(3, commentLike.getCreatedAt() != null ? Timestamp.valueOf(commentLike.getCreatedAt()) : Timestamp.valueOf(LocalDateTime.now()));
@@ -67,8 +67,8 @@ public class CommentLikeService implements CRUD<CommentLike, Integer> {
         if (commentLike.getId() == null) {
             throw new SQLException("id obligatoire pour UPDATE");
         }
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(UPDATE_COMMENT_LIKE)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(UPDATE_COMMENT_LIKE)) {
             ps.setInt(1, commentLike.getCommentId());
             ps.setInt(2, commentLike.getUserId());
             ps.setTimestamp(3, commentLike.getCreatedAt() != null ? Timestamp.valueOf(commentLike.getCreatedAt()) : null);
@@ -82,16 +82,16 @@ public class CommentLikeService implements CRUD<CommentLike, Integer> {
         if (id == null) {
             throw new SQLException("id obligatoire pour DELETE");
         }
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(DELETE_COMMENT_LIKE)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(DELETE_COMMENT_LIKE)) {
             ps.setInt(1, id);
             ps.executeUpdate();
         }
     }
 
     public CommentLike findById(Integer id) throws SQLException {
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_BY_ID)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_BY_ID)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -104,8 +104,8 @@ public class CommentLikeService implements CRUD<CommentLike, Integer> {
 
     public List<CommentLike> findAll() throws SQLException {
         List<CommentLike> likes = new ArrayList<>();
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_ALL);
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_ALL);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 likes.add(mapRow(rs));
@@ -116,8 +116,8 @@ public class CommentLikeService implements CRUD<CommentLike, Integer> {
 
     public List<CommentLike> findByCommentId(Integer commentId) throws SQLException {
         List<CommentLike> likes = new ArrayList<>();
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_BY_COMMENT_ID)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_BY_COMMENT_ID)) {
             ps.setInt(1, commentId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {

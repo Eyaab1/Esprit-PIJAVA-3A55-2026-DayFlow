@@ -59,8 +59,8 @@ public class TagService implements CRUD<Tag, Integer> {
 
     @Override
     public void insert(Tag tag) throws SQLException {
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(INSERT_TAG, Statement.RETURN_GENERATED_KEYS)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(INSERT_TAG, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, tag.getName());
             ps.setTimestamp(2, tag.getCreatedAt() != null ? Timestamp.valueOf(tag.getCreatedAt()) : Timestamp.valueOf(LocalDateTime.now()));
             ps.setInt(3, tag.getUsageCount() != null ? tag.getUsageCount() : 0);
@@ -78,8 +78,8 @@ public class TagService implements CRUD<Tag, Integer> {
         if (tag.getId() == null) {
             throw new SQLException("id obligatoire pour UPDATE");
         }
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(UPDATE_TAG)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(UPDATE_TAG)) {
             ps.setString(1, tag.getName());
             ps.setTimestamp(2, tag.getCreatedAt() != null ? Timestamp.valueOf(tag.getCreatedAt()) : null);
             ps.setInt(3, tag.getUsageCount() != null ? tag.getUsageCount() : 0);
@@ -93,16 +93,16 @@ public class TagService implements CRUD<Tag, Integer> {
         if (id == null) {
             throw new SQLException("id obligatoire pour DELETE");
         }
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(DELETE_TAG)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(DELETE_TAG)) {
             ps.setInt(1, id);
             ps.executeUpdate();
         }
     }
 
     public Tag findById(Integer id) throws SQLException {
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_BY_ID)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_BY_ID)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -115,8 +115,8 @@ public class TagService implements CRUD<Tag, Integer> {
 
     public List<Tag> findAll() throws SQLException {
         List<Tag> tags = new ArrayList<>();
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_ALL);
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_ALL);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 tags.add(mapRow(rs));
@@ -127,8 +127,8 @@ public class TagService implements CRUD<Tag, Integer> {
 
     public List<Tag> findByPostId(Integer postId) throws SQLException {
         List<Tag> tags = new ArrayList<>();
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_BY_POST_ID)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_BY_POST_ID)) {
             ps.setInt(1, postId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -140,8 +140,8 @@ public class TagService implements CRUD<Tag, Integer> {
     }
 
     public void addTagToPost(Integer postId, Integer tagId) throws SQLException {
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(INSERT_POST_TAG)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(INSERT_POST_TAG)) {
             ps.setInt(1, postId);
             ps.setInt(2, tagId);
             ps.executeUpdate();
@@ -149,8 +149,8 @@ public class TagService implements CRUD<Tag, Integer> {
     }
 
     public void removeTagFromPost(Integer postId, Integer tagId) throws SQLException {
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(DELETE_POST_TAG)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(DELETE_POST_TAG)) {
             ps.setInt(1, postId);
             ps.setInt(2, tagId);
             ps.executeUpdate();

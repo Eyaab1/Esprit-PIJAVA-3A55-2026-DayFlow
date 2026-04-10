@@ -55,8 +55,8 @@ public class PostService implements CRUD<Post, Integer> {
 
     @Override
     public void insert(Post post) throws SQLException {
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(INSERT_POST, Statement.RETURN_GENERATED_KEYS)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(INSERT_POST, Statement.RETURN_GENERATED_KEYS)) {
             int i = 1;
             ps.setString(i++, post.getTitle());
             ps.setString(i++, post.getContent());
@@ -87,8 +87,8 @@ public class PostService implements CRUD<Post, Integer> {
         if (post.getId() == null) {
             throw new SQLException("id obligatoire pour UPDATE");
         }
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(UPDATE_POST)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(UPDATE_POST)) {
             int i = 1;
             ps.setString(i++, post.getTitle());
             ps.setString(i++, post.getContent());
@@ -114,16 +114,16 @@ public class PostService implements CRUD<Post, Integer> {
         if (id == null) {
             throw new SQLException("id obligatoire pour DELETE");
         }
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(DELETE_POST)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(DELETE_POST)) {
             ps.setInt(1, id);
             ps.executeUpdate();
         }
     }
 
     public Post findById(Integer id) throws SQLException {
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_BY_ID)) {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_BY_ID)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -136,8 +136,8 @@ public class PostService implements CRUD<Post, Integer> {
 
     public List<Post> findAll() throws SQLException {
         List<Post> posts = new ArrayList<>();
-        try (Connection c = DbConnexion.getConnection();
-             PreparedStatement ps = c.prepareStatement(SELECT_ALL);
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_ALL);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 posts.add(mapRow(rs));
