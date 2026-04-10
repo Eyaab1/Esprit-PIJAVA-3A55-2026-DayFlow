@@ -18,6 +18,12 @@ public class SavedPost {
         this.savedAt = savedAt;
     }
 
+    public SavedPost(Integer userId, Integer postId, LocalDateTime savedAt) {
+        this.userId = userId;
+        this.postId = postId;
+        this.savedAt = savedAt;
+    }
+
     public Integer getId() {
         return id;
     }

@@ -43,6 +43,20 @@ public class Post {
         this.scheduledAt = scheduledAt;
     }
 
+    public Post(String title, String content, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt, List<String> images, Integer createdById, Integer clickCount, Integer viewCount, PostStatus status, LocalDateTime scheduledAt) {
+        this.title = title;
+        this.content = content;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.deletedAt = deletedAt;
+        this.images = images;
+        this.createdById = createdById;
+        this.clickCount = clickCount;
+        this.viewCount = viewCount;
+        this.status = status;
+        this.scheduledAt = scheduledAt;
+    }
+
     public Integer getId() {
         return id;
     }

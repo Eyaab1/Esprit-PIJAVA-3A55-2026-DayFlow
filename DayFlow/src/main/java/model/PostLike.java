@@ -18,6 +18,12 @@ public class PostLike {
         this.createdAt = createdAt;
     }
 
+    public PostLike(Integer postId, Integer userId, LocalDateTime createdAt) {
+        this.postId = postId;
+        this.userId = userId;
+        this.createdAt = createdAt;
+    }
+
     public Integer getId() {
         return id;
     }

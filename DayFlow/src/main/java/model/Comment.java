@@ -24,6 +24,15 @@ public class Comment {
         this.parentCommentId = parentCommentId;
     }
 
+    public Comment(String content, LocalDateTime createdAt, Integer postId, Integer commenterId, Integer parentCommentId) {
+        this.content = content;
+        this.createdAt = createdAt;
+        this.postId = postId;
+        this.commenterId = commenterId;
+        this.parentCommentId = parentCommentId;
+    }
+
+
     public Integer getId() {
         return id;
     }

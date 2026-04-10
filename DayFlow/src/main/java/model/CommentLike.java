@@ -18,6 +18,11 @@ public class CommentLike {
         this.createdAt = createdAt;
     }
 
+    public CommentLike(Integer commentId, Integer userId, LocalDateTime createdAt) {
+        this.commentId = commentId;
+        this.userId = userId;
+        this.createdAt = createdAt;
+    }
     public Integer getId() {
         return id;
     }

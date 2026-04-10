@@ -18,6 +18,12 @@ public class Tag {
         this.usageCount = usageCount;
     }
 
+    public Tag(String name, LocalDateTime createdAt, Integer usageCount) {
+        this.name = name;
+        this.createdAt = createdAt;
+        this.usageCount = usageCount;
+    }
+
     public Integer getId() {
         return id;
     }
