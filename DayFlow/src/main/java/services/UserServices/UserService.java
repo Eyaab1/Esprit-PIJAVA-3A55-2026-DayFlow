@@ -28,13 +28,22 @@ public class UserService implements CRUD<User, Integer> {
     private static final ObjectMapper JSON = new ObjectMapper();
 
     private static final String SELECT_BY_EMAIL = """
-            SELECT id, first_name, last_name, email, password, google_id, roles,
-                   phone_number, age, status, speciality, specialities, availability,
-                   rating, review_count, price_per_session, bio, photo_url,
-                   profile_picture_name, profile_picture_size
+            SELECT id, first_name, last_name, email, password, roles,
+                   phone_number, age, status, speciality, availability,
+                   rating, review_count, price_per_session, bio, photo_url
             FROM "user" WHERE LOWER(email) = LOWER(?)
             """;
 
+<<<<<<< Updated upstream
+=======
+    private static final String SELECT_BY_ID = """
+            SELECT id, first_name, last_name, email, password, roles,
+                   phone_number, age, status, speciality, availability,
+                   rating, review_count, price_per_session, bio, photo_url
+            FROM "user" WHERE id = ?
+            """;
+
+>>>>>>> Stashed changes
     private static final String INSERT_USER = """
             INSERT INTO "user" (
                 first_name, last_name, email, password, roles, status, review_count,
@@ -44,11 +53,10 @@ public class UserService implements CRUD<User, Integer> {
 
     private static final String UPDATE_USER = """
             UPDATE "user" SET
-                first_name = ?, last_name = ?, email = ?, password = ?, google_id = ?,
+                first_name = ?, last_name = ?, email = ?, password = ?,
                 roles = ?, phone_number = ?, age = ?, status = ?, speciality = ?,
-                specialities = ?, availability = ?, rating = ?, review_count = ?,
-                price_per_session = ?, bio = ?, photo_url = ?,
-                profile_picture_name = ?, profile_picture_size = ?
+                availability = ?, rating = ?, review_count = ?,
+                price_per_session = ?, bio = ?, photo_url = ?
             WHERE id = ?
             """;
 
@@ -56,6 +64,16 @@ public class UserService implements CRUD<User, Integer> {
             DELETE FROM "user" WHERE id = ?
             """;
 
+<<<<<<< Updated upstream
+=======
+    /** Colonnes complètes utilisateur (recherche coachs / API Symfony {@code CoachSearchController}). */
+    private static final String USER_FULL_SELECT = """
+            SELECT id, first_name, last_name, email, password, roles,
+                   phone_number, age, status, speciality, availability,
+                   rating, review_count, price_per_session, bio, photo_url
+            """;
+
+>>>>>>> Stashed changes
     public User signUp(String firstName, String lastName, String email, String rawPassword) throws SQLException {
         return signUp(firstName, lastName, email, rawPassword, UserRole.USER);
     }
@@ -166,11 +184,6 @@ public class UserService implements CRUD<User, Integer> {
             ps.setString(i++, user.getLastName());
             ps.setString(i++, user.getEmail());
             ps.setString(i++, user.getPassword());
-            if (user.getGoogleId() == null) {
-                ps.setNull(i++, Types.VARCHAR);
-            } else {
-                ps.setString(i++, user.getGoogleId());
-            }
             ps.setObject(i++, toJsonRoles(user.getRoles()));
             if (user.getPhoneNumber() == null) {
                 ps.setNull(i++, Types.VARCHAR);
@@ -187,11 +200,6 @@ public class UserService implements CRUD<User, Integer> {
                 ps.setNull(i++, Types.VARCHAR);
             } else {
                 ps.setString(i++, user.getSpeciality());
-            }
-            if (user.getSpecialities() == null) {
-                ps.setNull(i++, Types.OTHER);
-            } else {
-                ps.setObject(i++, toJsonList(user.getSpecialities()));
             }
             if (user.getAvailability() == null) {
                 ps.setNull(i++, Types.VARCHAR);
@@ -222,16 +230,6 @@ public class UserService implements CRUD<User, Integer> {
                 ps.setNull(i++, Types.VARCHAR);
             } else {
                 ps.setString(i++, user.getPhotoUrl());
-            }
-            if (user.getProfilePictureName() == null) {
-                ps.setNull(i++, Types.VARCHAR);
-            } else {
-                ps.setString(i++, user.getProfilePictureName());
-            }
-            if (user.getProfilePictureSize() == null) {
-                ps.setNull(i++, Types.INTEGER);
-            } else {
-                ps.setInt(i++, user.getProfilePictureSize());
             }
             ps.setInt(i, user.getId());
             ps.executeUpdate();
@@ -293,10 +291,6 @@ public class UserService implements CRUD<User, Integer> {
         u.setEmail(rs.getString("email"));
         String pwd = rs.getString("password");
         u.setPassword(rs.wasNull() ? null : pwd);
-        u.setGoogleId(rs.getString("google_id"));
-        if (rs.wasNull()) {
-            u.setGoogleId(null);
-        }
         u.setRoles(readStringList(rs.getString("roles")));
         u.setPhoneNumber(rs.getString("phone_number"));
         if (rs.wasNull()) {
@@ -309,7 +303,6 @@ public class UserService implements CRUD<User, Integer> {
         if (rs.wasNull()) {
             u.setSpeciality(null);
         }
-        u.setSpecialities(readStringListNullable(rs.getString("specialities")));
         u.setAvailability(rs.getString("availability"));
         if (rs.wasNull()) {
             u.setAvailability(null);
@@ -328,12 +321,6 @@ public class UserService implements CRUD<User, Integer> {
         if (rs.wasNull()) {
             u.setPhotoUrl(null);
         }
-        u.setProfilePictureName(rs.getString("profile_picture_name"));
-        if (rs.wasNull()) {
-            u.setProfilePictureName(null);
-        }
-        int picSize = rs.getInt("profile_picture_size");
-        u.setProfilePictureSize(rs.wasNull() ? null : picSize);
         return u;
     }
 
