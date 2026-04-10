@@ -46,7 +46,11 @@ public class LoginController {
                 AppSession.setCurrentUser(u);
                 NavbarController.refreshFromSession();
                 try {
-                    NavigationManager.show("/views/home_dashboard.fxml", "DayFlow — Accueil");
+                    if (AppSession.isCoach()) {
+                        NavigationManager.show("/user/coachdashboard/coach_dashboard.fxml", "DayFlow — Coach");
+                    } else {
+                        NavigationManager.show("/user/userdashboard/user_dashboard.fxml", "DayFlow — Accueil");
+                    }
                 } catch (IOException io) {
                     new Alert(Alert.AlertType.ERROR, io.getMessage()).showAndWait();
                 }

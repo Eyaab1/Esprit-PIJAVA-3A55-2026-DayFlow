@@ -16,6 +16,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import services.coaching_session_module.CoachPriceRange;
+import services.coaching_session_module.CoachSearchParams;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -33,6 +36,14 @@ public class UserService implements CRUD<User, Integer> {
                    rating, review_count, price_per_session, bio, photo_url,
                    profile_picture_name, profile_picture_size
             FROM "user" WHERE LOWER(email) = LOWER(?)
+            """;
+
+    private static final String SELECT_BY_ID = """
+            SELECT id, first_name, last_name, email, password, google_id, roles,
+                   phone_number, age, status, speciality, specialities, availability,
+                   rating, review_count, price_per_session, bio, photo_url,
+                   profile_picture_name, profile_picture_size
+            FROM "user" WHERE id = ?
             """;
 
     private static final String INSERT_USER = """
@@ -54,6 +65,14 @@ public class UserService implements CRUD<User, Integer> {
 
     private static final String DELETE_USER = """
             DELETE FROM "user" WHERE id = ?
+            """;
+
+    /** Colonnes complètes utilisateur (recherche coachs / API Symfony {@code CoachSearchController}). */
+    private static final String USER_FULL_SELECT = """
+            SELECT id, first_name, last_name, email, password, google_id, roles,
+                   phone_number, age, status, speciality, specialities, availability,
+                   rating, review_count, price_per_session, bio, photo_url,
+                   profile_picture_name, profile_picture_size
             """;
 
     public User signUp(String firstName, String lastName, String email, String rawPassword) throws SQLException {
@@ -263,6 +282,19 @@ public class UserService implements CRUD<User, Integer> {
         return Optional.empty();
     }
 
+    public Optional<User> findById(int id) throws SQLException {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(SELECT_BY_ID)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapRow(rs));
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
     private PGobject toJsonRoles(List<String> roles) throws SQLException {
         PGobject json = new PGobject();
         json.setType("json");
@@ -359,5 +391,149 @@ public class UserService implements CRUD<User, Integer> {
         } catch (JsonProcessingException e) {
             return null;
         }
+    }
+
+    /**
+     * Équivalent {@code UserRepository::searchCoaches} (filtres + tri).
+     */
+    public List<User> searchCoaches(CoachSearchParams p) throws SQLException {
+        StringBuilder sql = new StringBuilder(USER_FULL_SELECT).append(" FROM \"user\" u WHERE u.roles::text LIKE '%ROLE_COACH%' ");
+        List<Object> params = new ArrayList<>();
+
+        String q = p.query() != null ? p.query().trim() : "";
+        if (!q.isEmpty()) {
+            sql.append("""
+                     AND (
+                        u.first_name ILIKE ? OR u.last_name ILIKE ? OR u.email ILIKE ?
+                        OR COALESCE(u.bio, '') ILIKE ? OR COALESCE(u.speciality, '') ILIKE ?
+                    )
+                    """);
+            String like = "%" + q + "%";
+            params.add(like);
+            params.add(like);
+            params.add(like);
+            params.add(like);
+            params.add(like);
+        }
+
+        String spec = p.speciality() != null ? p.speciality().trim() : "";
+        if (!spec.isEmpty()) {
+            sql.append(" AND u.speciality ILIKE ? ");
+            params.add("%" + spec + "%");
+        }
+
+        if (p.minPrice() != null) {
+            sql.append(" AND u.price_per_session >= ? ");
+            params.add(p.minPrice());
+        }
+        if (p.maxPrice() != null) {
+            sql.append(" AND (u.price_per_session IS NOT NULL AND u.price_per_session <= ?) ");
+            params.add(p.maxPrice());
+        }
+        if (p.minRating() != null) {
+            sql.append(" AND u.rating >= ? ");
+            params.add(p.minRating());
+        }
+
+        String avail = p.availability() != null ? p.availability().trim() : "";
+        if (!avail.isEmpty()) {
+            sql.append(" AND COALESCE(u.availability, '') ILIKE ? ");
+            params.add("%" + avail + "%");
+        }
+
+        String ctype = p.coachingType() != null ? p.coachingType().trim() : "";
+        if (!ctype.isEmpty()) {
+            sql.append(" AND (COALESCE(u.availability, '') ILIKE ? OR COALESCE(u.speciality, '') ILIKE ?) ");
+            String c = "%" + ctype + "%";
+            params.add(c);
+            params.add(c);
+        }
+
+        String sortBy = p.sortBy() != null ? p.sortBy().trim().toLowerCase(Locale.ROOT) : "rating";
+        String orderCol = switch (sortBy) {
+            case "price", "pricepersession" -> "u.price_per_session";
+            case "name", "firstname" -> "u.first_name";
+            case "lastname" -> "u.last_name";
+            default -> "u.rating";
+        };
+        String ord = "asc".equalsIgnoreCase(p.sortOrder()) ? "ASC" : "DESC";
+        sql.append(" ORDER BY ").append(orderCol).append(" ").append(ord).append(" NULLS LAST ");
+
+        List<User> out = new ArrayList<>();
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                bindCoachParam(ps, i + 1, params.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    out.add(mapRow(rs));
+                }
+            }
+        }
+        return out;
+    }
+
+    private static void bindCoachParam(PreparedStatement ps, int index, Object value) throws SQLException {
+        switch (value) {
+            case Integer i -> ps.setInt(index, i);
+            case Double d -> ps.setDouble(index, d);
+            case String s -> ps.setString(index, s);
+            default -> ps.setObject(index, value);
+        }
+    }
+
+    public List<String> findAllCoachSpecialities() throws SQLException {
+        String sql = """
+                SELECT DISTINCT speciality FROM "user" u
+                WHERE u.roles::text LIKE '%ROLE_COACH%'
+                  AND u.speciality IS NOT NULL AND TRIM(u.speciality) <> ''
+                ORDER BY speciality
+                """;
+        return queryStringList(sql);
+    }
+
+    public List<String> findAllCoachAvailabilities() throws SQLException {
+        String sql = """
+                SELECT DISTINCT availability FROM "user" u
+                WHERE u.roles::text LIKE '%ROLE_COACH%'
+                  AND u.availability IS NOT NULL AND TRIM(u.availability) <> ''
+                ORDER BY availability
+                """;
+        return queryStringList(sql);
+    }
+
+    private List<String> queryStringList(String sql) throws SQLException {
+        List<String> list = new ArrayList<>();
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(rs.getString(1));
+            }
+        }
+        return list;
+    }
+
+    public CoachPriceRange getCoachPriceRange() throws SQLException {
+        String sql = """
+                SELECT MIN(price_per_session), MAX(price_per_session) FROM "user" u
+                WHERE u.roles::text LIKE '%ROLE_COACH%' AND u.price_per_session IS NOT NULL
+                """;
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                Double mn = rs.getObject(1) != null ? rs.getDouble(1) : null;
+                Double mx = rs.getObject(2) != null ? rs.getDouble(2) : null;
+                return new CoachPriceRange(mn, mx);
+            }
+        }
+        return new CoachPriceRange(null, null);
+    }
+
+    /** Libellés proposés côté Symfony pour le filtre « type de coaching ». */
+    public static List<String> defaultCoachingTypeFilters() {
+        return List.of("En ligne", "En présentiel", "Hybride");
     }
 }

@@ -156,7 +156,8 @@ public class CoachingRequest {
             throw new IllegalArgumentException("Statut invalide");
         }
         this.status = status;
-        if (STATUS_ACCEPTED.equals(status) || STATUS_DECLINED.equals(status)) {
+        /* Aligné Symfony : horodatage seulement si pas déjà renseigné (ex. rechargement JDBC). */
+        if ((STATUS_ACCEPTED.equals(status) || STATUS_DECLINED.equals(status)) && this.respondedAt == null) {
             this.respondedAt = new Date();
         }
     }

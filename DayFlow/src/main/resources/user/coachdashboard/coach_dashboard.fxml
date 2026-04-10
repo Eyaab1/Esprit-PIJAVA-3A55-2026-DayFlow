@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane styleClass="coach-dash-root" stylesheets="@coach_dashboard.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.coach.CoachDashboardController">
+   <children>
+      <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="coach-scroll" vbarPolicy="AS_NEEDED" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <content>
+            <VBox styleClass="coach-inner">
+               <children>
+                  <HBox alignment="CENTER_LEFT" styleClass="coach-breadcrumb-row">
+                     <children>
+                        <Hyperlink onAction="#onBackToUserHome" styleClass="coach-back-link" text="← Accueil utilisateur" />
+                        <Label styleClass="coach-badge-pill" text="COACH DASHBOARD" />
+                     </children>
+                  </HBox>
+                  <VBox spacing="10.0" styleClass="coach-hero">
+                     <children>
+                        <Label styleClass="coach-hero-title" text="Demandes de coaching" />
+                        <Label styleClass="coach-hero-sub" text="Gérez les demandes reçues et planifiez vos sessions." />
+                     </children>
+                  </VBox>
+                  <HBox alignment="CENTER" spacing="16.0" styleClass="coach-stats-row">
+                     <children>
+                        <VBox alignment="TOP_LEFT" spacing="8.0" styleClass="coach-stat-card">
+                           <children>
+                              <Label styleClass="coach-stat-icon" text="⏳" />
+                              <Label fx:id="statPendingLabel" styleClass="coach-stat-value" text="0" />
+                              <Label styleClass="coach-stat-label" text="En attente" />
+                           </children>
+                        </VBox>
+                        <VBox alignment="TOP_LEFT" spacing="8.0" styleClass="coach-stat-card">
+                           <children>
+                              <Label styleClass="coach-stat-icon" text="✓" />
+                              <Label fx:id="statAcceptedLabel" styleClass="coach-stat-value" text="0" />
+                              <Label styleClass="coach-stat-label" text="Acceptées" />
+                           </children>
+                        </VBox>
+                        <VBox alignment="TOP_LEFT" spacing="8.0" styleClass="coach-stat-card">
+                           <children>
+                              <Label styleClass="coach-stat-icon" text="📅" />
+                              <Label fx:id="statSessionsTodayLabel" styleClass="coach-stat-value" text="0" />
+                              <Label styleClass="coach-stat-label" text="Sessions aujourd'hui" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+                  <VBox styleClass="coach-filters-wrap">
+                     <children>
+                        <VBox spacing="14.0" styleClass="coach-filters-card">
+                           <children>
+                              <Label styleClass="coach-filters-title" text="🔽 Filtres" />
+                              <VBox spacing="10.0">
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                       <children>
+                                          <Label minWidth="90.0" text="Recherche" />
+                                          <TextField fx:id="searchField" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" promptText="Nom, email, message..." styleClass="filter-field" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                       <children>
+                                          <Label minWidth="90.0" text="Statut" />
+                                          <ComboBox fx:id="statusCombo" prefWidth="200.0" />
+                                          <Label text="Priorité" />
+                                          <ComboBox fx:id="priorityCombo" prefWidth="200.0" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                       <children>
+                                          <Label minWidth="90.0" text="Période" />
+                                          <Label text="Du" />
+                                          <DatePicker fx:id="dateFromPicker" prefWidth="140.0" />
+                                          <Label text="Au" />
+                                          <DatePicker fx:id="dateToPicker" prefWidth="140.0" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                              <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                 <children>
+                                    <Button mnemonicParsing="false" onAction="#onApplyFilters" styleClass="btn-apply" text="🔽 Appliquer" />
+                                    <Button mnemonicParsing="false" onAction="#onResetFilters" styleClass="btn-reset" text="↻ Réinitialiser" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
+                  <VBox spacing="12.0" styleClass="coach-section">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <children>
+                              <Label styleClass="coach-section-title" text="En attente" />
+                              <Label fx:id="pendingCountBadge" styleClass="coach-section-badge" text="0" />
+                           </children>
+                        </HBox>
+                        <VBox fx:id="pendingBox" spacing="12.0" />
+                        <Label fx:id="pendingEmptyLabel" styleClass="coach-empty" text="Aucune demande en attente (selon filtres)." visible="false" />
+                     </children>
+                  </VBox>
+                  <Separator />
+                  <VBox spacing="12.0" styleClass="coach-section">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                           <children>
+                              <Label styleClass="coach-section-title" text="Toutes les demandes" />
+                              <Label style="-fx-text-fill: #6366f1;" text="➜" />
+                           </children>
+                        </HBox>
+                        <VBox fx:id="allRequestsBox" spacing="10.0" />
+                        <Label fx:id="allEmptyLabel" styleClass="coach-empty" text="Aucune autre demande." visible="false" />
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+         </content>
+      </ScrollPane>
+   </children>
+</AnchorPane>

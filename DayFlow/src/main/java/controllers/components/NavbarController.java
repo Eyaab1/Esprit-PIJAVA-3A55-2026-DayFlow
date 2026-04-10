@@ -54,7 +54,11 @@ public class NavbarController {
 
     @FXML
     private void onAccueil() {
-        navigate("/views/home_dashboard.fxml", "DayFlow — Accueil");
+        if (AppSession.isCoach()) {
+            navigate("/user/coachdashboard/coach_dashboard.fxml", "DayFlow — Coach");
+        } else {
+            navigate("/user/userdashboard/user_dashboard.fxml", "DayFlow — Accueil");
+        }
     }
 
     @FXML
@@ -89,7 +93,11 @@ public class NavbarController {
 
     @FXML
     private void onGererSessions() {
-        toastSoon("Gérer sessions");
+        if (AppSession.isCoach()) {
+            navigate("/user/coachdashboard/coach_dashboard.fxml", "DayFlow — Coach");
+        } else {
+            toastSoon("Gérer sessions");
+        }
     }
 
     @FXML
