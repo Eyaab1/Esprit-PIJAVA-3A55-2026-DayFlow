@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="15" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="controllers.MessageController"
+      prefWidth="400" prefHeight="350">
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+    <Label text="Gestion des Messages" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Contenu :" prefWidth="100"/>
+        <TextField fx:id="contentField" promptText="Votre message..." prefWidth="250"/>
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Chatroom ID :" prefWidth="100"/>
+        <TextField fx:id="chatroomIdField" promptText="ex: 1" prefWidth="250"/>
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Author ID :" prefWidth="100"/>
+        <TextField fx:id="authorIdField" promptText="ex: 1" prefWidth="250"/>
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Épinglé :" prefWidth="100"/>
+        <CheckBox fx:id="pinnedCheck"/>
+    </HBox>
+
+    <HBox spacing="10">
+        <TextField fx:id="updateIdField" promptText="ID à modifier/supprimer" prefWidth="200"/>
+    </HBox>
+
+    <HBox spacing="10">
+        <Button text="Envoyer" onAction="#addMessage" prefWidth="110"
+                style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
+        <Button text="Modifier" onAction="#updateMessage" prefWidth="110"
+                style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
+        <Button text="Supprimer" onAction="#deleteMessage" prefWidth="110"
+                style="-fx-background-color: #f44336; -fx-text-fill: white;"/>
+    </HBox>
+
+    <Label fx:id="statusLabel" text="" style="-fx-text-fill: green;"/>
+</VBox>
