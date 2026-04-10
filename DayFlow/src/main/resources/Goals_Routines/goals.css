@@ -1,0 +1,339 @@
+/* Root Styles */
+.goals-root, .dashboard-root {
+    -fx-background-color: #f5f7fa;
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+    -fx-background-color: linear-gradient(to right, #2d3561, #4a5a8f);
+    -fx-background-radius: 15;
+}
+
+.breadcrumb-button {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.breadcrumb-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.25);
+}
+
+.dashboard-title {
+    -fx-font-size: 36px;
+    -fx-font-weight: 700;
+    -fx-text-fill: white;
+}
+
+.dashboard-subtitle {
+    -fx-font-size: 15px;
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+}
+
+.new-goal-button {
+    -fx-background-color: #6366f1;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.new-goal-button:hover {
+    -fx-background-color: #5558e3;
+}
+
+/* Statistics Cards */
+.stat-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 12, 0.1, 0, 4);
+}
+
+.stat-icon-container-green {
+    -fx-background-color: #d1f4e0;
+    -fx-background-radius: 50;
+    -fx-pref-width: 60;
+    -fx-pref-height: 60;
+}
+
+.stat-icon-container-blue {
+    -fx-background-color: #cfe4ff;
+    -fx-background-radius: 50;
+    -fx-pref-width: 60;
+    -fx-pref-height: 60;
+}
+
+.stat-icon-container-orange {
+    -fx-background-color: #ffe4cc;
+    -fx-background-radius: 50;
+    -fx-pref-width: 60;
+    -fx-pref-height: 60;
+}
+
+.stat-icon-container-pink {
+    -fx-background-color: #ffd4e5;
+    -fx-background-radius: 50;
+    -fx-pref-width: 60;
+    -fx-pref-height: 60;
+}
+
+.stat-icon {
+    -fx-font-size: 28px;
+}
+
+.stat-number {
+    -fx-font-size: 32px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1e293b;
+}
+
+.stat-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #64748b;
+    -fx-letter-spacing: 0.5px;
+}
+
+/* Summary Section */
+.summary-section {
+    -fx-background-color: linear-gradient(to right, #2d3561, #4a5a8f);
+    -fx-background-radius: 15;
+}
+
+.summary-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: rgba(255, 255, 255, 0.7);
+    -fx-letter-spacing: 1px;
+}
+
+.summary-card {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 12;
+}
+
+.summary-card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: white;
+}
+
+.summary-icon-container-purple {
+    -fx-background-color: rgba(139, 92, 246, 0.3);
+    -fx-background-radius: 8;
+    -fx-pref-width: 40;
+    -fx-pref-height: 40;
+}
+
+.summary-icon-text {
+    -fx-font-size: 20px;
+}
+
+.summary-item-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: rgba(255, 255, 255, 0.9);
+}
+
+.summary-item-value {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: white;
+}
+
+/* Filter Section */
+.filter-section {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 10, 0.1, 0, 2);
+}
+
+.filter-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #475569;
+}
+
+.search-field, .filter-choice {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 8;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-font-size: 14px;
+}
+
+.search-field:focused, .filter-choice:focused {
+    -fx-border-color: #6366f1;
+}
+
+.apply-button {
+    -fx-background-color: #60a5fa;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.apply-button:hover {
+    -fx-background-color: #3b82f6;
+}
+
+/* Goals Grid */
+.goals-grid {
+    -fx-padding: 10;
+}
+
+/* Goal Card */
+.goal-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 12, 0.1, 0, 4);
+}
+
+.goal-icon-container {
+    -fx-background-color: #e0e7ff;
+    -fx-background-radius: 50;
+    -fx-pref-width: 50;
+    -fx-pref-height: 50;
+}
+
+.goal-icon {
+    -fx-font-size: 24px;
+}
+
+.goal-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1e293b;
+}
+
+.goal-description {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+    -fx-line-spacing: 2px;
+}
+
+.progress-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #475569;
+}
+
+/* Status Badges */
+.status-badge-failed {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #dc2626;
+    -fx-background-radius: 6;
+    -fx-padding: 4 10 4 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.status-badge-active {
+    -fx-background-color: #d1fae5;
+    -fx-text-fill: #059669;
+    -fx-background-radius: 6;
+    -fx-padding: 4 10 4 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.status-badge-completed {
+    -fx-background-color: #dbeafe;
+    -fx-text-fill: #2563eb;
+    -fx-background-radius: 6;
+    -fx-padding: 4 10 4 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+/* Priority Badges */
+.priority-badge-medium {
+    -fx-background-color: #e0e7ff;
+    -fx-text-fill: #6366f1;
+    -fx-background-radius: 6;
+    -fx-padding: 4 10 4 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+.priority-badge-low {
+    -fx-background-color: #fef3c7;
+    -fx-text-fill: #d97706;
+    -fx-background-radius: 6;
+    -fx-padding: 4 10 4 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+.priority-badge-high {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #dc2626;
+    -fx-background-radius: 6;
+    -fx-padding: 4 10 4 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+/* Date Labels */
+.goal-dates {
+    -fx-spacing: 10;
+}
+
+.date-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #64748b;
+}
+
+/* Action Buttons */
+.action-button-modify {
+    -fx-background-color: #e0e7ff;
+    -fx-text-fill: #4f46e5;
+    -fx-background-radius: 6;
+    -fx-padding: 6 12 6 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.action-button-modify:hover {
+    -fx-background-color: #c7d2fe;
+}
+
+.action-button-duplicate {
+    -fx-background-color: transparent;
+    -fx-text-fill: #64748b;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-border-width: 1;
+    -fx-padding: 6 12 6 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.action-button-duplicate:hover {
+    -fx-background-color: #f8fafc;
+}
+
+.action-button-delete {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #dc2626;
+    -fx-background-radius: 6;
+    -fx-padding: 6 12 6 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.action-button-delete:hover {
+    -fx-background-color: #fecaca;
+}
