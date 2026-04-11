@@ -27,7 +27,7 @@
                   <Insets bottom="8.0" left="0.0" right="0.0" top="0.0" />
                </padding>
             </HBox>
-            <ScrollPane fitToWidth="true" styleClass="posts-scroll" VBox.vgrow="ALWAYS">
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" styleClass="posts-scroll" VBox.vgrow="ALWAYS">
                <content>
                   <VBox fx:id="postsContainer" spacing="20.0" styleClass="posts-list-wrap">
                      <padding>

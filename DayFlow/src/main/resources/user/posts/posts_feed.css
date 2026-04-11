@@ -215,3 +215,73 @@
 .like-btn.liked {
     -fx-text-fill: #dc2626;
 }
+
+/* ===== ENHANCED COMMENT CARD STYLES ===== */
+
+.comment-card {
+    -fx-background-color: #f9fafb;
+    -fx-background-radius: 14;
+    -fx-padding: 12 16;
+    -fx-spacing: 8;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 14;
+}
+
+.comment-text {
+    -fx-font-size: 13px;
+    -fx-text-fill: #374151;
+    -fx-wrap-text: true;
+}
+
+.comment-actions {
+    -fx-spacing: 10;
+    -fx-padding: 4 0 0 0;
+    -fx-alignment: center-left;
+}
+
+.comment-like-btn,
+.comment-reply-btn {
+    -fx-background-color: #f3f4f6;
+    -fx-background-radius: 8;
+    -fx-padding: 4 10;
+    -fx-font-size: 12px;
+    -fx-text-fill: #374151;
+    -fx-cursor: hand;
+}
+
+.comment-like-btn:hover,
+.comment-reply-btn:hover {
+    -fx-background-color: #e5e7eb;
+}
+
+.comment-replies {
+    -fx-padding: 8 0 0 20;
+    -fx-spacing: 6;
+}
+
+.comment-input-row {
+    -fx-spacing: 8;
+    -fx-alignment: center-left;
+    -fx-padding: 8 0 0 0;
+}
+
+.comment-reply-field {
+    -fx-background-radius: 10;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 10;
+    -fx-padding: 6 10;
+    -fx-font-size: 12px;
+}
+
+.btn-comment-reply {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-padding: 6 12;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.btn-comment-reply:hover {
+    -fx-background-color: #1d4ed8;
+}

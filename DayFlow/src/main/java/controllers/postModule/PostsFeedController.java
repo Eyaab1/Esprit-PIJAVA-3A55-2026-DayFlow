@@ -3,6 +3,7 @@ package controllers.postModule;
 import enums.PostStatus;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
@@ -53,6 +54,8 @@ public class PostsFeedController {
     private Button createPostBtn;
     @FXML
     private VBox postsContainer;
+    @FXML
+    private ScrollPane scrollPane;
 
     private final PostService postService = new PostService();
     private final TagService tagService = new TagService();
@@ -61,6 +64,17 @@ public class PostsFeedController {
     private final SavedPostService savedPostService = new SavedPostService();
     private final UserService userService = new UserService();
     private final InteractionController interaction = new InteractionController();
+
+    // Pagination variables for lazy loading
+    private int currentPage = 0;
+    private final int pageSize = 5;
+    private boolean isLoading = false;
+    private List<Post> allFilteredPosts = new ArrayList<>();
+
+    // Track expanded comments per post
+    private final java.util.Map<Integer, Boolean> commentsExpandedState = new java.util.HashMap<>();
+    // Track visible replies per comment
+    private final java.util.Map<Integer, Boolean> repliesVisibleState = new java.util.HashMap<>();
 
     @FXML
     private void initialize() {
@@ -80,6 +94,20 @@ public class PostsFeedController {
         filterCombo.setOnAction(e -> refreshFeed());
 
         tagCombo.setOnAction(e -> refreshFeed());
+
+        // Add scroll listener for infinite scroll / lazy loading after layout is ready
+        Platform.runLater(() -> {
+            if (scrollPane != null) {
+                scrollPane.vvalueProperty().addListener((obs, oldVal, newVal) -> {
+                    System.out.println("Scroll: " + newVal);
+                    if (newVal.doubleValue() >= 0.95 && !isLoading
+                            && currentPage * pageSize < allFilteredPosts.size()) {
+                        System.out.println("Loading more posts...");
+                        loadMorePosts();
+                    }
+                });
+            }
+        });
 
         reloadTagFilterChoices();
         refreshFeed();
@@ -201,19 +229,25 @@ public class PostsFeedController {
     }
 
     private void refreshFeed() {
+        currentPage = 0;
+        isLoading = false;
         postsContainer.getChildren().clear();
+        commentsExpandedState.clear();
+        repliesVisibleState.clear();
+        
         try {
-            List<Post> posts = postService.getAllPosts().stream()
+            // Load all filtered posts into list
+            allFilteredPosts = postService.getAllPosts().stream()
                     .filter(p -> p.getStatus() == PostStatus.PUBLISHED)
                     .collect(Collectors.toList());
 
             String filter = filterCombo.getSelectionModel().getSelectedItem();
             if ("Filtre : Avec images".equals(filter)) {
-                posts = posts.stream()
+                allFilteredPosts = allFilteredPosts.stream()
                         .filter(p -> p.getImages() != null && !p.getImages().isEmpty())
                         .collect(Collectors.toList());
             } else if ("Filtre : Texte seul".equals(filter)) {
-                posts = posts.stream()
+                allFilteredPosts = allFilteredPosts.stream()
                         .filter(p -> p.getImages() == null || p.getImages().isEmpty())
                         .collect(Collectors.toList());
             }
@@ -222,36 +256,64 @@ public class PostsFeedController {
             if (tagPick != null && !TAG_ALL.equals(tagPick)) {
                 final String tagName = tagPick;
                 List<Post> filtered = new ArrayList<>();
-                for (Post p : posts) {
+                for (Post p : allFilteredPosts) {
                     List<Tag> tags = tagService.getTagsByPost(p.getId());
                     boolean match = tags.stream().anyMatch(t -> tagName.equalsIgnoreCase(t.getName()));
                     if (match) {
                         filtered.add(p);
                     }
                 }
-                posts = filtered;
+                allFilteredPosts = filtered;
             }
 
             boolean newestFirst = "Trier : Plus récents".equals(sortCombo.getSelectionModel().getSelectedItem());
-            posts.sort((a, b) -> {
+            allFilteredPosts.sort((a, b) -> {
                 java.time.LocalDateTime da = a.getCreatedAt() != null ? a.getCreatedAt() : java.time.LocalDateTime.MIN;
                 java.time.LocalDateTime db = b.getCreatedAt() != null ? b.getCreatedAt() : java.time.LocalDateTime.MIN;
                 return newestFirst ? db.compareTo(da) : da.compareTo(db);
             });
 
-            Integer currentUserId = AppSession.getCurrentUser().map(User::getId).orElse(null);
+            // Load first page
+            loadMorePosts();
+            
+        } catch (SQLException e) {
+            showError("Chargement des posts", e);
+        }
+    }
 
-            for (Post p : posts) {
-                postsContainer.getChildren().add(buildPostCard(p, currentUserId));
+    private void loadMorePosts() {
+        if (isLoading) return;
+        isLoading = true;
+
+        try {
+            Integer currentUserId = AppSession.getCurrentUser().map(User::getId).orElse(null);
+            
+            int start = currentPage * pageSize;
+            int end = Math.min(start + pageSize, allFilteredPosts.size());
+            
+            if (start >= allFilteredPosts.size()) {
+                isLoading = false;
+                return;
             }
 
-            if (posts.isEmpty()) {
+            // Show empty state only on first load
+            if (currentPage == 0 && allFilteredPosts.isEmpty()) {
                 Label empty = new Label("Aucun post pour ces critères.");
                 empty.getStyleClass().add("post-meta");
                 postsContainer.getChildren().add(empty);
             }
+
+            // Add posts for current page
+            for (int i = start; i < end; i++) {
+                Post p = allFilteredPosts.get(i);
+                postsContainer.getChildren().add(buildPostCard(p, currentUserId));
+            }
+
+            currentPage++;
+            isLoading = false;
         } catch (SQLException e) {
             showError("Chargement des posts", e);
+            isLoading = false;
         }
     }
 
@@ -438,13 +500,57 @@ public class PostsFeedController {
 
         VBox commentsBlock = new VBox(8);
         List<Comment> comments = commentService.getCommentsByPost(post.getId());
+        int maxInitialComments = 3;
+        
         if (comments.isEmpty()) {
             Label empty = new Label("Pas encore de commentaire. Soyez le premier !");
             empty.getStyleClass().add("post-empty-comments");
             commentsBlock.getChildren().add(empty);
         } else {
-            for (Comment c : comments) {
-                commentsBlock.getChildren().add(buildCommentLine(c));
+            // Initialize expanded state if not already set
+            boolean isExpanded = commentsExpandedState.getOrDefault(post.getId(), false);
+            
+            // Determine which comments to show
+            int commentsToShow = isExpanded ? comments.size() : Math.min(maxInitialComments, comments.size());
+            
+            // Add visible comments
+            for (int i = 0; i < commentsToShow; i++) {
+                commentsBlock.getChildren().add(buildCommentLine(comments.get(i)));
+            }
+            
+            // Add "Show More" / "Hide" button if there are more comments than initial
+            if (comments.size() > maxInitialComments) {
+                Button toggleCommentsBtn = new Button(isExpanded ? 
+                    "Masquer les commentaires" : 
+                    ("Afficher plus de commentaires (" + (comments.size() - maxInitialComments) + ")"));
+                toggleCommentsBtn.getStyleClass().add("like-btn");
+                toggleCommentsBtn.setStyle("-fx-font-size: 12px;");
+                
+                toggleCommentsBtn.setOnAction(e -> {
+                    try {
+                        boolean expanded = !commentsExpandedState.getOrDefault(post.getId(), false);
+                        commentsExpandedState.put(post.getId(), expanded);
+                        
+                        // Clear and rebuild only the comments block (not entire feed)
+                        commentsBlock.getChildren().clear();
+                        
+                        int newCommentsToShow = expanded ? comments.size() : Math.min(maxInitialComments, comments.size());
+                        for (int i = 0; i < newCommentsToShow; i++) {
+                            commentsBlock.getChildren().add(buildCommentLine(comments.get(i)));
+                        }
+                        
+                        // Update button text and re-add button
+                        String newBtnText = expanded ? 
+                            "Masquer les commentaires" : 
+                            "Afficher plus de commentaires (" + (comments.size() - maxInitialComments) + ")";
+                        toggleCommentsBtn.setText(newBtnText);
+                        commentsBlock.getChildren().add(toggleCommentsBtn);
+                    } catch (SQLException ex) {
+                        showError("Toggle comments", ex);
+                    }
+                });
+                
+                commentsBlock.getChildren().add(toggleCommentsBtn);
             }
         }
 
@@ -457,7 +563,7 @@ public class PostsFeedController {
         return card;
     }
 
-    private HBox buildCommentLine(Comment c) throws SQLException {
+    private VBox buildCommentLine(Comment c) throws SQLException {
         User u = userService.findById(c.getCommenterId()).orElse(null);
         String name = u != null
                 ? ((u.getFirstName() != null ? u.getFirstName() : "") + " "
@@ -466,12 +572,164 @@ public class PostsFeedController {
         if (name.isBlank()) {
             name = "Utilisateur";
         }
-        Label lbl = new Label(name + " — " + htmlToPlainText(c.getContent()));
-        lbl.setWrapText(true);
-        lbl.getStyleClass().add("post-body");
-        HBox row = new HBox(lbl);
-        row.setPadding(new Insets(4, 0, 0, 0));
-        return row;
+
+        Integer currentUserId = AppSession.getCurrentUser().map(User::getId).orElse(null);
+
+        // Main comment card container
+        VBox commentCard = new VBox(8);
+        commentCard.getStyleClass().add("comment-card");
+        commentCard.setPadding(new Insets(8, 10, 8, 10));
+        commentCard.setStyle("-fx-border-color: #e0e0e0; -fx-border-radius: 4; -fx-background-color: #f9f9f9;");
+
+        // Comment content
+        Label contentLbl = new Label(name + " — " + htmlToPlainText(c.getContent()));
+        contentLbl.setWrapText(true);
+        contentLbl.getStyleClass().add("post-body");
+
+        // Get comment like count
+        int likeCount = getCommentLikeCount(c.getId());
+
+        // Like button (matching post like button style)
+        Button likeBtn = new Button("♡ " + likeCount);
+        likeBtn.getStyleClass().add("like-btn");
+        if (currentUserId != null && isCommentLikedBy(c.getId(), currentUserId)) {
+            likeBtn.getStyleClass().add("liked");
+            likeBtn.setText("♥ " + likeCount);
+        }
+
+        likeBtn.setOnAction(e -> {
+            if (currentUserId == null) {
+                new Alert(Alert.AlertType.INFORMATION, "Connectez-vous pour aimer un commentaire.").showAndWait();
+                return;
+            }
+            try {
+                String msg;
+                if (isCommentLikedBy(c.getId(), currentUserId)) {
+                    msg = interaction.unlikeComment(c.getId(), currentUserId);
+                } else {
+                    msg = interaction.likeComment(c.getId(), currentUserId);
+                }
+                
+                if (msg != null && msg.startsWith("Error")) {
+                    new Alert(Alert.AlertType.ERROR, msg).showAndWait();
+                    return;
+                }
+                refreshFeed();
+            } catch (SQLException ex) {
+                showError("Like commentaire", ex);
+            }
+        });
+
+        // Reply button
+        Button replyBtn = new Button("💬 Répondre");
+        replyBtn.getStyleClass().add("like-btn");
+        replyBtn.setStyle("-fx-font-size: 13;");
+
+        HBox actionsRow = new HBox(12);
+        actionsRow.setAlignment(Pos.CENTER_LEFT);
+        actionsRow.getChildren().addAll(likeBtn, replyBtn);
+        actionsRow.getStyleClass().add("comment-actions");
+
+        // Replies container (hidden by default)
+        VBox repliesContainer = new VBox(6);
+        repliesContainer.getStyleClass().add("comment-replies");
+        repliesContainer.setPadding(new Insets(8, 0, 0, 16));
+        repliesContainer.setStyle("-fx-border-left: 2 solid #ddd;");
+        repliesContainer.setVisible(false);
+        repliesContainer.setManaged(false);
+        
+        // Reply input row (hidden initially)
+        TextField replyField = new TextField();
+        replyField.setPromptText("Répondre...");
+        replyField.getStyleClass().add("comment-reply-field");
+        replyField.setPrefHeight(32);
+        HBox.setHgrow(replyField, Priority.ALWAYS);
+
+        Button sendReplyBtn = new Button("Envoyer");
+        sendReplyBtn.getStyleClass().add("btn-comment-reply");
+        sendReplyBtn.setStyle("-fx-padding: 6 12;");
+
+        HBox replyInputRow = new HBox(8);
+        replyInputRow.setAlignment(Pos.CENTER_LEFT);
+        replyInputRow.getChildren().addAll(replyField, sendReplyBtn);
+        replyInputRow.setPadding(new Insets(8, 0, 0, 0));
+        replyInputRow.setManaged(false);
+        replyInputRow.setVisible(false);
+        replyInputRow.getStyleClass().add("comment-input-row");
+
+        // Create and configure toggle replies button
+        Button toggleRepliesBtn = new Button("Afficher les réponses (0)");
+        toggleRepliesBtn.getStyleClass().add("like-btn");
+        toggleRepliesBtn.setStyle("-fx-font-size: 12px;");
+        toggleRepliesBtn.setVisible(false);
+        toggleRepliesBtn.setManaged(false);
+        
+        // Lambda to update toggle button state
+        Runnable updateToggleButton = () -> {
+            int replyCount = repliesContainer.getChildren().size();
+            if (replyCount > 0) {
+                if (!toggleRepliesBtn.isVisible()) {
+                    toggleRepliesBtn.setVisible(true);
+                    toggleRepliesBtn.setManaged(true);
+                    if (!actionsRow.getChildren().contains(toggleRepliesBtn)) {
+                        actionsRow.getChildren().add(toggleRepliesBtn);
+                    }
+                }
+                boolean isVisible = repliesContainer.isVisible();
+                toggleRepliesBtn.setText(isVisible ? "Masquer les réponses" : "Afficher les réponses (" + replyCount + ")");
+            }
+        };
+        
+        // Toggle replies visibility on button click
+        toggleRepliesBtn.setOnAction(e -> {
+            boolean isVisible = repliesContainer.isVisible();
+            repliesContainer.setVisible(!isVisible);
+            repliesContainer.setManaged(!isVisible);
+            updateToggleButton.run();
+        });
+        
+        // Send reply and update toggle button
+        sendReplyBtn.setOnAction(e -> {
+            String replyText = replyField.getText();
+            if (replyText != null && !replyText.isBlank()) {
+                String replyAuthor = AppSession.getCurrentUser()
+                        .map(us -> {
+                            String fn = us.getFirstName() != null ? us.getFirstName() : "";
+                            String ln = us.getLastName() != null ? us.getLastName() : "";
+                            return (fn + " " + ln).trim();
+                        })
+                        .orElse("Vous");
+
+                Label replyContentLbl = new Label(replyAuthor + " — " + replyText);
+                replyContentLbl.setWrapText(true);
+                replyContentLbl.getStyleClass().add("post-body");
+
+                VBox replyItem = new VBox(4);
+                replyItem.getChildren().add(replyContentLbl);
+                replyItem.setPadding(new Insets(6, 0, 6, 0));
+
+                repliesContainer.getChildren().add(replyItem);
+                replyField.clear();
+                
+                // Update toggle button after adding reply
+                updateToggleButton.run();
+            }
+        });
+
+        // Toggle reply input visibility when Reply button clicked
+        replyBtn.setOnAction(e -> {
+            boolean isVisible = replyInputRow.isVisible();
+            replyInputRow.setVisible(!isVisible);
+            replyInputRow.setManaged(!isVisible);
+            if (!isVisible) {
+                replyField.requestFocus();
+            }
+        });
+
+        // Assemble comment card
+        commentCard.getChildren().addAll(contentLbl, actionsRow, repliesContainer, replyInputRow);
+
+        return commentCard;
     }
 
     private void submitComment(int postId, TextField field) {
@@ -507,6 +765,26 @@ public class PostsFeedController {
     private boolean isPostLikedBy(int postId, int userId) throws SQLException {
         return postLikeService.findByPostId(postId).stream()
                 .anyMatch(l -> Objects.equals(l.getLikerId(), userId));
+    }
+
+    private boolean isCommentLikedBy(int commentId, int userId) throws SQLException {
+        try {
+            // Create instance to access comment likes
+            services.comment.CommentLikeService commentLikeService = new services.comment.CommentLikeService();
+            return commentLikeService.findByCommentId(commentId).stream()
+                    .anyMatch(cl -> Objects.equals(cl.getUserId(), userId));
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    private int getCommentLikeCount(int commentId) throws SQLException {
+        try {
+            services.comment.CommentLikeService commentLikeService = new services.comment.CommentLikeService();
+            return commentLikeService.findByCommentId(commentId).size();
+        } catch (SQLException e) {
+            return 0;
+        }
     }
 
     /**
