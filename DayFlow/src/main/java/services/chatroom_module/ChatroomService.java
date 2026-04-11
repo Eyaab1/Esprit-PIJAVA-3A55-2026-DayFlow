@@ -81,12 +81,24 @@ public class ChatroomService implements CRUD<Chatroom, Integer> {
         return c;
     }
 
+<<<<<<< HEAD
     public record ChatroomListItem(int chatroomId, int goalId, String goalTitle) {
+=======
+    public record ChatroomListItem(int chatroomId, int goalId, String goalTitle, String lastMessageSnippet) {
+>>>>>>> origin/chatroom
     }
 
     public List<ChatroomListItem> findAccessibleForUser(int userId) throws SQLException {
         String sql = """
+<<<<<<< HEAD
                 SELECT c.id AS cid, g.id AS gid, g.title
+=======
+                SELECT c.id AS cid, g.id AS gid, g.title,
+                       (SELECT m.content FROM message m
+                        WHERE m.chatroom_id = c.id
+                        ORDER BY m.created_at DESC NULLS LAST
+                        LIMIT 1) AS snippet
+>>>>>>> origin/chatroom
                 FROM chatroom c
                 INNER JOIN goal g ON g.id = c.goal_id
                 INNER JOIN goal_participation gp ON gp.goal_id = g.id
@@ -98,7 +110,16 @@ public class ChatroomService implements CRUD<Chatroom, Integer> {
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
+<<<<<<< HEAD
                     list.add(new ChatroomListItem(rs.getInt("cid"), rs.getInt("gid"), rs.getString("title")));
+=======
+                    String snip = rs.getString("snippet");
+                    list.add(new ChatroomListItem(
+                            rs.getInt("cid"),
+                            rs.getInt("gid"),
+                            rs.getString("title"),
+                            rs.wasNull() ? null : snip));
+>>>>>>> origin/chatroom
                 }
             }
         }

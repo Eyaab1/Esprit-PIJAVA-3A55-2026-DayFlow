@@ -4,11 +4,16 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
+<<<<<<< HEAD
 <VBox spacing="0"
+=======
+<VBox spacing="20" alignment="TOP_CENTER"
+>>>>>>> origin/chatroom
       xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="controllers.MessageController"
       stylesheets="@/styles/style.css"
+<<<<<<< HEAD
       prefWidth="700" prefHeight="600">
 
     <!-- HEADER -->
@@ -42,5 +47,62 @@
                    onAction="#sendMessage"/>
         <Button text="➤" onAction="#sendMessage" styleClass="send-btn"/>
     </HBox>
+=======
+      styleClass="root"
+      prefWidth="900" prefHeight="620">
+    <padding><Insets top="25" right="30" bottom="25" left="30"/></padding>
+
+    <!-- HEADER -->
+    <Label text="✉️ Gestion des Messages" styleClass="title"/>
+
+    <!-- FORM CARD -->
+    <VBox spacing="15" styleClass="card">
+
+        <TextArea fx:id="contentField" promptText="Votre message..." prefHeight="80"/>
+
+        <GridPane hgap="15" vgap="12">
+            <Label text="Chatroom ID :" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="chatroomIdField" promptText="ex: 1" prefWidth="160"
+                       GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+            <Label text="Author ID :" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+            <TextField fx:id="authorIdField" promptText="ex: 1" prefWidth="160"
+                       GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+            <Label text="Épinglé :" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <CheckBox fx:id="pinnedCheck"
+                      GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+            <Label text="ID (modif/suppr) :" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+            <TextField fx:id="updateIdField" promptText="ID existant" prefWidth="160"
+                       GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+        </GridPane>
+
+    </VBox>
+
+    <!-- BUTTONS -->
+    <HBox spacing="15" alignment="CENTER">
+        <Button text="➕ Envoyer"   onAction="#addMessage"    styleClass="button,btn-add"/>
+        <Button text="✏️ Modifier"  onAction="#updateMessage" styleClass="button,btn-edit"/>
+        <Button text="🗑 Supprimer" onAction="#deleteMessage" styleClass="button,btn-delete"/>
+        <Button text="🔄 Actualiser" onAction="#loadAll"      styleClass="button,btn-refresh"/>
+    </HBox>
+
+    <Label fx:id="statusLabel" text=""/>
+
+    <!-- TABLE CARD -->
+    <VBox styleClass="card" VBox.vgrow="ALWAYS">
+        <TableView fx:id="tableView" prefHeight="280" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colId"         text="ID"       prefWidth="55"/>
+                <TableColumn fx:id="colContent"    text="Contenu"  prefWidth="260"/>
+                <TableColumn fx:id="colChatroomId" text="Chatroom" prefWidth="100"/>
+                <TableColumn fx:id="colAuthorId"   text="Auteur"   prefWidth="90"/>
+                <TableColumn fx:id="colPinned"     text="Épinglé"  prefWidth="80"/>
+                <TableColumn fx:id="colCreatedAt"  text="Créé le"  prefWidth="160"/>
+            </columns>
+        </TableView>
+    </VBox>
+>>>>>>> origin/chatroom
 
 </VBox>

@@ -27,18 +27,29 @@ public class MessageService implements CRUD<Message, Integer> {
     }
 
     /**
+<<<<<<< HEAD
      * Envoie un message après vérification : salon {@code active} et utilisateur participant {@code APPROVED}.
+=======
+     * Envoie un message — insère directement sans validation JOIN.
+     * La vérification d'accès est faite côté controller (messageField.setDisable).
+>>>>>>> origin/chatroom
      */
     public void postMessage(int userId, int chatroomId, String rawContent) throws SQLException {
         String content = rawContent == null ? "" : rawContent.trim();
         if (content.isEmpty()) {
+<<<<<<< HEAD
             throw new SQLException("Le message ne peut pas être vide.");
         }
         validateCanPost(userId, chatroomId);
+=======
+            throw new IllegalArgumentException("Le message ne peut pas être vide.");
+        }
+>>>>>>> origin/chatroom
         Message m = new Message(content, chatroomId, userId);
         insert(m);
     }
 
+<<<<<<< HEAD
     private void validateCanPost(int userId, int chatroomId) throws SQLException {
         String sql = """
                 SELECT 1 FROM chatroom c
@@ -58,6 +69,8 @@ public class MessageService implements CRUD<Message, Integer> {
         }
     }
 
+=======
+>>>>>>> origin/chatroom
     @Override
     public void insert(Message message) throws SQLException {
         String sql = "INSERT INTO message (content, created_at, is_pinned, is_edited, chatroom_id, author_id) VALUES (?, ?, ?, ?, ?, ?)";

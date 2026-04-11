@@ -136,6 +136,19 @@ public class GoalParticipationService implements CRUD<GoalParticipation, Integer
         return queryList(sql, goalId);
     }
 
+<<<<<<< HEAD
+=======
+    public List<GoalParticipation> findApprovedByGoal(int goalId) throws SQLException {
+        String sql = """
+                SELECT id, user_id, goal_id, created_at, role, status
+                FROM goal_participation
+                WHERE goal_id = ? AND status = 'APPROVED'
+                ORDER BY role ASC, created_at ASC
+                """;
+        return queryList(sql, goalId);
+    }
+
+>>>>>>> origin/chatroom
     public int countApprovedByGoal(int goalId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM goal_participation WHERE goal_id = ? AND status = 'APPROVED'";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {

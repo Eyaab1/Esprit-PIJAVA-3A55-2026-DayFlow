@@ -4,11 +4,16 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
+<<<<<<< HEAD
 <VBox alignment="CENTER" spacing="30"
+=======
+<VBox spacing="25" alignment="CENTER"
+>>>>>>> origin/chatroom
       xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="controllers.MainController"
       stylesheets="@/styles/style.css"
+<<<<<<< HEAD
       styleClass="gradient-bg"
       prefWidth="440" prefHeight="380">
 
@@ -24,6 +29,19 @@
         <Button text="💬   Chatrooms"      onAction="#openChatroom"          prefWidth="260" styleClass="btn-nav"/>
         <Button text="✉️   Messages"       onAction="#openMessage"           prefWidth="260" styleClass="btn-nav"/>
         <Button text="🎯   Participations" onAction="#openGoalParticipation" prefWidth="260" styleClass="btn-nav"/>
+=======
+      styleClass="root"
+      prefWidth="420" prefHeight="340">
+    <padding><Insets top="40" right="50" bottom="40" left="50"/></padding>
+
+    <Label text="DayFlow" style="-fx-font-size: 32; -fx-font-weight: bold; -fx-text-fill: #3f51b5;"/>
+    <Label text="Choisissez un module" style="-fx-text-fill: #888; -fx-font-size: 14;"/>
+
+    <VBox spacing="12" styleClass="card" alignment="CENTER">
+        <Button text="💬  Chatrooms"     onAction="#openChatroom"          prefWidth="240" styleClass="button,btn-add"/>
+        <Button text="✉️  Messages"      onAction="#openMessage"           prefWidth="240" styleClass="button,btn-edit"/>
+        <Button text="🎯  Participations" onAction="#openGoalParticipation" prefWidth="240" styleClass="button,btn-refresh"/>
+>>>>>>> origin/chatroom
     </VBox>
 
 </VBox>

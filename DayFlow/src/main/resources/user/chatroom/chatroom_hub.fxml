@@ -5,10 +5,15 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
+<<<<<<< HEAD
+=======
+<?import javafx.scene.control.Separator?>
+>>>>>>> origin/chatroom
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<<<<<<< HEAD
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
@@ -61,4 +66,139 @@
          </children>
       </VBox>
    </center>
+=======
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="700" prefWidth="1100" styleClass="chat-root" stylesheets="@chatroom_hub.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.chatroom.ChatroomHubController">
+
+    <!-- ═══════════════════════════════════════
+         LEFT — SIDEBAR
+         ═══════════════════════════════════════ -->
+    <left>
+        <VBox prefWidth="270" styleClass="chat-sidebar">
+
+            <!-- App title -->
+            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="sidebar-header">
+                <Label style="-fx-font-size:20px;" text="💬" />
+                <Label styleClass="sidebar-app-title" text="DayFlow Chat" />
+            </HBox>
+
+            <!-- Search -->
+            <HBox alignment="CENTER_LEFT" spacing="8" styleClass="sidebar-search-box">
+                <padding><Insets bottom="0" left="14" right="14" top="0" /></padding>
+                <Label style="-fx-text-fill:#8b949e; -fx-font-size:13px;" text="🔍" />
+                <TextField fx:id="searchField" promptText="Rechercher..." styleClass="sidebar-search" HBox.hgrow="ALWAYS" />
+            </HBox>
+
+            <!-- Chats label -->
+            <Label styleClass="chat-sidebar-title" text="MES CHATS" />
+
+            <!-- Chat list -->
+            <ListView fx:id="chatListView" styleClass="chat-list" VBox.vgrow="ALWAYS" />
+
+        </VBox>
+    </left>
+
+    <!-- ═══════════════════════════════════════
+         CENTER — CHAT AREA
+         ═══════════════════════════════════════ -->
+    <center>
+        <VBox styleClass="chat-center">
+
+            <!-- Header -->
+            <HBox alignment="CENTER_LEFT" spacing="12" styleClass="chat-header">
+                <StackPane styleClass="avatar-header">
+                    <Label fx:id="headerAvatarLabel" styleClass="avatar-text" text="?" />
+                </StackPane>
+                <VBox spacing="2">
+                    <Label fx:id="headerTitleLabel" styleClass="chat-title" text="Sélectionnez un chat" />
+                    <Label fx:id="headerSubLabel" styleClass="chat-sub" text="" />
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button fx:id="pendingBtn" managed="false" onAction="#onPendingRequests" styleClass="btn-pending" text="⏳ Demandes" visible="false" />
+                <Button fx:id="lockBtn" managed="false" onAction="#onLock" styleClass="btn-admin,btn-lock" text="🔒 Verrouiller" visible="false" />
+                <Button fx:id="archiveBtn" managed="false" onAction="#onArchive" styleClass="btn-admin,btn-archive" text="📦 Archiver" visible="false" />
+                <Button fx:id="deleteBtn" managed="false" onAction="#onDeleteRoom" styleClass="btn-admin,btn-delete" text="🗑 Supprimer" visible="false" />
+            </HBox>
+
+            <!-- Messages -->
+            <ScrollPane fx:id="messagesScroll" fitToWidth="true" styleClass="chat-messages" VBox.vgrow="ALWAYS">
+                <content>
+                    <VBox fx:id="messagesBox" spacing="8">
+                        <padding><Insets bottom="20" left="20" right="20" top="20" /></padding>
+                    </VBox>
+                </content>
+            </ScrollPane>
+
+            <!-- Input bar -->
+            <HBox alignment="CENTER" spacing="10" styleClass="chat-input-row">
+                <padding><Insets bottom="12" left="16" right="16" top="12" /></padding>
+                <Label styleClass="input-icon" text="📎" />
+                <TextField fx:id="messageField" promptText="Votre message..." styleClass="chat-field" text="cc" HBox.hgrow="ALWAYS" />
+                <Label styleClass="input-icon" text="🎤" />
+                <Button onAction="#onSendMessage" styleClass="btn-send" />
+            </HBox>
+
+        </VBox>
+    </center>
+
+    <!-- ═══════════════════════════════════════
+         RIGHT — GROUP INFO PANEL
+         ═══════════════════════════════════════ -->
+    <right>
+        <VBox prefWidth="260" spacing="0" styleClass="right-panel">
+
+            <!-- Title -->
+            <HBox alignment="CENTER_LEFT" spacing="8" styleClass="right-panel-header">
+                <Label styleClass="right-panel-title" text="Group Info" />
+                <Region HBox.hgrow="ALWAYS" />
+            </HBox>
+
+            <ScrollPane fitToWidth="true" styleClass="right-scroll" VBox.vgrow="ALWAYS">
+                <VBox spacing="0">
+
+                    <!-- Files section -->
+                    <VBox spacing="10" styleClass="info-section">
+                        <Label styleClass="info-section-title" text="Files" />
+                        <HBox spacing="8">
+                            <VBox alignment="CENTER" styleClass="file-stat" HBox.hgrow="ALWAYS">
+                                <Label style="-fx-font-size:20px;" text="📷" />
+                                <Label fx:id="photoCount" styleClass="file-stat-label" text="— photos" />
+                            </VBox>
+                            <VBox alignment="CENTER" styleClass="file-stat" HBox.hgrow="ALWAYS">
+                                <Label style="-fx-font-size:20px;" text="🎬" />
+                                <Label fx:id="videoCount" styleClass="file-stat-label" text="— videos" />
+                            </VBox>
+                        </HBox>
+                        <HBox spacing="8">
+                            <VBox alignment="CENTER" styleClass="file-stat" HBox.hgrow="ALWAYS">
+                                <Label style="-fx-font-size:20px;" text="📁" />
+                                <Label styleClass="file-stat-label" text="Files" />
+                            </VBox>
+                            <VBox alignment="CENTER" styleClass="file-stat" HBox.hgrow="ALWAYS">
+                                <Label style="-fx-font-size:20px;" text="🔗" />
+                                <Label styleClass="file-stat-label" text="Links" />
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Separator -->
+                    <Separator styleClass="info-sep" />
+
+                    <!-- Members section -->
+                    <VBox spacing="10" styleClass="info-section">
+                        <HBox alignment="CENTER_LEFT">
+                            <Label fx:id="memberCountLabel" styleClass="info-section-title" text="Membres" />
+                        </HBox>
+                        <ListView fx:id="membersListView" prefHeight="280" styleClass="members-list" />
+                    </VBox>
+
+                </VBox>
+            </ScrollPane>
+
+        </VBox>
+    </right>
+
+>>>>>>> origin/chatroom
 </BorderPane>
