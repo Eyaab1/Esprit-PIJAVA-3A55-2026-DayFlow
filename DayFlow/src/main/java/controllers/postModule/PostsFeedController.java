@@ -342,7 +342,7 @@ public class PostsFeedController {
         titleLbl.getStyleClass().add("post-title");
         titleLbl.setWrapText(true);
 
-        Text bodyText = new Text(post.getContent() != null ? post.getContent() : "");
+        Text bodyText = new Text(htmlToPlainText(post.getContent()));
         bodyText.getStyleClass().add("post-body");
         TextFlow bodyFlow = new TextFlow(bodyText);
         bodyFlow.setMaxWidth(680);
@@ -437,7 +437,7 @@ public class PostsFeedController {
         if (name.isBlank()) {
             name = "Utilisateur";
         }
-        Label lbl = new Label(name + " — " + (c.getContent() != null ? c.getContent() : ""));
+        Label lbl = new Label(name + " — " + htmlToPlainText(c.getContent()));
         lbl.setWrapText(true);
         lbl.getStyleClass().add("post-body");
         HBox row = new HBox(lbl);
@@ -478,6 +478,27 @@ public class PostsFeedController {
     private boolean isPostLikedBy(int postId, int userId) throws SQLException {
         return postLikeService.findByPostId(postId).stream()
                 .anyMatch(l -> Objects.equals(l.getLikerId(), userId));
+    }
+
+    /**
+     * Le contenu peut venir du web (Symfony / éditeur riche) avec des balises HTML.
+     * {@link Text} JavaFX n'interprète pas le HTML — on affiche du texte lisible sans balises.
+     */
+    private static String htmlToPlainText(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return "";
+        }
+        String s = raw
+                .replaceAll("(?i)<\\s*br\\s*/?>", "\n")
+                .replaceAll("(?i)</p>\\s*", "\n")
+                .replaceAll("(?i)<\\s*p[^>]*>", "");
+        s = s.replaceAll("<[^>]+>", "");
+        s = s.replace("&nbsp;", " ")
+                .replace("&amp;", "&")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&quot;", "\"");
+        return s.trim();
     }
 
     private static String formatPostMeta(Post p) {
