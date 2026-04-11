@@ -4,46 +4,86 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox spacing="15" xmlns="http://javafx.com/javafx"
+<VBox alignment="TOP_CENTER" spacing="0"
+      xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="controllers.GoalParticipationController"
-      prefWidth="400" prefHeight="350">
-    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+      stylesheets="@/styles/style.css"
+      styleClass="gradient-bg"
+      prefWidth="840" prefHeight="650">
 
-    <Label text="Participation aux Goals" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+    <!-- TOP SECTION : form card -->
+    <VBox alignment="CENTER" VBox.vgrow="NEVER">
+        <padding><Insets top="30" right="40" bottom="20" left="40"/></padding>
 
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="User ID :" prefWidth="80"/>
-        <TextField fx:id="userIdField" promptText="ex: 1" prefWidth="200"/>
-    </HBox>
+        <VBox spacing="16" styleClass="card" maxWidth="500">
 
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Goal ID :" prefWidth="80"/>
-        <TextField fx:id="goalIdField" promptText="ex: 1" prefWidth="200"/>
-    </HBox>
+            <Label text="🎯  Participation aux Goals" styleClass="page-title"/>
 
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Rôle :" prefWidth="80"/>
-        <ComboBox fx:id="roleBox" prefWidth="200"/>
-    </HBox>
+            <!-- User + Goal -->
+            <HBox spacing="15">
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label text="USER ID" styleClass="section-label"/>
+                    <TextField fx:id="userIdField" promptText="ex: 1"
+                               styleClass="input-field" maxWidth="Infinity"/>
+                </VBox>
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label text="GOAL ID" styleClass="section-label"/>
+                    <TextField fx:id="goalIdField" promptText="ex: 1"
+                               styleClass="input-field" maxWidth="Infinity"/>
+                </VBox>
+            </HBox>
 
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Statut :" prefWidth="80"/>
-        <ComboBox fx:id="statusBox" prefWidth="200"/>
-    </HBox>
+            <!-- Rôle + Statut -->
+            <HBox spacing="15">
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label text="RÔLE" styleClass="section-label"/>
+                    <ComboBox fx:id="roleBox" styleClass="combo-box" maxWidth="Infinity"/>
+                </VBox>
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label text="STATUT" styleClass="section-label"/>
+                    <ComboBox fx:id="statusBox" styleClass="combo-box" maxWidth="Infinity"/>
+                </VBox>
+            </HBox>
 
-    <HBox spacing="10">
-        <TextField fx:id="updateIdField" promptText="ID à modifier/supprimer" prefWidth="200"/>
-    </HBox>
+            <!-- ID modifier/supprimer -->
+            <VBox spacing="4">
+                <Label text="ID À MODIFIER / SUPPRIMER" styleClass="section-label"/>
+                <TextField fx:id="updateIdField" promptText="Entrer l'ID existant"
+                           styleClass="input-field" maxWidth="Infinity"/>
+            </VBox>
 
-    <HBox spacing="10">
-        <Button text="Ajouter" onAction="#addParticipation" prefWidth="110"
-                style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
-        <Button text="Modifier" onAction="#updateParticipation" prefWidth="110"
-                style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
-        <Button text="Supprimer" onAction="#deleteParticipation" prefWidth="110"
-                style="-fx-background-color: #f44336; -fx-text-fill: white;"/>
-    </HBox>
+            <!-- Buttons -->
+            <HBox spacing="10" alignment="CENTER">
+                <Button text="➕  Ajouter"    onAction="#addParticipation"    styleClass="btn,btn-add"/>
+                <Button text="✏️  Modifier"   onAction="#updateParticipation" styleClass="btn,btn-edit"/>
+                <Button text="🗑  Supprimer"  onAction="#deleteParticipation" styleClass="btn,btn-delete"/>
+                <Button text="🔄  Actualiser" onAction="#loadAll"             styleClass="btn,btn-refresh"/>
+            </HBox>
 
-    <Label fx:id="statusLabel" text="" style="-fx-text-fill: green;"/>
+            <Label fx:id="statusLabel" text="" alignment="CENTER" maxWidth="Infinity"/>
+
+        </VBox>
+    </VBox>
+
+    <!-- BOTTOM SECTION : table -->
+    <VBox VBox.vgrow="ALWAYS" spacing="0">
+        <padding><Insets top="0" right="40" bottom="30" left="40"/></padding>
+
+        <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="10">
+            <Label text="📋  Liste des Participations" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #2d3748;"/>
+            <TableView fx:id="tableView" VBox.vgrow="ALWAYS" styleClass="table-view">
+                <columns>
+                    <TableColumn fx:id="colId"        text="ID"       prefWidth="60"/>
+                    <TableColumn fx:id="colUserId"    text="User ID"  prefWidth="95"/>
+                    <TableColumn fx:id="colGoalId"    text="Goal ID"  prefWidth="95"/>
+                    <TableColumn fx:id="colRole"      text="Rôle"     prefWidth="120"/>
+                    <TableColumn fx:id="colStatus"    text="Statut"   prefWidth="120"/>
+                    <TableColumn fx:id="colCreatedAt" text="Créé le"  prefWidth="160"/>
+                </columns>
+                <placeholder><Label text="Aucune participation trouvée"/></placeholder>
+            </TableView>
+        </VBox>
+    </VBox>
+
 </VBox>

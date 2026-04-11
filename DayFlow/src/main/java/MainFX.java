@@ -7,7 +7,7 @@ public class MainFX extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/main.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/chatroom/main.fxml"));
         stage.setTitle("DayFlow");
         stage.setScene(new Scene(loader.load()));
         stage.show();

@@ -4,36 +4,75 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox spacing="15" xmlns="http://javafx.com/javafx"
+<VBox alignment="TOP_CENTER" spacing="0"
+      xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="controllers.ChatroomController"
-      prefWidth="400" prefHeight="300">
-    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+      stylesheets="@/styles/style.css"
+      styleClass="gradient-bg"
+      prefWidth="820" prefHeight="640">
 
-    <Label text="Gestion des Chatrooms" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+    <!-- TOP SECTION : form card -->
+    <VBox alignment="CENTER" VBox.vgrow="NEVER">
+        <padding><Insets top="35" right="40" bottom="20" left="40"/></padding>
 
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Goal ID :" prefWidth="80"/>
-        <TextField fx:id="goalIdField" promptText="ex: 1" prefWidth="200"/>
-    </HBox>
+        <VBox spacing="18" styleClass="card" maxWidth="480">
 
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="État :" prefWidth="80"/>
-        <ComboBox fx:id="stateBox" prefWidth="200"/>
-    </HBox>
+            <!-- Title -->
+            <Label text="💬  Gestion des Chatrooms" styleClass="page-title"/>
 
-    <HBox spacing="10">
-        <TextField fx:id="updateIdField" promptText="ID à modifier/supprimer" prefWidth="200"/>
-    </HBox>
+            <!-- Goal ID -->
+            <VBox spacing="4">
+                <Label text="GOAL ID" styleClass="section-label"/>
+                <TextField fx:id="goalIdField" promptText="Entrer l'ID du goal"
+                           styleClass="input-field" maxWidth="Infinity"/>
+            </VBox>
 
-    <HBox spacing="10">
-        <Button fx:id="addButton" text="Ajouter" onAction="#addChatroom" prefWidth="120"
-                style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
-        <Button text="Modifier" onAction="#updateChatroom" prefWidth="120"
-                style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
-        <Button text="Supprimer" onAction="#deleteChatroom" prefWidth="120"
-                style="-fx-background-color: #f44336; -fx-text-fill: white;"/>
-    </HBox>
+            <!-- État -->
+            <VBox spacing="4">
+                <Label text="ÉTAT" styleClass="section-label"/>
+                <ComboBox fx:id="stateBox" promptText="Sélectionner l'état"
+                          styleClass="combo-box" maxWidth="Infinity"/>
+            </VBox>
 
-    <Label fx:id="statusLabel" text="" style="-fx-text-fill: green;"/>
+            <!-- ID modifier/supprimer -->
+            <VBox spacing="4">
+                <Label text="ID À MODIFIER / SUPPRIMER" styleClass="section-label"/>
+                <TextField fx:id="updateIdField" promptText="Entrer l'ID existant"
+                           styleClass="input-field" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- Buttons -->
+            <HBox spacing="10" alignment="CENTER">
+                <Button text="➕  Ajouter"    onAction="#addChatroom"    styleClass="btn,btn-add"/>
+                <Button text="✏️  Modifier"   onAction="#updateChatroom" styleClass="btn,btn-edit"/>
+                <Button text="🗑  Supprimer"  onAction="#deleteChatroom" styleClass="btn,btn-delete"/>
+                <Button text="🔄  Actualiser" onAction="#loadAll"        styleClass="btn,btn-refresh"/>
+            </HBox>
+
+            <!-- Status -->
+            <Label fx:id="statusLabel" text="" alignment="CENTER" maxWidth="Infinity"/>
+
+        </VBox>
+    </VBox>
+
+    <!-- BOTTOM SECTION : table -->
+    <VBox VBox.vgrow="ALWAYS" spacing="0">
+        <padding><Insets top="0" right="40" bottom="30" left="40"/></padding>
+
+        <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="10">
+            <Label text="📋  Liste des Chatrooms" styleClass="page-title"
+                   style="-fx-font-size: 15px;"/>
+            <TableView fx:id="tableView" VBox.vgrow="ALWAYS" styleClass="table-view">
+                <columns>
+                    <TableColumn fx:id="colId"        text="ID"       prefWidth="60"/>
+                    <TableColumn fx:id="colGoalId"    text="Goal ID"  prefWidth="130"/>
+                    <TableColumn fx:id="colState"     text="État"     prefWidth="140"/>
+                    <TableColumn fx:id="colCreatedAt" text="Créé le"  prefWidth="230"/>
+                </columns>
+                <placeholder><Label text="Aucun chatroom trouvé"/></placeholder>
+            </TableView>
+        </VBox>
+    </VBox>
+
 </VBox>

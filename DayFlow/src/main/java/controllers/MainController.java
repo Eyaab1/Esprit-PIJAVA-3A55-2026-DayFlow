@@ -12,17 +12,17 @@ public class MainController {
 
     @FXML
     public void openChatroom() throws IOException {
-        openWindow("/views/chatroom.fxml", "Chatrooms");
+        openWindow("/user/chatroom/chatroom.fxml", "Chatrooms");
     }
 
     @FXML
     public void openMessage() throws IOException {
-        openWindow("/views/message.fxml", "Messages");
+        openWindow("/user/chatroom/message.fxml", "Messages");
     }
 
     @FXML
     public void openGoalParticipation() throws IOException {
-        openWindow("/views/goalparticipation.fxml", "Participations");
+        openWindow("/user/chatroom/goalparticipation.fxml", "Participations");
     }
 
     private void openWindow(String fxmlPath, String title) throws IOException {
