@@ -1,54 +1,57 @@
 package utils;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 
-/**
- * Pool de connexions JDBC : la configuration et le pool HikariCP sont créés une seule fois.
- * Chaque {@link #getConnection()} emprunte une connexion ; la fermer (ex. try-with-resources) la rend au pool.
- */
 public final class DbConnexion {
 
     private static final String URL = "jdbc:postgresql://localhost:5432/pidev_db";
     private static final String USER = "postgres";
     private static final String PASSWORD = "admin";
 
-    private static volatile HikariDataSource dataSource;
+    private static volatile DbConnexion instance;
+
+    private final Connection cnx;
 
     private DbConnexion() {
+        try {
+            cnx = DriverManager.getConnection(URL, USER, PASSWORD);
+        } catch (SQLException e) {
+            throw new IllegalStateException("Échec connexion base de données", e);
+        }
     }
 
-    private static HikariDataSource getOrCreateDataSource() {
-        if (dataSource == null) {
+    public static DbConnexion getInstance() {
+        if (instance == null) {
             synchronized (DbConnexion.class) {
-                if (dataSource == null) {
-                    HikariConfig config = new HikariConfig();
-                    config.setJdbcUrl(URL);
-                    config.setUsername(USER);
-                    config.setPassword(PASSWORD);
-                    config.setPoolName("DayFlow-pool");
-                    config.setMaximumPoolSize(10);
-                    config.setMinimumIdle(1);
-                    dataSource = new HikariDataSource(config);
+                if (instance == null) {
+                    instance = new DbConnexion();
                 }
             }
         }
-        return dataSource;
+        return instance;
     }
 
-    public static Connection getConnection() throws SQLException {
-        return getOrCreateDataSource().getConnection();
+    public Connection getCnx() {
+        return cnx;
     }
 
-    /** Ferme le pool (à appeler à l’arrêt de l’application). */
+    /** Connexion unique partagée ; ne pas la fermer (fermer seulement les statements / result sets). */
+    public static Connection getConnection() {
+        return getInstance().getCnx();
+    }
+
     public static void shutdown() {
         synchronized (DbConnexion.class) {
-            if (dataSource != null) {
-                dataSource.close();
-                dataSource = null;
+            if (instance != null) {
+                try {
+                    if (!instance.cnx.isClosed()) {
+                        instance.cnx.close();
+                    }
+                } catch (SQLException ignored) {
+                }
+                instance = null;
             }
         }
     }

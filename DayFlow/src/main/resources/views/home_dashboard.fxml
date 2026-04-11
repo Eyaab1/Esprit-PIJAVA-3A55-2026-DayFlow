@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="TOP_CENTER" spacing="16.0" style="-fx-background-color: linear-gradient(to bottom, #f8fafc, #eef2ff);" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #111827;" text="Accueil" />
+      <Label style="-fx-text-fill: #6b7280; -fx-wrap-text: true; -fx-text-alignment: center; -fx-max-width: 520;" text="Espace connecté DayFlow. Utilise la barre de navigation pour accéder aux modules." />
+   </children>
+   <padding>
+      <Insets bottom="40.0" left="32.0" right="32.0" top="48.0" />
+   </padding>
+</VBox>
