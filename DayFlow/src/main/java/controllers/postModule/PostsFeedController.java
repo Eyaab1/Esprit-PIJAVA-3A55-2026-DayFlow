@@ -5,6 +5,7 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -204,7 +205,6 @@ public class PostsFeedController {
         try {
             List<Post> posts = postService.getAllPosts().stream()
                     .filter(p -> p.getStatus() == PostStatus.PUBLISHED)
-                    .filter(p -> p.getDeletedAt() == null)
                     .collect(Collectors.toList());
 
             String filter = filterCombo.getSelectionModel().getSelectedItem();
@@ -321,9 +321,47 @@ public class PostsFeedController {
             }
         });
 
+        // Create title and body EARLY so they can be referenced by the menu
+        Label titleLbl = new Label(post.getTitle());
+        titleLbl.getStyleClass().add("post-title");
+        titleLbl.setWrapText(true);
+
+        Text bodyText = new Text(htmlToPlainText(post.getContent()));
+        bodyText.getStyleClass().add("post-body");
+        TextFlow bodyFlow = new TextFlow(bodyText);
+        bodyFlow.setMaxWidth(680);
+
         Button menu = new Button("⋯");
         menu.getStyleClass().add("post-icon-btn");
         menu.setDisable(true);
+        
+        // Enable menu only for post owner
+        if (currentUserId != null && currentUserId.equals(post.getCreatedById())) {
+            menu.setDisable(false);
+            
+            ContextMenu contextMenu = new ContextMenu();
+            
+            MenuItem editItem = new MenuItem("Modifier");
+            editItem.setOnAction(e -> {
+                try {
+                    enterEditMode(card, post, titleLbl, bodyFlow);
+                } catch (SQLException ex) {
+                    showError("Edit mode", ex);
+                }
+            });
+            
+            MenuItem deleteItem = new MenuItem("Supprimer");
+            deleteItem.setOnAction(e -> {
+                try {
+                    deletePost(post);
+                } catch (SQLException ex) {
+                    showError("Suppression", ex);
+                }
+            });
+            
+            contextMenu.getItems().addAll(editItem, deleteItem);
+            menu.setOnAction(e -> contextMenu.show(menu, Side.BOTTOM, 0, 0));
+        }
 
         HBox header = new HBox(12);
         header.setAlignment(Pos.CENTER_LEFT);
@@ -337,15 +375,6 @@ public class PostsFeedController {
             pill.getStyleClass().add("post-tag-pill");
             tagsFlow.getChildren().add(pill);
         }
-
-        Label titleLbl = new Label(post.getTitle());
-        titleLbl.getStyleClass().add("post-title");
-        titleLbl.setWrapText(true);
-
-        Text bodyText = new Text(htmlToPlainText(post.getContent()));
-        bodyText.getStyleClass().add("post-body");
-        TextFlow bodyFlow = new TextFlow(bodyText);
-        bodyFlow.setMaxWidth(680);
 
         int likeCount = postLikeService.findByPostId(post.getId()).size();
         int commentCount = commentService.getCommentsByPost(post.getId()).size();
@@ -520,4 +549,114 @@ public class PostsFeedController {
     private static void showError(String ctx, SQLException e) {
         new Alert(Alert.AlertType.ERROR, ctx + " : " + e.getMessage()).showAndWait();
     }
+
+    /**
+     * Transform post card to edit mode: replace title label and body text flow with editable fields
+     */
+    private void enterEditMode(VBox card, Post post, Label titleLbl, TextFlow bodyFlow) throws SQLException {
+        // Create editable fields
+        TextField titleField = new TextField(post.getTitle());
+        titleField.getStyleClass().add("post-title");
+        titleField.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
+        
+        TextArea contentArea = new TextArea(htmlToPlainText(post.getContent()));
+        contentArea.getStyleClass().add("post-body");
+        contentArea.setPrefRowCount(6);
+        contentArea.setWrapText(true);
+        contentArea.setMaxWidth(680);
+        
+        // Find and replace the title and body in the card
+        int titleIndex = card.getChildren().indexOf(titleLbl);
+        int bodyIndex = card.getChildren().indexOf(bodyFlow);
+        
+        if (titleIndex >= 0) {
+            card.getChildren().set(titleIndex, titleField);
+        }
+        if (bodyIndex >= 0) {
+            card.getChildren().set(bodyIndex, contentArea);
+        }
+        
+        // Create Save and Cancel buttons
+        Button saveBtn = new Button("Enregistrer");
+        saveBtn.getStyleClass().add("btn-primary");
+        saveBtn.setOnAction(e -> {
+            try {
+                savePost(card, post, titleField, contentArea, titleLbl, bodyFlow);
+            } catch (SQLException ex) {
+                showError("Saving post", ex);
+            }
+        });
+        
+        Button cancelBtn = new Button("Annuler");
+        cancelBtn.getStyleClass().add("btn-secondary");
+        cancelBtn.setOnAction(e -> exitEditMode(card, titleField, contentArea, titleLbl, bodyFlow));
+        
+        HBox editActions = new HBox(10);
+        editActions.setAlignment(Pos.CENTER_LEFT);
+        editActions.getChildren().addAll(saveBtn, cancelBtn);
+        editActions.setPadding(new Insets(10, 0, 0, 0));
+        
+        // Insert action buttons after body
+        if (bodyIndex >= 0) {
+            card.getChildren().add(bodyIndex + 1, editActions);
+        }
+    }
+
+    /**
+     * Restore post card to normal view (cancel edit without saving)
+     */
+    private void exitEditMode(VBox card, TextField titleField, TextArea contentArea, Label titleLbl, TextFlow bodyFlow) {
+        // Simply refresh the entire feed to restore original state from database
+        refreshFeed();
+    }
+
+    /**
+     * Save edited post
+     */
+    private void savePost(VBox card, Post post, TextField titleField, TextArea contentArea, Label titleLbl, TextFlow bodyFlow) throws SQLException {
+        String newTitle = titleField.getText() != null ? titleField.getText().trim() : "";
+        String newContent = contentArea.getText() != null ? contentArea.getText().trim() : "";
+        
+        if (newTitle.isEmpty()) {
+            new Alert(Alert.AlertType.WARNING, "Le titre est obligatoire.").showAndWait();
+            return;
+        }
+        
+        post.setTitle(newTitle);
+        post.setContent(newContent.isEmpty() ? null : newContent);
+        post.setUpdatedAt(java.time.LocalDateTime.now());
+        
+        try {
+            postService.update(post);
+            refreshFeed();
+            new Alert(Alert.AlertType.INFORMATION, "Post mis à jour.").showAndWait();
+        } catch (SQLException e) {
+            showError("Mise à jour du post", e);
+        }
+    }
+
+    /**
+     * Delete post with confirmation (marks as HIDDEN, doesn't remove from database)
+     */
+    private void deletePost(Post post) throws SQLException {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirmer la suppression");
+        confirm.setHeaderText("Supprimer le post ?");
+        confirm.setContentText("Voulez-vous vraiment supprimer ce post ?");
+        
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                // Mark post as HIDDEN instead of deleting from database
+                post.setStatus(PostStatus.HIDDEN);
+                post.setUpdatedAt(java.time.LocalDateTime.now());
+                postService.update(post);
+                refreshFeed();
+                new Alert(Alert.AlertType.INFORMATION, "Post supprimé.").showAndWait();
+            } catch (SQLException e) {
+                showError("Suppression du post", e);
+            }
+        }
+    }
+
 }
