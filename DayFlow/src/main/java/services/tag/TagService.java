@@ -12,13 +12,13 @@ import java.util.List;
 public class TagService implements CRUD<Tag, Integer> {
 
     private static final String INSERT_TAG = """
-            INSERT INTO tags (name, created_at, usage_count)
-            VALUES (?, ?, ?)
+            INSERT INTO tags (name, slug, created_at, usage_count)
+            VALUES (?, ?, ?, ?)
             """;
 
     private static final String UPDATE_TAG = """
             UPDATE tags SET
-                name = ?, created_at = ?, usage_count = ?
+                name = ?, slug = ?, created_at = ?, usage_count = ?
             WHERE id = ?
             """;
 
@@ -27,17 +27,17 @@ public class TagService implements CRUD<Tag, Integer> {
             """;
 
     private static final String SELECT_BY_ID = """
-            SELECT id, name, created_at, usage_count
+            SELECT id, name, slug, created_at, usage_count
             FROM tags WHERE id = ?
             """;
 
     private static final String SELECT_ALL = """
-            SELECT id, name, created_at, usage_count
+            SELECT id, name, slug, created_at, usage_count
             FROM tags
             """;
 
     private static final String SELECT_BY_POST_ID = """
-            SELECT t.id, t.name, t.created_at, t.usage_count
+            SELECT t.id, t.name, t.slug, t.created_at, t.usage_count
             FROM tags t
             INNER JOIN post_tags pt ON t.id = pt.tag_id
             WHERE pt.post_id = ?
@@ -59,11 +59,21 @@ public class TagService implements CRUD<Tag, Integer> {
 
     @Override
     public void insert(Tag tag) throws SQLException {
+        // FIX: added null safety check for name
+        if (tag.getName() == null || tag.getName().isBlank()) {
+            throw new SQLException("Tag name is required");
+        }
         Connection c = DbConnexion.getConnection();
         try (PreparedStatement ps = c.prepareStatement(INSERT_TAG, Statement.RETURN_GENERATED_KEYS)) {
+            // FIX: slug generation BEFORE insert
+            if (tag.getSlug() == null) {
+                tag.setSlug(tag.getName().toLowerCase().replace(" ", "-"));
+            }
             ps.setString(1, tag.getName());
-            ps.setTimestamp(2, tag.getCreatedAt() != null ? Timestamp.valueOf(tag.getCreatedAt()) : Timestamp.valueOf(LocalDateTime.now()));
-            ps.setInt(3, tag.getUsageCount() != null ? tag.getUsageCount() : 0);
+            ps.setString(2, tag.getSlug());
+            
+            ps.setTimestamp(3, tag.getCreatedAt() != null ? Timestamp.valueOf(tag.getCreatedAt()) : Timestamp.valueOf(LocalDateTime.now()));
+            ps.setInt(4, tag.getUsageCount() != null ? tag.getUsageCount() : 0);
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
@@ -78,16 +88,24 @@ public class TagService implements CRUD<Tag, Integer> {
         if (tag.getId() == null) {
             throw new SQLException("id obligatoire pour UPDATE");
         }
+        // FIX: added null safety check for name
+        if (tag.getName() == null || tag.getName().isBlank()) {
+            throw new SQLException("Tag name is required");
+        }
         Connection c = DbConnexion.getConnection();
         try (PreparedStatement ps = c.prepareStatement(UPDATE_TAG)) {
+            // FIX: slug generation BEFORE update
+            if (tag.getSlug() == null) {
+                tag.setSlug(tag.getName().toLowerCase().replace(" ", "-"));
+            }
             ps.setString(1, tag.getName());
-            ps.setTimestamp(2, tag.getCreatedAt() != null ? Timestamp.valueOf(tag.getCreatedAt()) : null);
-            ps.setInt(3, tag.getUsageCount() != null ? tag.getUsageCount() : 0);
-            ps.setInt(4, tag.getId());
+            ps.setString(2, tag.getSlug());
+            ps.setTimestamp(3, tag.getCreatedAt() != null ? Timestamp.valueOf(tag.getCreatedAt()) : null);
+            ps.setInt(4, tag.getUsageCount() != null ? tag.getUsageCount() : 0);
+            ps.setInt(5, tag.getId());
             ps.executeUpdate();
         }
     }
-
     @Override
     public void delete(Integer id) throws SQLException {
         if (id == null) {
@@ -140,7 +158,18 @@ public class TagService implements CRUD<Tag, Integer> {
     }
 
     public void addTagToPost(Integer postId, Integer tagId) throws SQLException {
+        // FIX: prevent duplicate post_tags
+        String checkDuplicate = "SELECT 1 FROM post_tags WHERE post_id = ? AND tag_id = ?";
         Connection c = DbConnexion.getConnection();
+        try (PreparedStatement checkPs = c.prepareStatement(checkDuplicate)) {
+            checkPs.setInt(1, postId);
+            checkPs.setInt(2, tagId);
+            try (ResultSet rs = checkPs.executeQuery()) {
+                if (rs.next()) {
+                    throw new SQLException("Tag already associated with this post");
+                }
+            }
+        }
         try (PreparedStatement ps = c.prepareStatement(INSERT_POST_TAG)) {
             ps.setInt(1, postId);
             ps.setInt(2, tagId);
@@ -192,9 +221,10 @@ public class TagService implements CRUD<Tag, Integer> {
 
     // Helper methods
     private Tag mapRow(ResultSet rs) throws SQLException {
-        Tag t = new Tag(null, null, null, null);
+        Tag t = new Tag();
         t.setId(rs.getInt("id"));
         t.setName(rs.getString("name"));
+        t.setSlug(rs.getString("slug"));
         Timestamp createdTs = rs.getTimestamp("created_at");
         t.setCreatedAt(createdTs != null ? createdTs.toLocalDateTime() : null);
         t.setUsageCount(rs.getInt("usage_count"));

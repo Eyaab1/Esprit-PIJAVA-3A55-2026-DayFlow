@@ -41,21 +41,21 @@ public class PostTest {
 
     @BeforeEach
     public void setUp() {
-        // Initialize test data
-        testPost = new Post(
-                1,
-                "Test Post Title",
-                "Test post content",
-                LocalDateTime.now(),
-                null,
-                null,
-                List.of("image1.jpg", "image2.jpg"),
-                1,
-                0,
-                0,
-                PostStatus.PUBLISHED,
-                null
-        );
+        // Initialize test data using default constructor + setters
+        testPost = new Post();
+        testPost.setId(1);
+        testPost.setTitle("Test Post Title");
+        testPost.setContent("Test post content");
+        testPost.setCreatedAt(LocalDateTime.now());
+        testPost.setCreatedById(1);
+        testPost.setStatus(PostStatus.PUBLISHED);
+        testPost.setImages(List.of("image1.jpg", "image2.jpg"));
+        testPost.setScheduledAt(null);
+        testPost.setUpdatedAt(null);
+        testPost.setSlug("test-post-title");
+        testPost.setDeletedAt(null);
+        testPost.setViewCount(0);
+        testPost.setClickCount(0);
 
         testComment = new Comment(
                 1,
@@ -66,12 +66,12 @@ public class PostTest {
                 null
         );
 
-        testTag = new Tag(
-                1,
-                "Technology",
-                LocalDateTime.now(),
-                0
-        );
+        testTag = new Tag();
+        testTag.setId(1);
+        testTag.setName("Technology");
+        testTag.setSlug("technology");
+        testTag.setCreatedAt(LocalDateTime.now());
+        testTag.setUsageCount(0);
     }
 
     // PostService Tests
@@ -79,20 +79,19 @@ public class PostTest {
     @Test
     public void testCreatePost() throws SQLException {
         // Arrange
-        Post newPost = new Post(
-                null,
-                "New Post",
-                "New content",
-                LocalDateTime.now(),
-                null,
-                null,
-                List.of(),
-                1,
-                0,
-                0,
-                PostStatus.DRAFT,
-                null
-        );
+        Post newPost = new Post();
+        newPost.setTitle("New Post");
+        newPost.setContent("New content");
+        newPost.setCreatedAt(LocalDateTime.now());
+        newPost.setCreatedById(1);
+        newPost.setStatus(PostStatus.DRAFT);
+        newPost.setImages(List.of());
+        newPost.setScheduledAt(null);
+        newPost.setUpdatedAt(null);
+        newPost.setSlug("new-post");
+        newPost.setDeletedAt(null);
+        newPost.setViewCount(0);
+        newPost.setClickCount(0);
 
         doAnswer(invocation -> {
             Post post = invocation.getArgument(0);
@@ -128,22 +127,24 @@ public class PostTest {
     @Test
     public void testGetAllPosts() throws SQLException {
         // Arrange
+        Post secondPost = new Post();
+        secondPost.setId(2);
+        secondPost.setTitle("Second Post");
+        secondPost.setContent("Second content");
+        secondPost.setCreatedAt(LocalDateTime.now());
+        secondPost.setCreatedById(1);
+        secondPost.setStatus(PostStatus.PUBLISHED);
+        secondPost.setImages(List.of());
+        secondPost.setScheduledAt(null);
+        secondPost.setUpdatedAt(null);
+        secondPost.setSlug("second-post");
+        secondPost.setDeletedAt(null);
+        secondPost.setViewCount(0);
+        secondPost.setClickCount(0);
+
         List<Post> posts = new ArrayList<>();
         posts.add(testPost);
-        posts.add(new Post(
-                2,
-                "Second Post",
-                "Second content",
-                LocalDateTime.now(),
-                null,
-                null,
-                List.of(),
-                1,
-                0,
-                0,
-                PostStatus.PUBLISHED,
-                null
-        ));
+        posts.add(secondPost);
 
         when(postService.getAllPosts()).thenReturn(posts);
 
@@ -187,9 +188,11 @@ public class PostTest {
     @Test
     public void testDeletePostAndVerify() throws SQLException {
         // Arrange
-        when(postService.getPostById(1)).thenReturn(testPost);
+        when(postService.getPostById(1))
+                .thenReturn(testPost)
+                .thenReturn(null);
+
         doNothing().when(postService).deletePost(1);
-        when(postService.getPostById(1)).thenReturn(null);
 
         // Act
         Post beforeDelete = postService.getPostById(1);
@@ -201,7 +204,6 @@ public class PostTest {
         assertNull(afterDelete);
         verify(postService, times(1)).deletePost(1);
     }
-
     // CommentService Tests
 
     @Test
@@ -291,12 +293,11 @@ public class PostTest {
     @Test
     public void testAddTag() throws SQLException {
         // Arrange
-        Tag newTag = new Tag(
-                null,
-                "Java",
-                LocalDateTime.now(),
-                0
-        );
+        Tag newTag = new Tag();
+        newTag.setName("Java");
+        newTag.setSlug("java");
+        newTag.setCreatedAt(LocalDateTime.now());
+        newTag.setUsageCount(0);
 
         doAnswer(invocation -> {
             Tag tag = invocation.getArgument(0);
@@ -316,9 +317,16 @@ public class PostTest {
     @Test
     public void testGetAllTags() throws SQLException {
         // Arrange
+        Tag javaTag = new Tag();
+        javaTag.setId(2);
+        javaTag.setName("Java");
+        javaTag.setSlug("java");
+        javaTag.setCreatedAt(LocalDateTime.now());
+        javaTag.setUsageCount(5);
+
         List<Tag> tags = new ArrayList<>();
         tags.add(testTag);
-        tags.add(new Tag(2, "Java", LocalDateTime.now(), 5));
+        tags.add(javaTag);
 
         when(tagService.getAllTags()).thenReturn(tags);
 
@@ -336,9 +344,16 @@ public class PostTest {
     @Test
     public void testGetTagsByPost() throws SQLException {
         // Arrange
+        Tag programmingTag = new Tag();
+        programmingTag.setId(2);
+        programmingTag.setName("Programming");
+        programmingTag.setSlug("programming");
+        programmingTag.setCreatedAt(LocalDateTime.now());
+        programmingTag.setUsageCount(3);
+
         List<Tag> tags = new ArrayList<>();
         tags.add(testTag);
-        tags.add(new Tag(2, "Programming", LocalDateTime.now(), 3));
+        tags.add(programmingTag);
 
         when(tagService.getTagsByPost(1)).thenReturn(tags);
 
@@ -394,20 +409,19 @@ public class PostTest {
     @Test
     public void testCreatePostAndAddComments() throws SQLException {
         // Arrange
-        Post newPost = new Post(
-                null,
-                "Post with comments",
-                "Content",
-                LocalDateTime.now(),
-                null,
-                null,
-                List.of(),
-                1,
-                0,
-                0,
-                PostStatus.PUBLISHED,
-                null
-        );
+        Post newPost = new Post();
+        newPost.setTitle("Post with comments");
+        newPost.setContent("Content");
+        newPost.setCreatedAt(LocalDateTime.now());
+        newPost.setCreatedById(1);
+        newPost.setStatus(PostStatus.PUBLISHED);
+        newPost.setImages(List.of());
+        newPost.setScheduledAt(null);
+        newPost.setUpdatedAt(null);
+        newPost.setSlug("post-with-comments");
+        newPost.setDeletedAt(null);
+        newPost.setViewCount(0);
+        newPost.setClickCount(0);
 
         doAnswer(invocation -> {
             Post post = invocation.getArgument(0);
@@ -437,20 +451,19 @@ public class PostTest {
     @Test
     public void testCreatePostAndAttachTags() throws SQLException {
         // Arrange
-        Post newPost = new Post(
-                null,
-                "Post with tags",
-                "Content",
-                LocalDateTime.now(),
-                null,
-                null,
-                List.of(),
-                1,
-                0,
-                0,
-                PostStatus.PUBLISHED,
-                null
-        );
+        Post newPost = new Post();
+        newPost.setTitle("Post with tags");
+        newPost.setContent("Content");
+        newPost.setCreatedAt(LocalDateTime.now());
+        newPost.setCreatedById(1);
+        newPost.setStatus(PostStatus.PUBLISHED);
+        newPost.setImages(List.of());
+        newPost.setScheduledAt(null);
+        newPost.setUpdatedAt(null);
+        newPost.setSlug("post-with-tags");
+        newPost.setDeletedAt(null);
+        newPost.setViewCount(0);
+        newPost.setClickCount(0);
 
         doAnswer(invocation -> {
             Post post = invocation.getArgument(0);
@@ -460,9 +473,23 @@ public class PostTest {
 
         doNothing().when(tagService).attachTagToPost(anyInt(), anyInt());
 
+        Tag javaTag = new Tag();
+        javaTag.setId(1);
+        javaTag.setName("Java");
+        javaTag.setSlug("java");
+        javaTag.setCreatedAt(LocalDateTime.now());
+        javaTag.setUsageCount(0);
+
+        Tag springTag = new Tag();
+        springTag.setId(2);
+        springTag.setName("Spring");
+        springTag.setSlug("spring");
+        springTag.setCreatedAt(LocalDateTime.now());
+        springTag.setUsageCount(0);
+
         List<Tag> tags = new ArrayList<>();
-        tags.add(new Tag(1, "Java", LocalDateTime.now(), 0));
-        tags.add(new Tag(2, "Spring", LocalDateTime.now(), 0));
+        tags.add(javaTag);
+        tags.add(springTag);
 
         when(tagService.getTagsByPost(1)).thenReturn(tags);
 

@@ -48,6 +48,13 @@ public class CommentService implements CRUD<Comment, Integer> {
 
     @Override
     public void insert(Comment comment) throws SQLException {
+        // FIX: moved null checks BEFORE setters
+        if (comment.getContent() == null || comment.getContent().isBlank()) {
+            throw new SQLException("Comment content cannot be empty");
+        }
+        if (comment.getPostId() == null || comment.getCommenterId() == null) {
+            throw new SQLException("postId and commenterId are required");
+        }
         Connection c = DbConnexion.getConnection();
         try (PreparedStatement ps = c.prepareStatement(INSERT_COMMENT, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, comment.getContent());
@@ -72,6 +79,13 @@ public class CommentService implements CRUD<Comment, Integer> {
     public void update(Comment comment) throws SQLException {
         if (comment.getId() == null) {
             throw new SQLException("id obligatoire pour UPDATE");
+        }
+        // FIX: moved null checks BEFORE setters
+        if (comment.getContent() == null || comment.getContent().isBlank()) {
+            throw new SQLException("Comment content cannot be empty");
+        }
+        if (comment.getPostId() == null || comment.getCommenterId() == null) {
+            throw new SQLException("postId and commenterId are required");
         }
         Connection c = DbConnexion.getConnection();
         try (PreparedStatement ps = c.prepareStatement(UPDATE_COMMENT)) {
@@ -167,8 +181,7 @@ public class CommentService implements CRUD<Comment, Integer> {
 
     // Helper methods
     private Comment mapRow(ResultSet rs) throws SQLException {
-        Comment c = new Comment(null, null, null, null, null, null);
-        c.setId(rs.getInt("id"));
+        Comment c = new Comment();         c.setId(rs.getInt("id"));
         c.setContent(rs.getString("content"));
         Timestamp createdTs = rs.getTimestamp("created_at");
         c.setCreatedAt(createdTs != null ? createdTs.toLocalDateTime() : null);

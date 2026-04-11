@@ -8,20 +8,22 @@ public class PostLike {
 
     public static final String TABLE = "post_like";
 
+    // Fields in exact DB column order: id, post_id, liker_id
     public Integer id;
     public Integer postId;
-    public Integer userId;
-    public LocalDateTime createdAt;
+    public Integer likerId;
+
+    // Relations (for ORM compatibility, not used in JDBC)
     private User liker;
 
     public PostLike() {
     }
 
-    public PostLike(Integer id, Integer postId, Integer userId, LocalDateTime createdAt) {
+    // Constructor matching DB column order
+    public PostLike(Integer id, Integer postId, Integer likerId) {
         this.id = id;
         this.postId = postId;
-        this.userId = userId;
-        this.createdAt = createdAt;
+        this.likerId = likerId;
     }
 
     public Integer getId() {
@@ -40,13 +42,13 @@ public class PostLike {
         this.postId = postId;
     }
 
-    public Integer getUserId() {
-        return userId;
+    public Integer getLikerId() {
+        return likerId;
     }
 
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-        if (liker != null && liker.getId() != null && !liker.getId().equals(userId)) {
+    public void setLikerId(Integer likerId) {
+        this.likerId = likerId;
+        if (liker != null && liker.getId() != null && !liker.getId().equals(likerId)) {
             this.liker = null;
         }
     }
@@ -65,21 +67,13 @@ public class PostLike {
         this.liker = user;
         if (user != null) {
             if (user.getId() != null) {
-                this.userId = user.getId();
+                this.likerId = user.getId();
             }
             if (!user.getPostLikes().contains(this)) {
                 user.getPostLikes().add(this);
             }
         } else {
-            this.userId = null;
+            this.likerId = null;
         }
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 }
