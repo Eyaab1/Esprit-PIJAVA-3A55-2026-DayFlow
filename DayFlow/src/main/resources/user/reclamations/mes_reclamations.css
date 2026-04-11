@@ -1,0 +1,162 @@
+/* Mes réclamations — pastels roses / bleus */
+.reclam-root {
+    -fx-font-family: "Segoe UI", "Inter", "Arial", sans-serif;
+    -fx-background-color: linear-gradient(to bottom, #fff5f7 0%, #f8fafc 50%, #eef2ff 100%);
+}
+
+.reclam-page-inner {
+    -fx-padding: 28 36 40 36;
+    -fx-max-width: 920;
+}
+
+.reclam-main-card {
+    -fx-spacing: 18;
+    -fx-padding: 24 26 22 26;
+    -fx-background-color: #fffafb;
+    -fx-background-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(233, 30, 99, 0.12), 24, 0, 0, 4);
+}
+
+.reclam-header {
+    -fx-padding: 0 0 4 0;
+}
+
+.reclam-header-icon-wrap {
+    -fx-min-width: 44px;
+    -fx-min-height: 44px;
+    -fx-pref-width: 44px;
+    -fx-pref-height: 44px;
+    -fx-background-color: #e91e63;
+    -fx-background-radius: 22px;
+    -fx-alignment: center;
+}
+
+.reclam-header-emoji {
+    -fx-font-size: 20px;
+    -fx-text-fill: white;
+}
+
+.reclam-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ad1457;
+}
+
+.btn-new-reclam {
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-font-size: 13px;
+    -fx-padding: 10 18;
+    -fx-background-radius: 12;
+    -fx-cursor: hand;
+}
+
+.btn-new-reclam:hover {
+    -fx-background-color: #2563eb;
+}
+
+.reclam-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.reclam-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.reclam-list-inner {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14;
+    -fx-border-color: #bfdbfe;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-padding: 16 18;
+}
+
+.reclam-item {
+    -fx-spacing: 10;
+    -fx-padding: 14 16;
+    -fx-background-color: #fafafa;
+    -fx-background-radius: 12;
+    -fx-border-color: #f3e8ff;
+    -fx-border-radius: 12;
+}
+
+.reclam-item-top {
+    -fx-alignment: center-left;
+    -fx-spacing: 8;
+}
+
+.badge-status {
+    -fx-padding: 4 12;
+    -fx-background-radius: 16;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.badge-status.answered {
+    -fx-background-color: #dcfce7;
+    -fx-text-fill: #166534;
+}
+
+.badge-status.pending {
+    -fx-background-color: #fef3c7;
+    -fx-text-fill: #92400e;
+}
+
+.badge-status.in_progress {
+    -fx-background-color: #dbeafe;
+    -fx-text-fill: #1e40af;
+}
+
+.badge-status.resolved {
+    -fx-background-color: #e0e7ff;
+    -fx-text-fill: #3730a3;
+}
+
+.badge-status.rejected {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #991b1b;
+}
+
+.badge-type {
+    -fx-padding: 4 12;
+    -fx-background-radius: 16;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-background-color: #e0f2fe;
+    -fx-text-fill: #0369a1;
+}
+
+.btn-detail {
+    -fx-background-color: #f472b6;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 6 14;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.btn-detail:hover {
+    -fx-background-color: #ec4899;
+}
+
+.reclam-desc {
+    -fx-font-size: 14px;
+    -fx-text-fill: #374151;
+    -fx-wrap-text: true;
+}
+
+.reclam-meta {
+    -fx-font-size: 12px;
+    -fx-text-fill: #9ca3af;
+}
+
+.reclam-empty {
+    -fx-font-size: 14px;
+    -fx-text-fill: #9ca3af;
+    -fx-padding: 24 12;
+}

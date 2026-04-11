@@ -111,6 +111,6 @@
             </VBox>
          </content>
       </ScrollPane>
-      <Button focusTraversable="false" mnemonicParsing="false" onAction="#onFabFeedback" styleClass="fab-feedback" text="📣" AnchorPane.bottomAnchor="28.0" AnchorPane.rightAnchor="32.0" />
+      <Button focusTraversable="false" mnemonicParsing="false" onAction="#onMesReclamations" styleClass="fab-feedback" text="💬" AnchorPane.bottomAnchor="28.0" AnchorPane.rightAnchor="32.0" />
    </children>
 </AnchorPane>

@@ -168,9 +168,12 @@ public class UserDashboardController {
     }
 
     @FXML
-    private void onFabFeedback() {
-        new Alert(Alert.AlertType.INFORMATION,
-                "Retour utilisateur — bientôt disponible.").showAndWait();
+    private void onMesReclamations() {
+        try {
+            NavigationManager.show("/user/reclamations/mes_reclamations.fxml", "DayFlow — Mes réclamations");
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+        }
     }
 
     private static void toastSoon(String module) {
