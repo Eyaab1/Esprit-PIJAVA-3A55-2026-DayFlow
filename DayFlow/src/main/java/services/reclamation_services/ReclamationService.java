@@ -342,21 +342,29 @@ public class ReclamationService implements CRUD<Reclamation, Integer> {
         Reclamation r = new Reclamation();
         r.setId(rs.getInt("id"));
         r.setContent(rs.getString("content"));
-        ReclamationType t = ReclamationType.fromValue(rs.getString("type"));
-        if (t == null) {
-            throw new SQLException("type de réclamation inconnu en base");
-        }
-        r.setType(t);
-        ReclamationStatus s = ReclamationStatus.fromValue(rs.getString("status"));
-        if (s == null) {
-            throw new SQLException("statut de réclamation inconnu en base");
-        }
-        r.setStatus(s);
+        r.setType(mapTypeLoose(rs.getString("type")));
+        r.setStatus(mapStatusLoose(rs.getString("status")));
         Timestamp ts = rs.getTimestamp("created_at");
         r.setCreatedAt(ts != null ? ts.toLocalDateTime() : LocalDateTime.now());
         String photo = rs.getString("photo_path");
         r.setPhotoPath(rs.wasNull() ? null : photo);
         r.setUserId(rs.getInt("user_id"));
         return r;
+    }
+
+    /**
+     * Données hétérogènes (Symfony, imports, anciennes valeurs) : on ne bloque plus le chargement
+     * si {@code type} ne correspond pas exactement à l'enum.
+     */
+    private static ReclamationType mapTypeLoose(String raw) {
+        String v = raw != null ? raw.trim() : null;
+        ReclamationType t = ReclamationType.fromValue(v);
+        return t != null ? t : ReclamationType.OTHER;
+    }
+
+    private static ReclamationStatus mapStatusLoose(String raw) {
+        String v = raw != null ? raw.trim() : null;
+        ReclamationStatus s = ReclamationStatus.fromValue(v);
+        return s != null ? s : ReclamationStatus.PENDING;
     }
 }

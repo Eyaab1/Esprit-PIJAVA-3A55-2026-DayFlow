@@ -80,6 +80,7 @@ public class PostService implements CRUD<Post, Integer> {
             if (post.getSlug() == null) {
                 post.setSlug(post.getTitle().toLowerCase().replace(" ", "-"));
             }
+            ps.setString(i++, post.getSlug());
             ps.setTimestamp(i++, post.getDeletedAt() != null ? Timestamp.valueOf(post.getDeletedAt()) : null);
             ps.setInt(i++, post.getViewCount() != null ? post.getViewCount() : 0);
             ps.setInt(i++, post.getClickCount() != null ? post.getClickCount() : 0);
