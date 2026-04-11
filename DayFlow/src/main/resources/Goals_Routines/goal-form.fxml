@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="15.0" styleClass="form-container" stylesheets="@goals.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+   <children>
+      <Label styleClass="form-title" text="Nouvel Objectif" />
+      
+      <VBox spacing="5.0">
+         <children>
+            <Label styleClass="form-label" text="Titre *" />
+            <TextField fx:id="titleField" promptText="Ex: Perdre 10kg" styleClass="form-field" />
+         </children>
+      </VBox>
+      
+      <VBox spacing="5.0">
+         <children>
+            <Label styleClass="form-label" text="Description" />
+            <TextArea fx:id="descriptionField" prefRowCount="3" promptText="Décrivez votre objectif..." styleClass="form-field" wrapText="true" />
+         </children>
+      </VBox>
+      
+      <HBox spacing="15.0">
+         <children>
+            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label styleClass="form-label" text="Date de début *" />
+                  <DatePicker fx:id="startDatePicker" prefWidth="200.0" styleClass="form-field" />
+               </children>
+            </VBox>
+            
+            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label styleClass="form-label" text="Date de fin *" />
+                  <DatePicker fx:id="endDatePicker" prefWidth="200.0" styleClass="form-field" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      
+      <HBox spacing="15.0">
+         <children>
+            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label styleClass="form-label" text="Priorité" />
+                  <ChoiceBox fx:id="priorityChoice" prefWidth="200.0" styleClass="form-field" />
+               </children>
+            </VBox>
+            
+            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label styleClass="form-label" text="Statut" />
+                  <ChoiceBox fx:id="statusChoice" prefWidth="200.0" styleClass="form-field" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      
+      <HBox spacing="10.0" alignment="CENTER_RIGHT">
+         <padding>
+            <Insets top="10.0" />
+         </padding>
+         <children>
+            <Button fx:id="cancelButton" styleClass="secondary-button" text="Annuler">
+               <padding>
+                  <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+               </padding>
+            </Button>
+            <Button fx:id="saveButton" styleClass="primary-button" text="Enregistrer">
+               <padding>
+                  <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+               </padding>
+            </Button>
+         </children>
+      </HBox>
+   </children>
+</VBox>

@@ -2,222 +2,183 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.Region?>
 
-<VBox spacing="25.0" styleClass="dashboard-root" stylesheets="@goals.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
-   <padding>
-      <Insets bottom="40.0" left="50.0" right="50.0" top="40.0" />
-   </padding>
-   <children>
-      <!-- Header Section -->
-      <VBox styleClass="dashboard-header">
+<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.GoalsDashboardController">
+   <content>
+      <VBox spacing="25.0" styleClass="dashboard-root" stylesheets="@goals.css">
+         <padding>
+            <Insets bottom="40.0" left="50.0" right="50.0" top="40.0" />
+         </padding>
          <children>
-            <HBox alignment="CENTER_LEFT" spacing="12.0">
+            <!-- Header Section -->
+            <VBox styleClass="dashboard-header">
                <children>
-                  <Button styleClass="breadcrumb-button" text="← SUIVI D'OBJECTIFS">
+                  <HBox alignment="CENTER_LEFT" spacing="20.0">
+                     <children>
+                        <VBox spacing="8.0">
+                           <children>
+                              <Label styleClass="dashboard-title" text="Mes Objectifs" />
+                              <Label styleClass="dashboard-subtitle" text="Gérez vos objectifs et suivez vos progrès au quotidien." />
+                           </children>
+                        </VBox>
+                        
+                        <Region HBox.hgrow="ALWAYS" />
+                        
+                        <Button fx:id="newGoalButton" onAction="#onNewGoal" styleClass="new-goal-button" text="➕ Nouvel objectif">
+                           <padding>
+                              <Insets bottom="12.0" left="24.0" right="24.0" top="12.0" />
+                           </padding>
+                        </Button>
+                     </children>
+                  </HBox>
+               </children>
+               <padding>
+                  <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+               </padding>
+            </VBox>
+            
+            <!-- Statistics Cards -->
+            <HBox spacing="20.0" alignment="CENTER">
+               <children>
+                  <VBox styleClass="stat-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                     <children>
+                        <StackPane styleClass="stat-icon-container-green">
+                           <children>
+                              <Label styleClass="stat-icon" text="🎯" />
+                           </children>
+                        </StackPane>
+                        <Label fx:id="activeCountLabel" styleClass="stat-number" text="0">
+                           <padding><Insets top="15.0" /></padding>
+                        </Label>
+                        <Label styleClass="stat-label" text="ACTIFS">
+                           <padding><Insets top="5.0" /></padding>
+                        </Label>
+                     </children>
                      <padding>
-                        <Insets bottom="8.0" left="16.0" right="16.0" top="8.0" />
+                        <Insets bottom="25.0" left="30.0" right="30.0" top="25.0" />
                      </padding>
-                  </Button>
+                  </VBox>
+                  
+                  <VBox styleClass="stat-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                     <children>
+                        <StackPane styleClass="stat-icon-container-blue">
+                           <children>
+                              <Label styleClass="stat-icon" text="✓" />
+                           </children>
+                        </StackPane>
+                        <Label fx:id="completedCountLabel" styleClass="stat-number" text="0">
+                           <padding><Insets top="15.0" /></padding>
+                        </Label>
+                        <Label styleClass="stat-label" text="TERMINÉS">
+                           <padding><Insets top="5.0" /></padding>
+                        </Label>
+                     </children>
+                     <padding>
+                        <Insets bottom="25.0" left="30.0" right="30.0" top="25.0" />
+                     </padding>
+                  </VBox>
+                  
+                  <VBox styleClass="stat-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                     <children>
+                        <StackPane styleClass="stat-icon-container-orange">
+                           <children>
+                              <Label styleClass="stat-icon" text="⏸" />
+                           </children>
+                        </StackPane>
+                        <Label fx:id="pausedCountLabel" styleClass="stat-number" text="0">
+                           <padding><Insets top="15.0" /></padding>
+                        </Label>
+                        <Label styleClass="stat-label" text="EN PAUSE">
+                           <padding><Insets top="5.0" /></padding>
+                        </Label>
+                     </children>
+                     <padding>
+                        <Insets bottom="25.0" left="30.0" right="30.0" top="25.0" />
+                     </padding>
+                  </VBox>
+                  
+                  <VBox styleClass="stat-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                     <children>
+                        <StackPane styleClass="stat-icon-container-pink">
+                           <children>
+                              <Label styleClass="stat-icon" text="✗" />
+                           </children>
+                        </StackPane>
+                        <Label fx:id="failedCountLabel" styleClass="stat-number" text="0">
+                           <padding><Insets top="15.0" /></padding>
+                        </Label>
+                        <Label styleClass="stat-label" text="ÉCHOUÉS">
+                           <padding><Insets top="5.0" /></padding>
+                        </Label>
+                     </children>
+                     <padding>
+                        <Insets bottom="25.0" left="30.0" right="30.0" top="25.0" />
+                     </padding>
+                  </VBox>
                </children>
             </HBox>
             
-            <HBox alignment="CENTER_LEFT" spacing="20.0">
-               <padding>
-                  <Insets top="20.0" />
-               </padding>
+            <!-- Search and Filter Section -->
+            <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="filter-section">
                <children>
-                  <VBox spacing="8.0">
+                  <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                      <children>
-                        <Label styleClass="dashboard-title" text="Mes Objectifs" />
-                        <Label styleClass="dashboard-subtitle" text="Gérez vos objectifs et suivez vos progrès au quotidien." />
+                        <Label styleClass="filter-label" text="Recherche" />
+                        <TextField fx:id="searchField" promptText="Rechercher..." styleClass="search-field">
+                           <padding>
+                              <Insets bottom="10.0" left="12.0" right="12.0" top="10.0" />
+                           </padding>
+                        </TextField>
                      </children>
                   </VBox>
                   
-                  <Region HBox.hgrow="ALWAYS" />
+                  <VBox spacing="5.0" prefWidth="180.0">
+                     <children>
+                        <Label styleClass="filter-label" text="Statut" />
+                        <ChoiceBox fx:id="statusFilter" prefWidth="180.0" styleClass="filter-choice">
+                           <padding>
+                              <Insets bottom="10.0" left="12.0" right="12.0" top="10.0" />
+                           </padding>
+                        </ChoiceBox>
+                     </children>
+                  </VBox>
                   
-                  <Button styleClass="new-goal-button" text="➕ Nouvel objectif">
-                     <padding>
-                        <Insets bottom="12.0" left="24.0" right="24.0" top="12.0" />
-                     </padding>
-                  </Button>
+                  <VBox spacing="5.0" prefWidth="180.0">
+                     <children>
+                        <Label styleClass="filter-label" text="Priorité" />
+                        <ChoiceBox fx:id="priorityFilter" prefWidth="180.0" styleClass="filter-choice">
+                           <padding>
+                              <Insets bottom="10.0" left="12.0" right="12.0" top="10.0" />
+                           </padding>
+                        </ChoiceBox>
+                     </children>
+                  </VBox>
+                  
+                  <VBox alignment="BOTTOM_LEFT" spacing="5.0">
+                     <children>
+                        <Label text=" " />
+                        <Button onAction="#onApplyFilters" styleClass="apply-button" text="🔽 Appliquer">
+                           <padding>
+                              <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                           </padding>
+                        </Button>
+                     </children>
+                  </VBox>
                </children>
             </HBox>
+            
+            <!-- Goals Grid -->
+            <FlowPane fx:id="goalsContainer" hgap="20.0" vgap="20.0" styleClass="goals-grid" />
          </children>
-         <padding>
-            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-         </padding>
       </VBox>
-      
-      <!-- Statistics Cards -->
-      <HBox spacing="20.0" alignment="CENTER">
-         <children>
-            <!-- Active Goals Card -->
-            <VBox styleClass="stat-card" alignment="CENTER" HBox.hgrow="ALWAYS">
-               <children>
-                  <StackPane styleClass="stat-icon-container-green">
-                     <children>
-                        <Label styleClass="stat-icon" text="🎯" />
-                     </children>
-                  </StackPane>
-                  
-                  <Label styleClass="stat-number" text="0">
-                     <padding>
-                        <Insets top="15.0" />
-                     </padding>
-                  </Label>
-                  
-                  <Label styleClass="stat-label" text="ACTIFS">
-                     <padding>
-                        <Insets top="5.0" />
-                     </padding>
-                  </Label>
-               </children>
-               <padding>
-                  <Insets bottom="25.0" left="30.0" right="30.0" top="25.0" />
-               </padding>
-            </VBox>
-            
-            <!-- Completed Goals Card -->
-            <VBox styleClass="stat-card" alignment="CENTER" HBox.hgrow="ALWAYS">
-               <children>
-                  <StackPane styleClass="stat-icon-container-blue">
-                     <children>
-                        <Label styleClass="stat-icon" text="✓" />
-                     </children>
-                  </StackPane>
-                  
-                  <Label styleClass="stat-number" text="0">
-                     <padding>
-                        <Insets top="15.0" />
-                     </padding>
-                  </Label>
-                  
-                  <Label styleClass="stat-label" text="TERMINÉS">
-                     <padding>
-                        <Insets top="5.0" />
-                     </padding>
-                  </Label>
-               </children>
-               <padding>
-                  <Insets bottom="25.0" left="30.0" right="30.0" top="25.0" />
-               </padding>
-            </VBox>
-            
-            <!-- Paused Goals Card -->
-            <VBox styleClass="stat-card" alignment="CENTER" HBox.hgrow="ALWAYS">
-               <children>
-                  <StackPane styleClass="stat-icon-container-orange">
-                     <children>
-                        <Label styleClass="stat-icon" text="⏸" />
-                     </children>
-                  </StackPane>
-                  
-                  <Label styleClass="stat-number" text="0">
-                     <padding>
-                        <Insets top="15.0" />
-                     </padding>
-                  </Label>
-                  
-                  <Label styleClass="stat-label" text="EN PAUSE">
-                     <padding>
-                        <Insets top="5.0" />
-                     </padding>
-                  </Label>
-               </children>
-               <padding>
-                  <Insets bottom="25.0" left="30.0" right="30.0" top="25.0" />
-               </padding>
-            </VBox>
-            
-            <!-- Failed Goals Card -->
-            <VBox styleClass="stat-card" alignment="CENTER" HBox.hgrow="ALWAYS">
-               <children>
-                  <StackPane styleClass="stat-icon-container-pink">
-                     <children>
-                        <Label styleClass="stat-icon" text="❤" />
-                     </children>
-                  </StackPane>
-                  
-                  <Label styleClass="stat-number" text="4">
-                     <padding>
-                        <Insets top="15.0" />
-                     </padding>
-                  </Label>
-                  
-                  <Label styleClass="stat-label" text="ÉCHOUÉS">
-                     <padding>
-                        <Insets top="5.0" />
-                     </padding>
-                  </Label>
-               </children>
-               <padding>
-                  <Insets bottom="25.0" left="30.0" right="30.0" top="25.0" />
-               </padding>
-            </VBox>
-         </children>
-      </HBox>
-      
-      <!-- Summary Section -->
-      <VBox styleClass="summary-section">
-         <children>
-            <HBox alignment="CENTER_LEFT" spacing="15.0">
-               <children>
-                  <Label styleClass="summary-title" text="TABLEAU DE BORD" />
-               </children>
-               <padding>
-                  <Insets bottom="20.0" />
-               </padding>
-            </HBox>
-            
-            <VBox styleClass="summary-card">
-               <children>
-                  <Label styleClass="summary-card-title" text="Vue d'ensemble de vos objectifs">
-                     <padding>
-                        <Insets bottom="20.0" />
-                     </padding>
-                  </Label>
-                  
-                  <!-- Summary Items -->
-                  <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="summary-item">
-                     <children>
-                        <StackPane styleClass="summary-icon-container-purple">
-                           <children>
-                              <Label styleClass="summary-icon-text" text="🎯" />
-                           </children>
-                        </StackPane>
-                        <Label styleClass="summary-item-label" text="Actifs" HBox.hgrow="ALWAYS" />
-                        <Label styleClass="summary-item-value" text="0" />
-                     </children>
-                     <padding>
-                        <Insets bottom="15.0" />
-                     </padding>
-                  </HBox>
-                  
-                  <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="summary-item">
-                     <children>
-                        <StackPane styleClass="summary-icon-container-purple">
-                           <children>
-                              <Label styleClass="summary-icon-text" text="✓" />
-                           </children>
-                        </StackPane>
-                        <Label styleClass="summary-item-label" text="Terminés" HBox.hgrow="ALWAYS" />
-                        <Label styleClass="summary-item-value" text="0" />
-                     </children>
-                  </HBox>
-               </children>
-               <padding>
-                  <Insets bottom="25.0" left="30.0" right="30.0" top="25.0" />
-               </padding>
-            </VBox>
-         </children>
-         <padding>
-            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-         </padding>
-      </VBox>
-   </children>
-</VBox>
+   </content>
+</ScrollPane>

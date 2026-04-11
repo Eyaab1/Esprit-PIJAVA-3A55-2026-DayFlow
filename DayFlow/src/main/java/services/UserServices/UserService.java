@@ -34,8 +34,6 @@ public class UserService implements CRUD<User, Integer> {
             FROM "user" WHERE LOWER(email) = LOWER(?)
             """;
 
-<<<<<<< Updated upstream
-=======
     private static final String SELECT_BY_ID = """
             SELECT id, first_name, last_name, email, password, roles,
                    phone_number, age, status, speciality, availability,
@@ -43,7 +41,6 @@ public class UserService implements CRUD<User, Integer> {
             FROM "user" WHERE id = ?
             """;
 
->>>>>>> Stashed changes
     private static final String INSERT_USER = """
             INSERT INTO "user" (
                 first_name, last_name, email, password, roles, status, review_count,
@@ -64,8 +61,6 @@ public class UserService implements CRUD<User, Integer> {
             DELETE FROM "user" WHERE id = ?
             """;
 
-<<<<<<< Updated upstream
-=======
     /** Colonnes complètes utilisateur (recherche coachs / API Symfony {@code CoachSearchController}). */
     private static final String USER_FULL_SELECT = """
             SELECT id, first_name, last_name, email, password, roles,
@@ -73,7 +68,6 @@ public class UserService implements CRUD<User, Integer> {
                    rating, review_count, price_per_session, bio, photo_url
             """;
 
->>>>>>> Stashed changes
     public User signUp(String firstName, String lastName, String email, String rawPassword) throws SQLException {
         return signUp(firstName, lastName, email, rawPassword, UserRole.USER);
     }
