@@ -1,0 +1,395 @@
+/* =============================================
+   CHATROOM HUB — Discord/WhatsApp style
+   ============================================= */
+
+.chat-root {
+    -fx-font-family: "Segoe UI", "Inter", "Arial", sans-serif;
+    -fx-background-color: #f0f2f5;
+}
+
+/* ══ SIDEBAR ══════════════════════════════════ */
+.chat-sidebar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e8ecf0;
+    -fx-border-width: 0 1 0 0;
+}
+
+.sidebar-header {
+    -fx-padding: 16 16 12 16;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #f0f2f5;
+    -fx-border-width: 0 0 1 0;
+}
+
+.sidebar-app-title {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1a202c;
+}
+
+.sidebar-search-box {
+    -fx-background-color: #f7f8fa;
+    -fx-background-radius: 10;
+    -fx-border-color: #e8ecf0;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-margin: 10 14 4 14;
+}
+
+.sidebar-search {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-font-size: 13px;
+    -fx-text-fill: #2d3748;
+    -fx-prompt-text-fill: #a0aec0;
+    -fx-padding: 0;
+}
+
+.sidebar-search:focused {
+    -fx-border-color: transparent;
+    -fx-effect: none;
+}
+
+.chat-sidebar-title {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #a0aec0;
+    -fx-padding: 12 16 4 16;
+}
+
+/* Chat list */
+.chat-list {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 4 8;
+}
+
+.chat-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 8 10;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.chat-list .list-cell:hover {
+    -fx-background-color: #f0f2f5;
+}
+
+.chat-list .list-cell:selected {
+    -fx-background-color: #ede9fe;
+}
+
+.chat-list .list-cell:selected .sidebar-item-name {
+    -fx-text-fill: #5865f2;
+}
+
+.sidebar-item-name {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1a202c;
+}
+
+.sidebar-item-preview {
+    -fx-font-size: 12px;
+    -fx-text-fill: #718096;
+}
+
+/* ══ CHAT CENTER ══════════════════════════════ */
+.chat-center {
+    -fx-background-color: #f7f8fa;
+}
+
+/* Header */
+.chat-header {
+    -fx-padding: 12 18;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e8ecf0;
+    -fx-border-width: 0 0 1 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 4, 0, 0, 2);
+}
+
+.avatar-header {
+    -fx-background-color: linear-gradient(to bottom right, #5865f2, #764ba2);
+    -fx-background-radius: 50%;
+}
+
+.chat-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1a202c;
+}
+
+.chat-sub {
+    -fx-font-size: 11px;
+    -fx-text-fill: #48bb78;
+}
+
+/* Messages scroll — critical: no transparent background */
+.chat-messages {
+    -fx-background-color: #f7f8fa;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.chat-messages > .viewport {
+    -fx-background-color: #f7f8fa;
+}
+
+.chat-messages > .scroll-bar:vertical {
+    -fx-pref-width: 5;
+    -fx-background-color: transparent;
+}
+
+.chat-messages > .scroll-bar:vertical > .thumb {
+    -fx-background-color: #cbd5e0;
+    -fx-background-radius: 3;
+}
+
+/* ══ BUBBLES ══════════════════════════════════ */
+.bubble-sent {
+    -fx-background-color: linear-gradient(to bottom right, #5865f2, #764ba2);
+    -fx-background-radius: 18 18 4 18;
+    -fx-padding: 10 14;
+    -fx-effect: dropshadow(gaussian, rgba(88,101,242,0.25), 6, 0, 0, 2);
+}
+
+.bubble-sent-text {
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-wrap-text: true;
+}
+
+.bubble-received {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 18 18 18 4;
+    -fx-padding: 10 14;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 6, 0, 0, 2);
+}
+
+.bubble-received-text {
+    -fx-text-fill: #2d3748;
+    -fx-font-size: 13px;
+    -fx-wrap-text: true;
+}
+
+.bubble-time {
+    -fx-font-size: 10px;
+    -fx-text-fill: rgba(255,255,255,0.55);
+    -fx-padding: 2 0 0 0;
+}
+
+.bubble-time-received {
+    -fx-font-size: 10px;
+    -fx-text-fill: #a0aec0;
+    -fx-padding: 2 0 0 0;
+}
+
+.bubble-author {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #5865f2;
+    -fx-padding: 0 0 3 0;
+}
+
+.bubble-author-sent {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(255,255,255,0.7);
+    -fx-padding: 0 0 3 0;
+}
+
+.bubble-pin {
+    -fx-font-size: 10px;
+    -fx-text-fill: rgba(255,255,255,0.6);
+    -fx-padding: 0 0 3 0;
+}
+
+/* ══ AVATAR ═══════════════════════════════════ */
+.avatar {
+    -fx-background-color: linear-gradient(to bottom right, #5865f2, #764ba2);
+    -fx-background-radius: 50%;
+}
+
+.avatar-text {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+/* ══ INPUT ROW ════════════════════════════════ */
+.chat-input-row {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e8ecf0;
+    -fx-border-width: 1 0 0 0;
+}
+
+.input-icon {
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+    -fx-opacity: 0.55;
+}
+
+.input-icon:hover { -fx-opacity: 1; }
+
+.chat-field {
+    -fx-background-color: #f0f2f5;
+    -fx-background-radius: 22;
+    -fx-border-color: transparent;
+    -fx-border-radius: 22;
+    -fx-padding: 10 16;
+    -fx-font-size: 13px;
+    -fx-text-fill: #2d3748;
+    -fx-prompt-text-fill: #a0aec0;
+}
+
+.chat-field:focused {
+    -fx-background-color: #e8eaf6;
+    -fx-effect: none;
+}
+
+.btn-send {
+    -fx-background-color: linear-gradient(to bottom right, #5865f2, #764ba2);
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 50%;
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-max-width: 40;
+    -fx-max-height: 40;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(88,101,242,0.4), 8, 0, 0, 3);
+}
+
+.btn-send:hover {
+    -fx-background-color: linear-gradient(to bottom right, #4752c4, #6a3fa0);
+}
+
+/* ══ ADMIN BUTTONS ════════════════════════════ */
+.btn-pending {
+    -fx-background-color: #f59e0b;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-padding: 6 12;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.btn-admin {
+    -fx-padding: 6 10;
+    -fx-background-radius: 8;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.btn-lock    { -fx-background-color: #eab308; -fx-text-fill: #1e293b; }
+.btn-archive { -fx-background-color: #94a3b8; -fx-text-fill: white; }
+.btn-delete  { -fx-background-color: #ef4444; -fx-text-fill: white; }
+.btn-lock:hover    { -fx-background-color: #ca8a04; }
+.btn-archive:hover { -fx-background-color: #64748b; }
+.btn-delete:hover  { -fx-background-color: #dc2626; }
+
+/* ══ RIGHT PANEL ══════════════════════════════ */
+.right-panel {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e8ecf0;
+    -fx-border-width: 0 0 0 1;
+}
+
+.right-panel-header {
+    -fx-padding: 16 16 12 16;
+    -fx-border-color: #f0f2f5;
+    -fx-border-width: 0 0 1 0;
+}
+
+.right-panel-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1a202c;
+}
+
+.right-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.right-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.info-section {
+    -fx-padding: 14 14 10 14;
+}
+
+.info-section-title {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4a5568;
+}
+
+.info-sep {
+    -fx-background-color: #f0f2f5;
+}
+
+.file-stat {
+    -fx-background-color: #f7f8fa;
+    -fx-background-radius: 10;
+    -fx-padding: 10 6;
+    -fx-border-color: #e8ecf0;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+
+.file-stat:hover {
+    -fx-background-color: #ede9fe;
+    -fx-border-color: #c4b5fd;
+}
+
+.file-stat-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #718096;
+    -fx-padding: 3 0 0 0;
+}
+
+/* Members list */
+.members-list {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.members-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 6 4;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.members-list .list-cell:hover {
+    -fx-background-color: #f7f8fa;
+}
+
+.member-name {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d3748;
+}
+
+.member-role {
+    -fx-font-size: 11px;
+    -fx-text-fill: #a0aec0;
+}
+
+.member-role-admin {
+    -fx-font-size: 11px;
+    -fx-text-fill: #5865f2;
+    -fx-font-weight: bold;
+}
+
+/* ══ EMPTY STATE ══════════════════════════════ */
+.empty-state {
+    -fx-text-fill: #a0aec0;
+    -fx-font-size: 13px;
+    -fx-font-style: italic;
+}
