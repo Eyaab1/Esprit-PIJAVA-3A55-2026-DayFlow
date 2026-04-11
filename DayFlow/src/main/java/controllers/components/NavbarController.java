@@ -59,7 +59,7 @@ public class NavbarController {
 
     @FXML
     private void onObjectifs() {
-        toastSoon("Objectifs");
+        navigate("/Goals_Routines/goals-dashboard.fxml", "DayFlow — Mes Objectifs");
     }
 
     @FXML
