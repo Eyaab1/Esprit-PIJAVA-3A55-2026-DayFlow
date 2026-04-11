@@ -12,13 +12,13 @@ import java.util.List;
 public class CommentLikeService implements CRUD<CommentLike, Integer> {
 
     private static final String INSERT_COMMENT_LIKE = """
-            INSERT INTO comment_like (comment_id, user_id, created_at)
+            INSERT INTO comment_like (created_at, comment_id, user_id)
             VALUES (?, ?, ?)
             """;
 
     private static final String UPDATE_COMMENT_LIKE = """
             UPDATE comment_like SET
-                comment_id = ?, user_id = ?, created_at = ?
+                created_at = ?, comment_id = ?, user_id = ?
             WHERE id = ?
             """;
 
@@ -27,17 +27,17 @@ public class CommentLikeService implements CRUD<CommentLike, Integer> {
             """;
 
     private static final String SELECT_BY_ID = """
-            SELECT id, comment_id, user_id, created_at
+            SELECT id, created_at, comment_id, user_id
             FROM comment_like WHERE id = ?
             """;
 
     private static final String SELECT_ALL = """
-            SELECT id, comment_id, user_id, created_at
+            SELECT id, created_at, comment_id, user_id
             FROM comment_like
             """;
 
     private static final String SELECT_BY_COMMENT_ID = """
-            SELECT id, comment_id, user_id, created_at
+            SELECT id, created_at, comment_id, user_id
             FROM comment_like WHERE comment_id = ?
             """;
 
@@ -48,11 +48,26 @@ public class CommentLikeService implements CRUD<CommentLike, Integer> {
 
     @Override
     public void insert(CommentLike commentLike) throws SQLException {
+        // FIX: moved null checks BEFORE setters
+        if (commentLike.getCommentId() == null || commentLike.getUserId() == null) {
+            throw new SQLException("commentId and userId are required");
+        }
+        // FIX: prevent duplicate comment_like
+        String checkDuplicate = "SELECT 1 FROM comment_like WHERE comment_id = ? AND user_id = ?";
         Connection c = DbConnexion.getConnection();
+        try (PreparedStatement checkPs = c.prepareStatement(checkDuplicate)) {
+            checkPs.setInt(1, commentLike.getCommentId());
+            checkPs.setInt(2, commentLike.getUserId());
+            try (ResultSet rs = checkPs.executeQuery()) {
+                if (rs.next()) {
+                    throw new SQLException("User has already liked this comment");
+                }
+            }
+        }
         try (PreparedStatement ps = c.prepareStatement(INSERT_COMMENT_LIKE, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, commentLike.getCommentId());
-            ps.setInt(2, commentLike.getUserId());
-            ps.setTimestamp(3, commentLike.getCreatedAt() != null ? Timestamp.valueOf(commentLike.getCreatedAt()) : Timestamp.valueOf(LocalDateTime.now()));
+            ps.setTimestamp(1, commentLike.getCreatedAt() != null ? Timestamp.valueOf(commentLike.getCreatedAt()) : Timestamp.valueOf(LocalDateTime.now()));
+            ps.setInt(2, commentLike.getCommentId());
+            ps.setInt(3, commentLike.getUserId());
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
@@ -67,11 +82,15 @@ public class CommentLikeService implements CRUD<CommentLike, Integer> {
         if (commentLike.getId() == null) {
             throw new SQLException("id obligatoire pour UPDATE");
         }
+        // FIX: moved null checks BEFORE setters
+        if (commentLike.getCommentId() == null || commentLike.getUserId() == null) {
+            throw new SQLException("commentId and userId are required");
+        }
         Connection c = DbConnexion.getConnection();
         try (PreparedStatement ps = c.prepareStatement(UPDATE_COMMENT_LIKE)) {
-            ps.setInt(1, commentLike.getCommentId());
-            ps.setInt(2, commentLike.getUserId());
-            ps.setTimestamp(3, commentLike.getCreatedAt() != null ? Timestamp.valueOf(commentLike.getCreatedAt()) : null);
+            ps.setTimestamp(1, commentLike.getCreatedAt() != null ? Timestamp.valueOf(commentLike.getCreatedAt()) : null);
+            ps.setInt(2, commentLike.getCommentId());
+            ps.setInt(3, commentLike.getUserId());
             ps.setInt(4, commentLike.getId());
             ps.executeUpdate();
         }
@@ -130,12 +149,12 @@ public class CommentLikeService implements CRUD<CommentLike, Integer> {
 
     // Helper methods
     private CommentLike mapRow(ResultSet rs) throws SQLException {
-        CommentLike cl = new CommentLike(null, null, null, null);
+        CommentLike cl = new CommentLike();
         cl.setId(rs.getInt("id"));
-        cl.setCommentId(rs.getInt("comment_id"));
-        cl.setUserId(rs.getInt("user_id"));
         Timestamp createdTs = rs.getTimestamp("created_at");
         cl.setCreatedAt(createdTs != null ? createdTs.toLocalDateTime() : null);
+        cl.setCommentId(rs.getInt("comment_id"));
+        cl.setUserId(rs.getInt("user_id"));
         return cl;
     }
 }

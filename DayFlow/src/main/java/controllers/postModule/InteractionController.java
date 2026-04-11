@@ -10,6 +10,7 @@ import services.post.SavedPostService;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 public class InteractionController {
 
@@ -31,7 +32,7 @@ public class InteractionController {
 
     public String likePost(int postId, int userId) {
         try {
-            PostLike postLike = new PostLike(null, postId, userId, LocalDateTime.now());
+            PostLike postLike = new PostLike(null, postId, userId);
             postLikeService.insert(postLike);
             return "Post liked successfully";
         } catch (SQLException e) {
@@ -43,7 +44,7 @@ public class InteractionController {
         try {
             List<PostLike> likes = postLikeService.findByPostId(postId);
             for (PostLike like : likes) {
-                if (like.getUserId().equals(userId)) {
+                if (Objects.equals(like.getLikerId(), userId)) {
                     postLikeService.delete(like.getId());
                     return "Post unliked successfully";
                 }
@@ -56,7 +57,7 @@ public class InteractionController {
 
     public String likeComment(int commentId, int userId) {
         try {
-            CommentLike commentLike = new CommentLike(null, commentId, userId, LocalDateTime.now());
+            CommentLike commentLike = new CommentLike(null, LocalDateTime.now(), commentId, userId);
             commentLikeService.insert(commentLike);
             return "Comment liked successfully";
         } catch (SQLException e) {
@@ -81,7 +82,7 @@ public class InteractionController {
 
     public String savePost(int postId, int userId) {
         try {
-            SavedPost savedPost = new SavedPost(null, userId, postId, LocalDateTime.now());
+            SavedPost savedPost = new SavedPost(null, LocalDateTime.now(), userId, postId);
             savedPostService.insert(savedPost);
             return "Post saved successfully";
         } catch (SQLException e) {

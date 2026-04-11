@@ -10,42 +10,45 @@ public class Post {
 
     public static final String TABLE = "post";
 
+    // Fields in exact DB column order
     public Integer id;
     public String title;
     public String content;
-
     public LocalDateTime createdAt;
-    public LocalDateTime updatedAt;
-    public LocalDateTime deletedAt;
-    public LocalDateTime scheduledAt;
-
-    public PostStatus status;
-
-    public List<String> images;
-
-    // Relations → ID pour JDBC ; objet pour graphe Symfony (mappedBy createdBy)
     public Integer createdById;
-    private User createdBy;
-
+    public PostStatus status;
+    public List<String> images;
+    public LocalDateTime scheduledAt;
+    public LocalDateTime updatedAt;
+    public String slug;
+    public LocalDateTime deletedAt;
     public Integer viewCount;
     public Integer clickCount;
+
+    // Relations (for ORM compatibility, not used in JDBC)
+    private User createdBy;
 
     public Post() {
     }
 
-    public Post(Integer id, String title, String content, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt, List<String> images, Integer createdById, Integer clickCount, Integer viewCount, PostStatus status, LocalDateTime scheduledAt) {
+    // Constructor matching DB column order
+    public Post(Integer id, String title, String content, LocalDateTime createdAt,
+                Integer createdById, PostStatus status, List<String> images,
+                LocalDateTime scheduledAt, LocalDateTime updatedAt, String slug,
+                LocalDateTime deletedAt, Integer viewCount, Integer clickCount) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.deletedAt = deletedAt;
-        this.images = images;
         this.createdById = createdById;
-        this.clickCount = clickCount;
-        this.viewCount = viewCount;
         this.status = status;
+        this.images = images;
         this.scheduledAt = scheduledAt;
+        this.updatedAt = updatedAt;
+        this.slug = slug;
+        this.deletedAt = deletedAt;
+        this.viewCount = viewCount;
+        this.clickCount = clickCount;
     }
 
     public Integer getId() {
@@ -80,28 +83,15 @@ public class Post {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getScheduledAt() {
-        return scheduledAt;
+    public Integer getCreatedById() {
+        return createdById;
     }
 
-    public void setScheduledAt(LocalDateTime scheduledAt) {
-        this.scheduledAt = scheduledAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
-    }
-
-    public void setDeletedAt(LocalDateTime deletedAt) {
-        this.deletedAt = deletedAt;
+    public void setCreatedById(Integer createdById) {
+        this.createdById = createdById;
+        if (createdBy != null && createdBy.getId() != null && !createdBy.getId().equals(createdById)) {
+            this.createdBy = null;
+        }
     }
 
     public PostStatus getStatus() {
@@ -120,15 +110,52 @@ public class Post {
         this.images = images;
     }
 
-    public Integer getCreatedById() {
-        return createdById;
+    public LocalDateTime getScheduledAt() {
+        return scheduledAt;
     }
 
-    public void setCreatedById(Integer createdById) {
-        this.createdById = createdById;
-        if (createdBy != null && createdBy.getId() != null && !createdBy.getId().equals(createdById)) {
-            this.createdBy = null;
-        }
+    public void setScheduledAt(LocalDateTime scheduledAt) {
+        this.scheduledAt = scheduledAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
+    public Integer getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(Integer viewCount) {
+        this.viewCount = viewCount;
+    }
+
+    public Integer getClickCount() {
+        return clickCount;
+    }
+
+    public void setClickCount(Integer clickCount) {
+        this.clickCount = clickCount;
     }
 
     public User getCreatedBy() {
@@ -154,21 +181,4 @@ public class Post {
             this.createdById = null;
         }
     }
-
-    public Integer getViewCount() {
-        return viewCount;
-    }
-
-    public void setViewCount(Integer viewCount) {
-        this.viewCount = viewCount;
-    }
-
-    public Integer getClickCount() {
-        return clickCount;
-    }
-
-    public void setClickCount(Integer clickCount) {
-        this.clickCount = clickCount;
-    }
-
 }

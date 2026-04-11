@@ -12,13 +12,13 @@ import java.util.List;
 public class SavedPostService implements CRUD<SavedPost, Integer> {
 
     private static final String INSERT_SAVED_POST = """
-            INSERT INTO saved_posts (user_id, post_id, saved_at)
+            INSERT INTO saved_posts (saved_at, user_id, post_id)
             VALUES (?, ?, ?)
             """;
 
     private static final String UPDATE_SAVED_POST = """
             UPDATE saved_posts SET
-                user_id = ?, post_id = ?, saved_at = ?
+                saved_at = ?, user_id = ?, post_id = ?
             WHERE id = ?
             """;
 
@@ -27,17 +27,17 @@ public class SavedPostService implements CRUD<SavedPost, Integer> {
             """;
 
     private static final String SELECT_BY_ID = """
-            SELECT id, user_id, post_id, saved_at
+            SELECT id, saved_at, user_id, post_id
             FROM saved_posts WHERE id = ?
             """;
 
     private static final String SELECT_ALL = """
-            SELECT id, user_id, post_id, saved_at
+            SELECT id, saved_at, user_id, post_id
             FROM saved_posts
             """;
 
     private static final String SELECT_BY_USER_ID = """
-            SELECT id, user_id, post_id, saved_at
+            SELECT id, saved_at, user_id, post_id
             FROM saved_posts WHERE user_id = ?
             """;
 
@@ -48,11 +48,26 @@ public class SavedPostService implements CRUD<SavedPost, Integer> {
 
     @Override
     public void insert(SavedPost savedPost) throws SQLException {
+        // FIX: moved null checks BEFORE setters
+        if (savedPost.getUserId() == null || savedPost.getPostId() == null) {
+            throw new SQLException("userId and postId are required");
+        }
+        // FIX: prevent duplicate saved_posts
+        String checkDuplicate = "SELECT 1 FROM saved_posts WHERE user_id = ? AND post_id = ?";
         Connection c = DbConnexion.getConnection();
+        try (PreparedStatement checkPs = c.prepareStatement(checkDuplicate)) {
+            checkPs.setInt(1, savedPost.getUserId());
+            checkPs.setInt(2, savedPost.getPostId());
+            try (ResultSet rs = checkPs.executeQuery()) {
+                if (rs.next()) {
+                    throw new SQLException("Post already saved by this user");
+                }
+            }
+        }
         try (PreparedStatement ps = c.prepareStatement(INSERT_SAVED_POST, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, savedPost.getUserId());
-            ps.setInt(2, savedPost.getPostId());
-            ps.setTimestamp(3, savedPost.getSavedAt() != null ? Timestamp.valueOf(savedPost.getSavedAt()) : Timestamp.valueOf(LocalDateTime.now()));
+            ps.setTimestamp(1, savedPost.getSavedAt() != null ? Timestamp.valueOf(savedPost.getSavedAt()) : Timestamp.valueOf(LocalDateTime.now()));
+            ps.setInt(2, savedPost.getUserId());
+            ps.setInt(3, savedPost.getPostId());
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
@@ -67,11 +82,15 @@ public class SavedPostService implements CRUD<SavedPost, Integer> {
         if (savedPost.getId() == null) {
             throw new SQLException("id obligatoire pour UPDATE");
         }
+        // FIX: moved null checks BEFORE setters
+        if (savedPost.getUserId() == null || savedPost.getPostId() == null) {
+            throw new SQLException("userId and postId are required");
+        }
         Connection c = DbConnexion.getConnection();
         try (PreparedStatement ps = c.prepareStatement(UPDATE_SAVED_POST)) {
-            ps.setInt(1, savedPost.getUserId());
-            ps.setInt(2, savedPost.getPostId());
-            ps.setTimestamp(3, savedPost.getSavedAt() != null ? Timestamp.valueOf(savedPost.getSavedAt()) : null);
+            ps.setTimestamp(1, savedPost.getSavedAt() != null ? Timestamp.valueOf(savedPost.getSavedAt()) : null);
+            ps.setInt(2, savedPost.getUserId());
+            ps.setInt(3, savedPost.getPostId());
             ps.setInt(4, savedPost.getId());
             ps.executeUpdate();
         }
@@ -130,12 +149,12 @@ public class SavedPostService implements CRUD<SavedPost, Integer> {
 
     // Helper methods
     private SavedPost mapRow(ResultSet rs) throws SQLException {
-        SavedPost sp = new SavedPost(null, null, null, null);
+        SavedPost sp = new SavedPost();
         sp.setId(rs.getInt("id"));
-        sp.setUserId(rs.getInt("user_id"));
-        sp.setPostId(rs.getInt("post_id"));
         Timestamp savedTs = rs.getTimestamp("saved_at");
         sp.setSavedAt(savedTs != null ? savedTs.toLocalDateTime() : null);
+        sp.setUserId(rs.getInt("user_id"));
+        sp.setPostId(rs.getInt("post_id"));
         return sp;
     }
 }

@@ -12,13 +12,13 @@ import java.util.List;
 public class PostLikeService implements CRUD<PostLike, Integer> {
 
     private static final String INSERT_POST_LIKE = """
-            INSERT INTO post_like (post_id, user_id, created_at)
-            VALUES (?, ?, ?)
+            INSERT INTO post_like (post_id, liker_id)
+            VALUES (?, ?)
             """;
 
     private static final String UPDATE_POST_LIKE = """
             UPDATE post_like SET
-                post_id = ?, user_id = ?, created_at = ?
+                post_id = ?, liker_id = ?
             WHERE id = ?
             """;
 
@@ -27,17 +27,17 @@ public class PostLikeService implements CRUD<PostLike, Integer> {
             """;
 
     private static final String SELECT_BY_ID = """
-            SELECT id, post_id, user_id, created_at
+            SELECT id, post_id, liker_id
             FROM post_like WHERE id = ?
             """;
 
     private static final String SELECT_ALL = """
-            SELECT id, post_id, user_id, created_at
+            SELECT id, post_id, liker_id
             FROM post_like
             """;
 
     private static final String SELECT_BY_POST_ID = """
-            SELECT id, post_id, user_id, created_at
+            SELECT id, post_id, liker_id
             FROM post_like WHERE post_id = ?
             """;
 
@@ -48,11 +48,25 @@ public class PostLikeService implements CRUD<PostLike, Integer> {
 
     @Override
     public void insert(PostLike postLike) throws SQLException {
+        // FIX: added null safety checks
+        if (postLike.getPostId() == null || postLike.getLikerId() == null) {
+            throw new SQLException("postId and likerId are required");
+        }
+        // FIX: prevent duplicate post_like
+        String checkDuplicate = "SELECT 1 FROM post_like WHERE post_id = ? AND liker_id = ?";
         Connection c = DbConnexion.getConnection();
+        try (PreparedStatement checkPs = c.prepareStatement(checkDuplicate)) {
+            checkPs.setInt(1, postLike.getPostId());
+            checkPs.setInt(2, postLike.getLikerId());
+            try (ResultSet rs = checkPs.executeQuery()) {
+                if (rs.next()) {
+                    throw new SQLException("User has already liked this post");
+                }
+            }
+        }
         try (PreparedStatement ps = c.prepareStatement(INSERT_POST_LIKE, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, postLike.getPostId());
-            ps.setInt(2, postLike.getUserId());
-            ps.setTimestamp(3, postLike.getCreatedAt() != null ? Timestamp.valueOf(postLike.getCreatedAt()) : Timestamp.valueOf(LocalDateTime.now()));
+            ps.setInt(2, postLike.getLikerId());
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
@@ -67,12 +81,15 @@ public class PostLikeService implements CRUD<PostLike, Integer> {
         if (postLike.getId() == null) {
             throw new SQLException("id obligatoire pour UPDATE");
         }
+        // FIX: added null safety checks for update
+        if (postLike.getPostId() == null || postLike.getLikerId() == null) {
+            throw new SQLException("postId and likerId are required");
+        }
         Connection c = DbConnexion.getConnection();
         try (PreparedStatement ps = c.prepareStatement(UPDATE_POST_LIKE)) {
             ps.setInt(1, postLike.getPostId());
-            ps.setInt(2, postLike.getUserId());
-            ps.setTimestamp(3, postLike.getCreatedAt() != null ? Timestamp.valueOf(postLike.getCreatedAt()) : null);
-            ps.setInt(4, postLike.getId());
+            ps.setInt(2, postLike.getLikerId());
+            ps.setInt(3, postLike.getId());
             ps.executeUpdate();
         }
     }
@@ -130,12 +147,10 @@ public class PostLikeService implements CRUD<PostLike, Integer> {
 
     // Helper methods
     private PostLike mapRow(ResultSet rs) throws SQLException {
-        PostLike pl = new PostLike(null, null, null, null);
+        PostLike pl = new PostLike();
         pl.setId(rs.getInt("id"));
         pl.setPostId(rs.getInt("post_id"));
-        pl.setUserId(rs.getInt("user_id"));
-        Timestamp createdTs = rs.getTimestamp("created_at");
-        pl.setCreatedAt(createdTs != null ? createdTs.toLocalDateTime() : null);
+        pl.setLikerId(rs.getInt("liker_id"));
         return pl;
     }
 }

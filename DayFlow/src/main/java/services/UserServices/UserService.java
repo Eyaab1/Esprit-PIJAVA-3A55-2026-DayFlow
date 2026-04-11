@@ -31,7 +31,7 @@ public class UserService implements CRUD<User, Integer> {
     private static final ObjectMapper JSON = new ObjectMapper();
 
     private static final String SELECT_BY_EMAIL = """
-            SELECT id, first_name, last_name, email, password, google_id, roles,
+            SELECT id, first_name, last_name, email, password, roles,
                    phone_number, age, status, speciality, specialities, availability,
                    rating, review_count, price_per_session, bio, photo_url,
                    profile_picture_name, profile_picture_size
@@ -39,7 +39,7 @@ public class UserService implements CRUD<User, Integer> {
             """;
 
     private static final String SELECT_BY_ID = """
-            SELECT id, first_name, last_name, email, password, google_id, roles,
+            SELECT id, first_name, last_name, email, password, roles,
                    phone_number, age, status, speciality, specialities, availability,
                    rating, review_count, price_per_session, bio, photo_url,
                    profile_picture_name, profile_picture_size
@@ -55,7 +55,7 @@ public class UserService implements CRUD<User, Integer> {
 
     private static final String UPDATE_USER = """
             UPDATE "user" SET
-                first_name = ?, last_name = ?, email = ?, password = ?, google_id = ?,
+                first_name = ?, last_name = ?, email = ?, password = ?,
                 roles = ?, phone_number = ?, age = ?, status = ?, speciality = ?,
                 specialities = ?, availability = ?, rating = ?, review_count = ?,
                 price_per_session = ?, bio = ?, photo_url = ?,
@@ -69,7 +69,7 @@ public class UserService implements CRUD<User, Integer> {
 
     /** Colonnes complètes utilisateur (recherche coachs / API Symfony {@code CoachSearchController}). */
     private static final String USER_FULL_SELECT = """
-            SELECT id, first_name, last_name, email, password, google_id, roles,
+            SELECT id, first_name, last_name, email, password, roles,
                    phone_number, age, status, speciality, specialities, availability,
                    rating, review_count, price_per_session, bio, photo_url,
                    profile_picture_name, profile_picture_size
@@ -185,11 +185,6 @@ public class UserService implements CRUD<User, Integer> {
             ps.setString(i++, user.getLastName());
             ps.setString(i++, user.getEmail());
             ps.setString(i++, user.getPassword());
-            if (user.getGoogleId() == null) {
-                ps.setNull(i++, Types.VARCHAR);
-            } else {
-                ps.setString(i++, user.getGoogleId());
-            }
             ps.setObject(i++, toJsonRoles(user.getRoles()));
             if (user.getPhoneNumber() == null) {
                 ps.setNull(i++, Types.VARCHAR);
@@ -325,10 +320,6 @@ public class UserService implements CRUD<User, Integer> {
         u.setEmail(rs.getString("email"));
         String pwd = rs.getString("password");
         u.setPassword(rs.wasNull() ? null : pwd);
-        u.setGoogleId(rs.getString("google_id"));
-        if (rs.wasNull()) {
-            u.setGoogleId(null);
-        }
         u.setRoles(readStringList(rs.getString("roles")));
         u.setPhoneNumber(rs.getString("phone_number"));
         if (rs.wasNull()) {

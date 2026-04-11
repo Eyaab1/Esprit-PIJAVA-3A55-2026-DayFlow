@@ -6,16 +6,21 @@ public class SavedPost {
 
     public static final String TABLE = "saved_posts";
 
+    // Fields in exact DB column order: id, saved_at, user_id, post_id
     public Integer id;
+    public LocalDateTime savedAt;
     public Integer userId;
     public Integer postId;
-    public LocalDateTime savedAt;
 
-    public SavedPost(Integer id, Integer userId, Integer postId, LocalDateTime savedAt) {
+    public SavedPost() {
+    }
+
+    // Constructor matching DB column order
+    public SavedPost(Integer id, LocalDateTime savedAt, Integer userId, Integer postId) {
         this.id = id;
+        this.savedAt = savedAt;
         this.userId = userId;
         this.postId = postId;
-        this.savedAt = savedAt;
     }
 
     public Integer getId() {
@@ -24,6 +29,14 @@ public class SavedPost {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public LocalDateTime getSavedAt() {
+        return savedAt;
+    }
+
+    public void setSavedAt(LocalDateTime savedAt) {
+        this.savedAt = savedAt;
     }
 
     public Integer getUserId() {
@@ -40,13 +53,5 @@ public class SavedPost {
 
     public void setPostId(Integer postId) {
         this.postId = postId;
-    }
-
-    public LocalDateTime getSavedAt() {
-        return savedAt;
-    }
-
-    public void setSavedAt(LocalDateTime savedAt) {
-        this.savedAt = savedAt;
     }
 }

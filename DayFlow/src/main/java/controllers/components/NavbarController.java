@@ -83,7 +83,7 @@ public class NavbarController {
 
     @FXML
     private void onPosts() {
-        toastSoon("Posts");
+        navigate("/user/posts/posts_feed.fxml", "DayFlow — Posts");
     }
 
     @FXML
