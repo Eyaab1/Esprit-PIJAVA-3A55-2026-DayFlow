@@ -1,14 +1,15 @@
 package enums;
 
 /**
- * Équivalent de {@code ReclamationTypeEnum} côté Symfony / Doctrine.
+ * Aligné sur {@code App\Enum\ReclamationTypeEnum} (Symfony) — les {@link #value}
+ * correspondent aux chaînes persistées en base.
  */
 public enum ReclamationType {
-    BUG("BUG"),
-    FEATURE("FEATURE"),
     ACCOUNT("ACCOUNT"),
-    PAYMENT("PAYMENT"),
-    OTHER("OTHER");
+    BUG("Bug"),
+    COACHING("Coaching"),
+    PAYMENT("Payment"),
+    OTHER("Other");
 
     public final String value;
 
@@ -20,8 +21,9 @@ public enum ReclamationType {
         if (value == null) {
             return null;
         }
+        String v = value.trim();
         for (ReclamationType t : values()) {
-            if (t.value.equalsIgnoreCase(value)) {
+            if (t.value.equalsIgnoreCase(v)) {
                 return t;
             }
         }

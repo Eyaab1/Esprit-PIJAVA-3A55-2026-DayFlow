@@ -63,12 +63,12 @@ public class NavbarController {
 
     @FXML
     private void onObjectifs() {
-        toastSoon("Objectifs");
+        navigate("/user/goals/goals_dashboard.fxml", "DayFlow — Goals");
     }
 
     @FXML
     private void onCommunity() {
-        toastSoon("Community");
+        navigate("/user/community/community.fxml", "DayFlow — Community");
     }
 
     @FXML
@@ -102,7 +102,7 @@ public class NavbarController {
 
     @FXML
     private void onMessages() {
-        toastSoon("Messages");
+        navigate("/user/chatroom/chatroom_hub.fxml", "DayFlow — Messages");
     }
 
     @FXML

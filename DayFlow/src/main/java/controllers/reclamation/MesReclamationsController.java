@@ -240,9 +240,9 @@ public class MesReclamationsController {
             return "";
         }
         return switch (t) {
-            case BUG -> "Bug";
-            case FEATURE -> "Fonctionnalité";
             case ACCOUNT -> "Compte";
+            case BUG -> "Bug";
+            case COACHING -> "Coaching";
             case PAYMENT -> "Paiement";
             case OTHER -> "Autre";
         };

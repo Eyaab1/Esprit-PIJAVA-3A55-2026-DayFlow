@@ -169,6 +169,7 @@ public class Goal {
     public void setFavorite(boolean favorite)   { this.isFavorite = favorite; }
     public void setRequiredTasks(Integer n)     { this.requiredTasks = n; }
     public void setTrelloBoardId(String id)     { this.trelloBoardId = id; }
+    public void setCreatedAt(LocalDateTime t)   { this.createdAt = t; }
     public void setUpdatedAt(LocalDateTime t)   { this.updatedAt = t; }
 
     public void setUser(User user) {

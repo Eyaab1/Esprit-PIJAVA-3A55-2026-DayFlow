@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.goals.GoalsDashboardController"
+      styleClass="goals-page-root" stylesheets="@goals_dashboard.css">
+   <children>
+      <VBox styleClass="goals-hero" VBox.vgrow="NEVER">
+         <children>
+            <Label styleClass="goals-pill" text="● SUIVI D'OBJECTIFS" />
+            <HBox alignment="CENTER_LEFT" spacing="20">
+               <children>
+                  <VBox spacing="6">
+                     <children>
+                        <Label styleClass="goals-hero-title" text="Mes Objectifs" />
+                        <Label styleClass="goals-hero-sub"
+                               text="Gérez vos objectifs et suivez vos progrès au quotidien." />
+                     </children>
+                  </VBox>
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Button fx:id="createGoalBtn" mnemonicParsing="false" onAction="#onCreateGoal"
+                          styleClass="btn-hero-create" text="+ Nouvel objectif" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+
+      <HBox alignment="CENTER" spacing="16" styleClass="goals-stats-row">
+         <children>
+            <VBox alignment="CENTER" spacing="8" styleClass="stat-tile stat-tile-active">
+               <children>
+                  <Label styleClass="stat-tile-icon" text="🎯" />
+                  <Label fx:id="statActiveLabel" styleClass="stat-tile-value" text="0" />
+                  <Label styleClass="stat-tile-caption" text="ACTIFS" />
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" spacing="8" styleClass="stat-tile stat-tile-done">
+               <children>
+                  <Label styleClass="stat-tile-icon" text="✓" />
+                  <Label fx:id="statCompletedLabel" styleClass="stat-tile-value" text="0" />
+                  <Label styleClass="stat-tile-caption" text="TERMINÉS" />
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" spacing="8" styleClass="stat-tile stat-tile-pause">
+               <children>
+                  <Label styleClass="stat-tile-icon" text="⏸" />
+                  <Label fx:id="statPausedLabel" styleClass="stat-tile-value" text="0" />
+                  <Label styleClass="stat-tile-caption" text="EN PAUSE" />
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" spacing="8" styleClass="stat-tile stat-tile-fail">
+               <children>
+                  <Label styleClass="stat-tile-icon" text="✕" />
+                  <Label fx:id="statFailedLabel" styleClass="stat-tile-value" text="0" />
+                  <Label styleClass="stat-tile-caption" text="ÉCHOUÉS" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+
+      <VBox spacing="12" styleClass="goals-filter-wrap">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="12" styleClass="goals-filter-bar">
+               <children>
+                  <VBox spacing="4" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label styleClass="filter-label" text="Recherche" />
+                        <TextField fx:id="searchField" promptText="Rechercher…" styleClass="filter-field" />
+                     </children>
+                  </VBox>
+                  <VBox spacing="4">
+                     <children>
+                        <Label styleClass="filter-label" text="Statut" />
+                        <ComboBox fx:id="statusFilterCombo" prefWidth="140" styleClass="filter-combo" />
+                     </children>
+                  </VBox>
+                  <VBox spacing="4">
+                     <children>
+                        <Label styleClass="filter-label" text="Trier" />
+                        <ComboBox fx:id="sortCombo" prefWidth="160" styleClass="filter-combo" />
+                     </children>
+                  </VBox>
+                  <Region prefHeight="1" prefWidth="8" />
+                  <Button mnemonicParsing="false" onAction="#onApplyFilters" styleClass="btn-filter-apply" text="Appliquer" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+
+      <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="goals-scroll" VBox.vgrow="ALWAYS">
+         <content>
+            <VBox fx:id="goalsListBox" spacing="16" styleClass="goals-list-wrap">
+               <padding>
+                  <Insets bottom="24" left="4" right="4" top="8" />
+               </padding>
+            </VBox>
+         </content>
+      </ScrollPane>
+   </children>
+</VBox>

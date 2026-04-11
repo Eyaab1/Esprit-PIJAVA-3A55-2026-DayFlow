@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.chatroom.ChatroomHubController"
+            styleClass="chat-root" stylesheets="@chatroom_hub.css">
+   <left>
+      <VBox spacing="10.0" styleClass="chat-sidebar">
+         <children>
+            <Label styleClass="chat-sidebar-title" text="Chats" />
+            <ListView fx:id="chatListView" prefHeight="400.0" VBox.vgrow="ALWAYS" />
+         </children>
+         <padding>
+            <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+         </padding>
+      </VBox>
+   </left>
+   <center>
+      <VBox styleClass="chat-center" BorderPane.alignment="CENTER">
+         <children>
+            <HBox alignment="CENTER_LEFT" styleClass="chat-header">
+               <children>
+                  <VBox spacing="4.0">
+                     <children>
+                        <Label fx:id="headerTitleLabel" styleClass="chat-title" text="—" />
+                        <Label fx:id="headerSubLabel" styleClass="chat-sub" text="" />
+                     </children>
+                  </VBox>
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Button fx:id="pendingBtn" mnemonicParsing="false" onAction="#onPendingRequests" styleClass="btn-pending" text="Demandes" visible="false" managed="false" />
+                  <Button fx:id="lockBtn" mnemonicParsing="false" onAction="#onLock" styleClass="btn-admin, btn-lock" text="Verrouiller" visible="false" managed="false" />
+                  <Button fx:id="archiveBtn" mnemonicParsing="false" onAction="#onArchive" styleClass="btn-admin, btn-archive" text="Archiver" visible="false" managed="false" />
+                  <Button fx:id="deleteBtn" mnemonicParsing="false" onAction="#onDeleteRoom" styleClass="btn-admin, btn-delete" text="Supprimer" visible="false" managed="false" />
+               </children>
+            </HBox>
+            <ScrollPane fx:id="messagesScroll" fitToWidth="true" styleClass="chat-messages" VBox.vgrow="ALWAYS">
+               <content>
+                  <VBox fx:id="messagesBox" spacing="6.0">
+                     <padding>
+                        <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+                     </padding>
+                  </VBox>
+               </content>
+            </ScrollPane>
+            <HBox styleClass="chat-input-row">
+               <children>
+                  <TextField fx:id="messageField" promptText="Écrire un message…" styleClass="chat-field" HBox.hgrow="ALWAYS" />
+                  <Button mnemonicParsing="false" onAction="#onSendMessage" styleClass="btn-send" text="Envoyer" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>

@@ -1,0 +1,91 @@
+.chat-root {
+    -fx-font-family: "Segoe UI", "Inter", "Arial", sans-serif;
+    -fx-background-color: #f1f5f9;
+}
+
+.chat-sidebar {
+    -fx-min-width: 220;
+    -fx-pref-width: 240;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 0 1 0 0;
+    -fx-padding: 12;
+}
+
+.chat-sidebar-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 8 0;
+}
+
+.chat-center {
+    -fx-spacing: 0;
+}
+
+.chat-header {
+    -fx-padding: 14 18;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 0 0 1 0;
+    -fx-alignment: center-left;
+    -fx-spacing: 12;
+}
+
+.chat-title {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+}
+
+.chat-sub {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748b;
+}
+
+.chat-messages {
+    -fx-background-color: #f8fafc;
+    -fx-padding: 16;
+}
+
+.chat-msg-line {
+    -fx-font-size: 14px;
+    -fx-text-fill: #334155;
+    -fx-padding: 4 0;
+}
+
+.chat-input-row {
+    -fx-padding: 12 16;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1 0 0 0;
+    -fx-spacing: 10;
+    -fx-alignment: center-left;
+}
+
+.chat-field {
+    -fx-background-radius: 8;
+}
+
+.btn-send {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-padding: 8 16;
+    -fx-background-radius: 8;
+}
+
+.btn-pending {
+    -fx-background-color: #f59e0b;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-padding: 6 12;
+    -fx-background-radius: 8;
+}
+
+.btn-admin {
+    -fx-padding: 6 10;
+    -fx-background-radius: 8;
+}
+
+.btn-lock { -fx-background-color: #eab308; -fx-text-fill: #1e293b; }
+.btn-archive { -fx-background-color: #94a3b8; -fx-text-fill: white; }
+.btn-delete { -fx-background-color: #ef4444; -fx-text-fill: white; }

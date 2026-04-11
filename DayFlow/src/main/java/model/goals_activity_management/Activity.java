@@ -159,7 +159,13 @@ public class Activity {
     }
     public void setUpdatedAt(LocalDateTime t)                       { this.updatedAt              = t; }
 
+    public void setCreatedAt(LocalDateTime t)                       { this.createdAt              = t; }
+
     // ─── Getters ──────────────────────────────────────────────
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public int            getId()                      { return id; }
     public String         getTitle()                   { return title; }
