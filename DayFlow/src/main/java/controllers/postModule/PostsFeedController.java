@@ -28,6 +28,8 @@ import services.tag.TagService;
 import session.AppSession;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -154,6 +156,30 @@ public class PostsFeedController {
         contentArea.setWrapText(true);
         TextField tagsField = new TextField();
         tagsField.setPromptText("Tags (optionnel, séparés par des virgules)");
+        ComboBox<String> statusCombo = new ComboBox<>();
+        statusCombo.setItems(FXCollections.observableArrayList(
+                "Brouillon",
+                "Publier maintenant",
+                "Programmer"
+        ));
+        statusCombo.getSelectionModel().select("Publier maintenant");
+
+        DatePicker datePicker = new DatePicker();
+        datePicker.setVisible(false);
+        datePicker.setManaged(false);
+
+        TextField timeField = new TextField();
+        timeField.setPromptText("HH:mm");
+        timeField.setVisible(false);
+        timeField.setManaged(false);
+
+        statusCombo.setOnAction(e -> {
+            boolean isScheduled = "Programmer".equals(statusCombo.getValue());
+            datePicker.setVisible(isScheduled);
+            datePicker.setManaged(isScheduled);
+            timeField.setVisible(isScheduled);
+            timeField.setManaged(isScheduled);
+        });
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -165,6 +191,12 @@ public class PostsFeedController {
         grid.add(contentArea, 1, 1);
         grid.add(new Label("Tags :"), 0, 2);
         grid.add(tagsField, 1, 2);
+        grid.add(new Label("Statut :"), 0, 3);
+        grid.add(statusCombo, 1, 3);
+        grid.add(new Label("Date :"), 0, 4);
+        grid.add(datePicker, 1, 4);
+        grid.add(new Label("Heure :"), 0, 5);
+        grid.add(timeField, 1, 5);
         dialog.getDialogPane().setContent(grid);
 
         Optional<ButtonType> result = dialog.showAndWait();
@@ -182,12 +214,36 @@ public class PostsFeedController {
         Post post = new Post();
         post.setTitle(title);
         post.setContent(content.isEmpty() ? null : content);
-        post.setStatus(PostStatus.PUBLISHED);
         post.setCreatedById(uid);
-        post.setCreatedAt(java.time.LocalDateTime.now());
         post.setImages(List.of());
         post.setViewCount(0);
         post.setClickCount(0);
+        LocalDateTime now = LocalDateTime.now();
+        String selectedStatus = statusCombo.getValue();
+        if ("Brouillon".equals(selectedStatus)) {
+            post.setStatus(PostStatus.DRAFT);
+            post.setCreatedAt(now);
+            post.setScheduledAt(null);
+        } else if ("Programmer".equals(selectedStatus)) {
+            if (datePicker.getValue() == null || timeField.getText() == null || timeField.getText().isBlank()) {
+                new Alert(Alert.AlertType.WARNING, "La date et l'heure sont obligatoires pour programmer un post.").showAndWait();
+                return;
+            }
+            try {
+                LocalTime time = LocalTime.parse(timeField.getText().trim());
+                LocalDateTime scheduled = LocalDateTime.of(datePicker.getValue(), time);
+                post.setStatus(PostStatus.SCHEDULED);
+                post.setScheduledAt(scheduled);
+                post.setCreatedAt(now);
+            } catch (Exception ex) {
+                new Alert(Alert.AlertType.WARNING, "Heure invalide. Utilisez le format HH:mm.").showAndWait();
+                return;
+            }
+        } else {
+            post.setStatus(PostStatus.PUBLISHED);
+            post.setCreatedAt(now);
+            post.setScheduledAt(null);
+        }
         if (post.getSlug() == null) {
             post.setSlug(title.toLowerCase(Locale.FRENCH).replace(" ", "-").replaceAll("[^a-z0-9\\-]", ""));
         }
