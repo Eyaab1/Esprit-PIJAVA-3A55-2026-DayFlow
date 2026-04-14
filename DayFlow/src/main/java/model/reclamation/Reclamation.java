@@ -1,17 +1,15 @@
 package model.reclamation;
 
-import enums.ReclamationStatus;
 import enums.ReclamationType;
+import enums.ReclamationStatus;
 import model.user.User;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Réclamation utilisateur. Équivalent de l'entité Symfony {@code Reclamation}.
- */
+
 public class Reclamation {
 
     private Integer id;
@@ -20,9 +18,9 @@ public class Reclamation {
     private ReclamationStatus status;
     private LocalDateTime createdAt;
     private String photoPath;
-    /** Colonne {@code user_id} (JDBC). */
+    
     private Integer userId;
-    /** ManyToOne {@code user} (Symfony). */
+    
     private User user;
     private final List<Response> responses = new ArrayList<>();
 
