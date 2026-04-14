@@ -53,9 +53,8 @@ public class SignupController {
             return;
         }
         UserRole role = roleChoiceBox.getValue();
-        if (role == null) {
-            role = UserRole.USER;
-        }
+        if (role == null) role = UserRole.USER;
+
         try {
             User created = userService.signUp(
                     firstNameField.getText(),
@@ -64,16 +63,29 @@ public class SignupController {
                     passwordField.getText(),
                     role
             );
-            String extra = "";
-            if (usernameField.getText() != null && !usernameField.getText().isBlank()) {
-                extra += "\n(Pseudo : non enregistré en base pour l'instant.)";
+
+            // Message propre sans infos techniques
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Succès");
+            alert.setHeaderText(null);
+            alert.setContentText("Compte créé avec succès 🎉\nBienvenue " + created.getFirstName() + " !");
+            alert.showAndWait();
+
+            // Connexion automatique + redirection dashboard
+            session.AppSession.setCurrentUser(created);
+            controllers.components.NavbarController.refreshFromSession();
+            try {
+                if (session.AppSession.isCoach()) {
+                    controllers.navigation.NavigationManager.show(
+                            "/user/coachdashboard/coach_dashboard.fxml", "DayFlow — Coach");
+                } else {
+                    controllers.navigation.NavigationManager.show(
+                            "/user/userdashboard/user_dashboard.fxml", "DayFlow — Accueil");
+                }
+            } catch (IOException io) {
+                new Alert(Alert.AlertType.ERROR, io.getMessage()).showAndWait();
             }
-            if (birthDatePicker.getValue() != null) {
-                extra += "\n(Date de naissance : non enregistrée en base pour l'instant.)";
-            }
-            new Alert(Alert.AlertType.INFORMATION,
-                    "Compte créé, id = " + created.getId() + ". Vous pouvez vous connecter." + extra).showAndWait();
-            navigateToLogin();
+
         } catch (IllegalArgumentException ex) {
             new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
         } catch (SQLException ex) {

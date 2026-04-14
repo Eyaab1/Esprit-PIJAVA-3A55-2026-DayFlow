@@ -12,6 +12,7 @@ public class Message {
 
     private int chatroomId;
     private int authorId;
+    private int replyToId; // 0 = pas une réponse
 
     public Message() {
         this.createdAt = LocalDateTime.now();
@@ -79,6 +80,9 @@ public class Message {
     public boolean isEdited() {
         return isEdited;
     }
+
+    public int getReplyToId()              { return replyToId; }
+    public void setReplyToId(int replyToId){ this.replyToId = replyToId; }
 
     public void setId(int id) {
         this.id = id;

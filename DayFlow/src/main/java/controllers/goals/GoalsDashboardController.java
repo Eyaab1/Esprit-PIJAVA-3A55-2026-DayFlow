@@ -57,18 +57,32 @@ public class GoalsDashboardController {
 
     @FXML
     private void initialize() {
-        if (AppSession.getCurrentUser().isEmpty()) {
-            createGoalBtn.setDisable(true);
+        try {
+            if (AppSession.getCurrentUser().isEmpty()) {
+                createGoalBtn.setDisable(true);
+            }
+            statusFilterCombo.setItems(FXCollections.observableArrayList(
+                    "Tous", "Actif", "Terminé", "En pause", "Échoué"));
+            statusFilterCombo.getSelectionModel().selectFirst();
+
+            sortCombo.setItems(FXCollections.observableArrayList(
+                    "Plus récent", "Titre (A-Z)"));
+            sortCombo.getSelectionModel().selectFirst();
+
+            refreshAll();
+        } catch (Throwable e) {
+            // Capturer TOUT — y compris Error et RuntimeException
+            e.printStackTrace();
+            String msg = e.getClass().getName() + ": " + e.getMessage();
+            if (e.getCause() != null) {
+                msg += "\nCaused by: " + e.getCause().getClass().getName() + ": " + e.getCause().getMessage();
+            }
+            if (goalsListBox != null) {
+                goalsListBox.getChildren().clear();
+                goalsListBox.getChildren().add(new javafx.scene.control.Label(msg));
+            }
+            throw new RuntimeException(msg, e); // re-throw pour que FXMLLoader affiche le vrai message
         }
-        statusFilterCombo.setItems(FXCollections.observableArrayList(
-                "Tous", "Actif", "Terminé", "En pause", "Échoué"));
-        statusFilterCombo.getSelectionModel().selectFirst();
-
-        sortCombo.setItems(FXCollections.observableArrayList(
-                "Plus récent", "Titre (A-Z)"));
-        sortCombo.getSelectionModel().selectFirst();
-
-        refreshAll();
     }
 
     private void refreshAll() {
@@ -77,9 +91,10 @@ public class GoalsDashboardController {
             GoalStatusCounts c = goalService.countGoalsByStatus();
             bindStats(c);
             applyFilters();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             goalsListBox.getChildren().clear();
-            goalsListBox.getChildren().add(new Label("Erreur : " + e.getMessage()));
+            goalsListBox.getChildren().add(new Label("Erreur chargement : " + e.getClass().getSimpleName() + " — " + e.getMessage()));
+            e.printStackTrace();
         }
     }
 
@@ -299,19 +314,45 @@ public class GoalsDashboardController {
             return;
         }
         try {
+            String titleText = titleF.getText() != null ? titleF.getText().trim() : "";
+            String descText  = descF.getText()  != null ? descF.getText().trim()  : "";
+
+            // Validation manuelle (title + description fusionnés → description en BD)
+            if (titleText.length() < 3)
+                throw new IllegalArgumentException("Le titre doit contenir au moins 3 caractères.");
+            if (start.getValue() == null)
+                throw new IllegalArgumentException("La date de début est obligatoire.");
+            if (end.getValue() == null)
+                throw new IllegalArgumentException("La date de fin est obligatoire.");
+            if (!end.getValue().isAfter(start.getValue()))
+                throw new IllegalArgumentException("La date de fin doit être postérieure à la date de début.");
+
+            // En BD : description = "Titre — Description" (title n'existe pas en BD)
+            String fullDesc = descText.isBlank() ? titleText : titleText + " — " + descText;
+
             Goal g = new Goal();
-            g.setTitle(titleF.getText() != null ? titleF.getText().trim() : "");
-            g.setDescription(descF.getText() != null ? descF.getText().trim() : null);
+            // setTitle sans validation BD (champ Java uniquement)
+            g.setTitleDirect(titleText);
+            g.setDescription(fullDesc);
             g.setStartDate(start.getValue());
             g.setEndDate(end.getValue());
             g.setStatus(status.getValue());
-            g.validate();
+
+            // Lier l'utilisateur courant
+            model.user.User u = new model.user.User();
+            u.setId(uid.get());
+            g.setUser(u);
+
             goalService.insert(g);
             lifecycle.ensureChatroomAndOwner(g.getId(), uid.get());
-            alert(Alert.AlertType.INFORMATION, "Objectif créé. Vous êtes administrateur du chatroom associé.");
+            alert(Alert.AlertType.INFORMATION, "Objectif créé ✅");
             refreshAll();
         } catch (Exception ex) {
-            alert(Alert.AlertType.ERROR, ex.getMessage());
+            ex.printStackTrace();
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            alert(Alert.AlertType.ERROR,
+                    cause.getClass().getSimpleName() + ": " +
+                    (cause.getMessage() != null ? cause.getMessage() : "erreur inconnue"));
         }
     }
 

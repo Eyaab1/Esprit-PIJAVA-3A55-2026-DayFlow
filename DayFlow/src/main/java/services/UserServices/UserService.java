@@ -32,7 +32,7 @@ public class UserService implements CRUD<User, Integer> {
 
     private static final String SELECT_BY_EMAIL = """
             SELECT id, first_name, last_name, email, password, roles,
-                   phone_number, age, status, speciality, specialities, availability,
+                   phone_number, age, status, speciality, availability,
                    rating, review_count, price_per_session, bio, photo_url,
                    profile_picture_name, profile_picture_size
             FROM "user" WHERE LOWER(email) = LOWER(?)
@@ -40,7 +40,7 @@ public class UserService implements CRUD<User, Integer> {
 
     private static final String SELECT_BY_ID = """
             SELECT id, first_name, last_name, email, password, roles,
-                   phone_number, age, status, speciality, specialities, availability,
+                   phone_number, age, status, speciality, availability,
                    rating, review_count, price_per_session, bio, photo_url,
                    profile_picture_name, profile_picture_size
             FROM "user" WHERE id = ?
@@ -57,7 +57,7 @@ public class UserService implements CRUD<User, Integer> {
             UPDATE "user" SET
                 first_name = ?, last_name = ?, email = ?, password = ?,
                 roles = ?, phone_number = ?, age = ?, status = ?, speciality = ?,
-                specialities = ?, availability = ?, rating = ?, review_count = ?,
+                availability = ?, rating = ?, review_count = ?,
                 price_per_session = ?, bio = ?, photo_url = ?,
                 profile_picture_name = ?, profile_picture_size = ?
             WHERE id = ?
@@ -70,7 +70,7 @@ public class UserService implements CRUD<User, Integer> {
     /** Colonnes complètes utilisateur (recherche coachs / API Symfony {@code CoachSearchController}). */
     private static final String USER_FULL_SELECT = """
             SELECT id, first_name, last_name, email, password, roles,
-                   phone_number, age, status, speciality, specialities, availability,
+                   phone_number, age, status, speciality, availability,
                    rating, review_count, price_per_session, bio, photo_url,
                    profile_picture_name, profile_picture_size
             """;
@@ -202,11 +202,6 @@ public class UserService implements CRUD<User, Integer> {
             } else {
                 ps.setString(i++, user.getSpeciality());
             }
-            if (user.getSpecialities() == null) {
-                ps.setNull(i++, Types.OTHER);
-            } else {
-                ps.setObject(i++, toJsonList(user.getSpecialities()));
-            }
             if (user.getAvailability() == null) {
                 ps.setNull(i++, Types.VARCHAR);
             } else {
@@ -332,7 +327,6 @@ public class UserService implements CRUD<User, Integer> {
         if (rs.wasNull()) {
             u.setSpeciality(null);
         }
-        u.setSpecialities(readStringListNullable(rs.getString("specialities")));
         u.setAvailability(rs.getString("availability"));
         if (rs.wasNull()) {
             u.setAvailability(null);
