@@ -43,9 +43,12 @@ import java.util.stream.Collectors;
  */
 public class PostsFeedController {
 
+    /** Entrée « tous les tags » dans le filtre par tag. */
     private static final String TAG_ALL = "Tous les tags";
+    /** Format d’affichage des dates (création / modification) sur une carte post. */
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("d MMM uuuu, HH:mm", Locale.FRENCH);
 
+    // --- Contrôles FXML (posts_feed.fxml) ---
     @FXML
     private ComboBox<String> sortCombo;
     @FXML
@@ -59,6 +62,7 @@ public class PostsFeedController {
     @FXML
     private ScrollPane scrollPane;
 
+    // --- Services et sous-contrôleur d’interactions (likes, signets) ---
     private final PostService postService = new PostService();
     private final TagService tagService = new TagService();
     private final CommentService commentService = new CommentService();
@@ -67,19 +71,21 @@ public class PostsFeedController {
     private final UserService userService = new UserService();
     private final InteractionController interaction = new InteractionController();
 
-    // Pagination variables for lazy loading
+    // Pagination « scroll infini » : pages de posts ajoutées au conteneur
     private int currentPage = 0;
     private final int pageSize = 5;
     private boolean isLoading = false;
     private List<Post> allFilteredPosts = new ArrayList<>();
 
-    // Track expanded comments per post
+    /** Par post : la liste des commentaires est-elle entièrement dépliée. */
     private final java.util.Map<Integer, Boolean> commentsExpandedState = new java.util.HashMap<>();
-    // Track visible replies per comment
+    /** Par commentaire : les réponses sont-elles visibles (état UI). */
     private final java.util.Map<Integer, Boolean> repliesVisibleState = new java.util.HashMap<>();
 
+    /** Initialise les combos, le scroll infini et charge le fil d’actualité. */
     @FXML
     private void initialize() {
+        // Tri : ordre chronologique du fil
         sortCombo.setItems(FXCollections.observableArrayList(
                 "Trier : Plus récents",
                 "Trier : Plus anciens"
@@ -87,6 +93,7 @@ public class PostsFeedController {
         sortCombo.getSelectionModel().selectFirst();
         sortCombo.setOnAction(e -> refreshFeed());
 
+        // Filtre : tous / avec images / texte seul
         filterCombo.setItems(FXCollections.observableArrayList(
                 "Filtre : Tous les posts",
                 "Filtre : Avec images",
@@ -97,11 +104,12 @@ public class PostsFeedController {
 
         tagCombo.setOnAction(e -> refreshFeed());
 
-        // Add scroll listener for infinite scroll / lazy loading after layout is ready
+        // Quand le layout est prêt : écouter le scroll pour charger la page suivante
         Platform.runLater(() -> {
             if (scrollPane != null) {
                 scrollPane.vvalueProperty().addListener((obs, oldVal, newVal) -> {
                     System.out.println("Scroll: " + newVal);
+                    // Bas du ScrollPane atteint : page suivante si des posts restent
                     if (newVal.doubleValue() >= 0.95 && !isLoading
                             && currentPage * pageSize < allFilteredPosts.size()) {
                         System.out.println("Loading more posts...");
@@ -115,6 +123,7 @@ public class PostsFeedController {
         refreshFeed();
     }
 
+    /** Reconstruit les choix du filtre tag (BDD + « Tous ») en conservant la sélection si possible. */
     private void reloadTagFilterChoices() {
         String prev = tagCombo.getSelectionModel().getSelectedItem();
         List<String> items = new ArrayList<>();
@@ -136,13 +145,16 @@ public class PostsFeedController {
         }
     }
 
+    /** Ouvre le dialogue de création, valide les champs, enregistre le post et attache les tags. */
     @FXML
     private void onCreatePost() {
+        // Session requise
         if (AppSession.getCurrentUser().isEmpty()) {
             new Alert(Alert.AlertType.WARNING, "Connectez-vous pour créer un post.").showAndWait();
             return;
         }
 
+        // Dialogue : formulaire titre, contenu, tags, statut / programmation
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Nouveau post");
         dialog.setHeaderText("Créer un post");
@@ -173,6 +185,7 @@ public class PostsFeedController {
         timeField.setVisible(false);
         timeField.setManaged(false);
 
+        // Afficher date/heure seulement si « Programmer » est choisi
         statusCombo.setOnAction(e -> {
             boolean isScheduled = "Programmer".equals(statusCombo.getValue());
             datePicker.setVisible(isScheduled);
@@ -203,6 +216,7 @@ public class PostsFeedController {
         if (result.isEmpty() || result.get() != ButtonType.OK) {
             return;
         }
+        // Saisie obligatoire : titre et contenu
         String title = titleField.getText() != null ? titleField.getText().trim() : "";
         String content = contentArea.getText() != null ? contentArea.getText().trim() : "";
         if (title.isEmpty()) {
@@ -214,6 +228,7 @@ public class PostsFeedController {
             return;
         }
 
+        // Construire le Post : auteur, compteurs, statut (brouillon / publié / programmé)
         int uid = AppSession.getCurrentUser().get().getId();
         Post post = new Post();
         post.setTitle(title);
@@ -252,6 +267,7 @@ public class PostsFeedController {
             post.setSlug(title.toLowerCase(Locale.FRENCH).replace(" ", "-").replaceAll("[^a-z0-9\\-]", ""));
         }
 
+        // Insertion puis liaison des tags (création du tag si besoin)
         try {
             postService.insert(post);
             int pid = post.getId();
@@ -279,6 +295,7 @@ public class PostsFeedController {
         }
     }
 
+    /** Retourne un tag existant par nom (sans respect de la casse), ou null. */
     private Tag findTagByName(String name) throws SQLException {
         for (Tag t : tagService.getAllTags()) {
             if (t.getName() != null && t.getName().equalsIgnoreCase(name)) {
@@ -288,6 +305,7 @@ public class PostsFeedController {
         return null;
     }
 
+    /** Remet à zéro la pagination, applique filtres / tri / tag, puis affiche la première page. */
     private void refreshFeed() {
         currentPage = 0;
         isLoading = false;
@@ -296,11 +314,12 @@ public class PostsFeedController {
         repliesVisibleState.clear();
         
         try {
-            // Load all filtered posts into list
+            // Base : uniquement les posts publiés
             allFilteredPosts = postService.getAllPosts().stream()
                     .filter(p -> p.getStatus() == PostStatus.PUBLISHED)
                     .collect(Collectors.toList());
 
+            // Filtre média : avec images ou texte seul
             String filter = filterCombo.getSelectionModel().getSelectedItem();
             if ("Filtre : Avec images".equals(filter)) {
                 allFilteredPosts = allFilteredPosts.stream()
@@ -312,6 +331,7 @@ public class PostsFeedController {
                         .collect(Collectors.toList());
             }
 
+            // Filtre par un tag précis (hors « Tous les tags »)
             String tagPick = tagCombo.getSelectionModel().getSelectedItem();
             if (tagPick != null && !TAG_ALL.equals(tagPick)) {
                 final String tagName = tagPick;
@@ -326,6 +346,7 @@ public class PostsFeedController {
                 allFilteredPosts = filtered;
             }
 
+            // Tri par date de création (plus récent ou plus ancien en premier)
             boolean newestFirst = "Trier : Plus récents".equals(sortCombo.getSelectionModel().getSelectedItem());
             allFilteredPosts.sort((a, b) -> {
                 java.time.LocalDateTime da = a.getCreatedAt() != null ? a.getCreatedAt() : java.time.LocalDateTime.MIN;
@@ -333,7 +354,7 @@ public class PostsFeedController {
                 return newestFirst ? db.compareTo(da) : da.compareTo(db);
             });
 
-            // Load first page
+            // Première « page » de cartes dans le VBox
             loadMorePosts();
             
         } catch (SQLException e) {
@@ -341,6 +362,7 @@ public class PostsFeedController {
         }
     }
 
+    /** Ajoute au conteneur la tranche [page courante × taille …] sans recharger toute la liste. */
     private void loadMorePosts() {
         if (isLoading) return;
         isLoading = true;
@@ -350,20 +372,21 @@ public class PostsFeedController {
             
             int start = currentPage * pageSize;
             int end = Math.min(start + pageSize, allFilteredPosts.size());
-            
+
+            // Plus rien à afficher pour cette page
             if (start >= allFilteredPosts.size()) {
                 isLoading = false;
                 return;
             }
 
-            // Show empty state only on first load
+            // Message si aucun résultat après filtres (uniquement au premier chargement)
             if (currentPage == 0 && allFilteredPosts.isEmpty()) {
                 Label empty = new Label("Aucun post pour ces critères.");
                 empty.getStyleClass().add("post-meta");
                 postsContainer.getChildren().add(empty);
             }
 
-            // Add posts for current page
+            // Une carte UI par post de la page courante
             for (int i = start; i < end; i++) {
                 Post p = allFilteredPosts.get(i);
                 postsContainer.getChildren().add(buildPostCard(p, currentUserId));
@@ -377,11 +400,13 @@ public class PostsFeedController {
         }
     }
 
+    /** Assemble une carte complète : en-tête, tags, corps, likes, commentaires. */
     private VBox buildPostCard(Post post, Integer currentUserId) throws SQLException {
         VBox card = new VBox(12);
         card.getStyleClass().add("post-card");
         card.setMaxWidth(720);
 
+        // Auteur : nom affiché + initiales pour l’avatar
         User author = post.getCreatedById() != null
                 ? userService.findById(post.getCreatedById()).orElse(null)
                 : null;
@@ -410,6 +435,7 @@ public class PostsFeedController {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
+        // Signet : bascule enregistrer / retirer pour l’utilisateur connecté
         Button bookmark = new Button("🔖");
         bookmark.getStyleClass().add("post-icon-btn");
         if (currentUserId != null && isPostSaved(currentUserId, post.getId())) {
@@ -443,7 +469,7 @@ public class PostsFeedController {
             }
         });
 
-        // Create title and body EARLY so they can be referenced by the menu
+        // Titre et corps créés tôt : le menu contextuel (propriétaire) y réfère pour l’édition
         Label titleLbl = new Label(post.getTitle());
         titleLbl.getStyleClass().add("post-title");
         titleLbl.setWrapText(true);
@@ -456,8 +482,8 @@ public class PostsFeedController {
         Button menu = new Button("⋯");
         menu.getStyleClass().add("post-icon-btn");
         menu.setDisable(true);
-        
-        // Enable menu only for post owner
+
+        // Menu ⋯ : modifier / supprimer réservé au créateur du post
         if (currentUserId != null && currentUserId.equals(post.getCreatedById())) {
             menu.setDisable(false);
             
@@ -485,10 +511,12 @@ public class PostsFeedController {
             menu.setOnAction(e -> contextMenu.show(menu, Side.BOTTOM, 0, 0));
         }
 
+        // Ligne d’en-tête : avatar, nom, méta, signet, menu
         HBox header = new HBox(12);
         header.setAlignment(Pos.CENTER_LEFT);
         header.getChildren().addAll(avatar, nameCol, spacer, bookmark, menu);
 
+        // Pastilles de tags liés au post
         javafx.scene.layout.FlowPane tagsFlow = new javafx.scene.layout.FlowPane();
         tagsFlow.getStyleClass().add("post-tags-flow");
         tagsFlow.setPrefWrapLength(680);
@@ -498,6 +526,7 @@ public class PostsFeedController {
             tagsFlow.getChildren().add(pill);
         }
 
+        // Compteurs likes et commentaires
         int likeCount = postLikeService.findByPostId(post.getId()).size();
         int commentCount = commentService.getCommentsByPost(post.getId()).size();
 
@@ -529,6 +558,7 @@ public class PostsFeedController {
             }
         });
 
+        // Ligne de stats sous le contenu
         Label statsComments = new Label("💬  " + commentCount + " commentaire" + (commentCount != 1 ? "s" : ""));
         statsComments.getStyleClass().add("post-stat-text");
 
@@ -539,6 +569,7 @@ public class PostsFeedController {
 
         Separator sep = new Separator();
 
+        // Saisie d’un nouveau commentaire sur ce post
         Label avatarSm = new Label(AppSession.getCurrentUser()
                 .map(u -> initials(u.getFirstName(), u.getLastName()))
                 .orElse("?"));
@@ -558,6 +589,7 @@ public class PostsFeedController {
         commentRow.getChildren().addAll(avatarSm, commentField, sendComment);
         commentRow.getStyleClass().add("comment-row");
 
+        // Liste des commentaires (aperçu limité + bouton afficher plus)
         VBox commentsBlock = new VBox(8);
         List<Comment> comments = commentService.getCommentsByPost(post.getId());
         int maxInitialComments = 3;
@@ -567,18 +599,14 @@ public class PostsFeedController {
             empty.getStyleClass().add("post-empty-comments");
             commentsBlock.getChildren().add(empty);
         } else {
-            // Initialize expanded state if not already set
             boolean isExpanded = commentsExpandedState.getOrDefault(post.getId(), false);
-            
-            // Determine which comments to show
+
             int commentsToShow = isExpanded ? comments.size() : Math.min(maxInitialComments, comments.size());
-            
-            // Add visible comments
+
             for (int i = 0; i < commentsToShow; i++) {
                 commentsBlock.getChildren().add(buildCommentLine(comments.get(i)));
             }
-            
-            // Add "Show More" / "Hide" button if there are more comments than initial
+
             if (comments.size() > maxInitialComments) {
                 Button toggleCommentsBtn = new Button(isExpanded ? 
                     "Masquer les commentaires" : 
@@ -590,16 +618,15 @@ public class PostsFeedController {
                     try {
                         boolean expanded = !commentsExpandedState.getOrDefault(post.getId(), false);
                         commentsExpandedState.put(post.getId(), expanded);
-                        
-                        // Clear and rebuild only the comments block (not entire feed)
+
+                        // Reconstruire uniquement le bloc commentaires (sans rafraîchir tout le fil)
                         commentsBlock.getChildren().clear();
                         
                         int newCommentsToShow = expanded ? comments.size() : Math.min(maxInitialComments, comments.size());
                         for (int i = 0; i < newCommentsToShow; i++) {
                             commentsBlock.getChildren().add(buildCommentLine(comments.get(i)));
                         }
-                        
-                        // Update button text and re-add button
+
                         String newBtnText = expanded ? 
                             "Masquer les commentaires" : 
                             "Afficher plus de commentaires (" + (comments.size() - maxInitialComments) + ")";
@@ -614,6 +641,7 @@ public class PostsFeedController {
             }
         }
 
+        // Assemblage final de la carte
         card.getChildren().addAll(header);
         if (!tagsFlow.getChildren().isEmpty()) {
             card.getChildren().add(tagsFlow);
@@ -623,6 +651,7 @@ public class PostsFeedController {
         return card;
     }
 
+    /** Une ligne de commentaire : texte, like, réponses locales (UI). */
     private VBox buildCommentLine(Comment c) throws SQLException {
         User u = userService.findById(c.getCommenterId()).orElse(null);
         String name = u != null
@@ -635,21 +664,18 @@ public class PostsFeedController {
 
         Integer currentUserId = AppSession.getCurrentUser().map(User::getId).orElse(null);
 
-        // Main comment card container
         VBox commentCard = new VBox(8);
         commentCard.getStyleClass().add("comment-card");
         commentCard.setPadding(new Insets(8, 10, 8, 10));
         commentCard.setStyle("-fx-border-color: #e0e0e0; -fx-border-radius: 4; -fx-background-color: #f9f9f9;");
 
-        // Comment content
         Label contentLbl = new Label(name + " — " + htmlToPlainText(c.getContent()));
         contentLbl.setWrapText(true);
         contentLbl.getStyleClass().add("post-body");
 
-        // Get comment like count
         int likeCount = getCommentLikeCount(c.getId());
 
-        // Like button (matching post like button style)
+        // Like sur le commentaire (même style que le like post)
         Button likeBtn = new Button("♡ " + likeCount);
         likeBtn.getStyleClass().add("like-btn");
         if (currentUserId != null && isCommentLikedBy(c.getId(), currentUserId)) {
@@ -680,7 +706,6 @@ public class PostsFeedController {
             }
         });
 
-        // Reply button
         Button replyBtn = new Button("💬 Répondre");
         replyBtn.getStyleClass().add("like-btn");
         replyBtn.setStyle("-fx-font-size: 13;");
@@ -690,15 +715,14 @@ public class PostsFeedController {
         actionsRow.getChildren().addAll(likeBtn, replyBtn);
         actionsRow.getStyleClass().add("comment-actions");
 
-        // Replies container (hidden by default)
+        // Réponses affichées sous le commentaire (masquées jusqu’à présence / toggle)
         VBox repliesContainer = new VBox(6);
         repliesContainer.getStyleClass().add("comment-replies");
         repliesContainer.setPadding(new Insets(8, 0, 0, 16));
         repliesContainer.setStyle("-fx-border-left: 2 solid #ddd;");
         repliesContainer.setVisible(false);
         repliesContainer.setManaged(false);
-        
-        // Reply input row (hidden initially)
+
         TextField replyField = new TextField();
         replyField.setPromptText("Répondre...");
         replyField.getStyleClass().add("comment-reply-field");
@@ -717,14 +741,13 @@ public class PostsFeedController {
         replyInputRow.setVisible(false);
         replyInputRow.getStyleClass().add("comment-input-row");
 
-        // Create and configure toggle replies button
+        // Bouton pour afficher / masquer la liste des réponses (apparaît s’il y a des réponses)
         Button toggleRepliesBtn = new Button("Afficher les réponses (0)");
         toggleRepliesBtn.getStyleClass().add("like-btn");
         toggleRepliesBtn.setStyle("-fx-font-size: 12px;");
         toggleRepliesBtn.setVisible(false);
         toggleRepliesBtn.setManaged(false);
-        
-        // Lambda to update toggle button state
+
         Runnable updateToggleButton = () -> {
             int replyCount = repliesContainer.getChildren().size();
             if (replyCount > 0) {
@@ -739,16 +762,15 @@ public class PostsFeedController {
                 toggleRepliesBtn.setText(isVisible ? "Masquer les réponses" : "Afficher les réponses (" + replyCount + ")");
             }
         };
-        
-        // Toggle replies visibility on button click
+
         toggleRepliesBtn.setOnAction(e -> {
             boolean isVisible = repliesContainer.isVisible();
             repliesContainer.setVisible(!isVisible);
             repliesContainer.setManaged(!isVisible);
             updateToggleButton.run();
         });
-        
-        // Send reply and update toggle button
+
+        // Réponse affichée dans le fil du commentaire (saisie non vide)
         sendReplyBtn.setOnAction(e -> {
             String replyText = replyField.getText();
             if (replyText != null && !replyText.isBlank()) {
@@ -770,15 +792,14 @@ public class PostsFeedController {
 
                 repliesContainer.getChildren().add(replyItem);
                 replyField.clear();
-                
-                // Update toggle button after adding reply
+
                 updateToggleButton.run();
             } else {
                 new Alert(Alert.AlertType.WARNING, "La réponse ne peut pas être vide.").showAndWait();
             }
         });
 
-        // Toggle reply input visibility when Reply button clicked
+        // Afficher ou masquer le champ « Répondre » sous le commentaire
         replyBtn.setOnAction(e -> {
             boolean isVisible = replyInputRow.isVisible();
             replyInputRow.setVisible(!isVisible);
@@ -788,17 +809,18 @@ public class PostsFeedController {
             }
         });
 
-        // Assemble comment card
         commentCard.getChildren().addAll(contentLbl, actionsRow, repliesContainer, replyInputRow);
 
         return commentCard;
     }
 
+    /** Valide la saisie, persiste le commentaire racine (sans parent) et rafraîchit le fil. */
     private void submitComment(int postId, TextField field) {
         if (AppSession.getCurrentUser().isEmpty()) {
             new Alert(Alert.AlertType.INFORMATION, "Connectez-vous pour commenter.").showAndWait();
             return;
         }
+        // Texte non vide requis avant appel service
         String text = field.getText() != null ? field.getText().trim() : "";
         if (text.isEmpty()) {
             new Alert(Alert.AlertType.WARNING, "Le commentaire ne peut pas être vide.").showAndWait();
@@ -820,6 +842,7 @@ public class PostsFeedController {
         }
     }
 
+    /** Indique si le post est dans les signets de l’utilisateur. */
     private boolean isPostSaved(int userId, int postId) throws SQLException {
         return savedPostService.findByUserId(userId).stream()
                 .anyMatch(s -> s.getPostId() != null && s.getPostId() == postId);
@@ -830,9 +853,9 @@ public class PostsFeedController {
                 .anyMatch(l -> Objects.equals(l.getLikerId(), userId));
     }
 
+    /** Indique si l’utilisateur a liké ce commentaire. */
     private boolean isCommentLikedBy(int commentId, int userId) throws SQLException {
         try {
-            // Create instance to access comment likes
             services.comment.CommentLikeService commentLikeService = new services.comment.CommentLikeService();
             return commentLikeService.findByCommentId(commentId).stream()
                     .anyMatch(cl -> Objects.equals(cl.getUserId(), userId));
@@ -841,6 +864,7 @@ public class PostsFeedController {
         }
     }
 
+    /** Nombre de likes sur un commentaire. */
     private int getCommentLikeCount(int commentId) throws SQLException {
         try {
             services.comment.CommentLikeService commentLikeService = new services.comment.CommentLikeService();
@@ -871,6 +895,7 @@ public class PostsFeedController {
         return s.trim();
     }
 
+    /** Libellé « Publié … » ou « Modifié … » selon les dates du post. */
     private static String formatPostMeta(Post p) {
         java.time.LocalDateTime ref = p.getUpdatedAt() != null ? p.getUpdatedAt() : p.getCreatedAt();
         if (ref == null) {
@@ -880,6 +905,7 @@ public class PostsFeedController {
         return prefix + ref.format(DATE_FMT);
     }
 
+    /** Initiales pour l’avatar (2 lettres max, « ? » si aucun nom). */
     private static String initials(String firstName, String lastName) {
         String a = (firstName != null && !firstName.isBlank()) ? firstName.substring(0, 1).toUpperCase(Locale.FRENCH) : "";
         String b = (lastName != null && !lastName.isBlank()) ? lastName.substring(0, 1).toUpperCase(Locale.FRENCH) : "";
@@ -887,6 +913,7 @@ public class PostsFeedController {
         return s.isEmpty() ? "?" : s;
     }
 
+    /** Boîte d’erreur standard pour les échecs SQL. */
     private static void showError(String ctx, SQLException e) {
         new Alert(Alert.AlertType.ERROR, ctx + " : " + e.getMessage()).showAndWait();
     }
@@ -895,7 +922,6 @@ public class PostsFeedController {
      * Transform post card to edit mode: replace title label and body text flow with editable fields
      */
     private void enterEditMode(VBox card, Post post, Label titleLbl, TextFlow bodyFlow) throws SQLException {
-        // Create editable fields
         TextField titleField = new TextField(post.getTitle());
         titleField.getStyleClass().add("post-title");
         titleField.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
@@ -905,8 +931,7 @@ public class PostsFeedController {
         contentArea.setPrefRowCount(6);
         contentArea.setWrapText(true);
         contentArea.setMaxWidth(680);
-        
-        // Find and replace the title and body in the card
+
         int titleIndex = card.getChildren().indexOf(titleLbl);
         int bodyIndex = card.getChildren().indexOf(bodyFlow);
         
@@ -916,8 +941,7 @@ public class PostsFeedController {
         if (bodyIndex >= 0) {
             card.getChildren().set(bodyIndex, contentArea);
         }
-        
-        // Create Save and Cancel buttons
+
         Button saveBtn = new Button("Enregistrer");
         saveBtn.getStyleClass().add("btn-primary");
         saveBtn.setOnAction(e -> {
@@ -936,8 +960,7 @@ public class PostsFeedController {
         editActions.setAlignment(Pos.CENTER_LEFT);
         editActions.getChildren().addAll(saveBtn, cancelBtn);
         editActions.setPadding(new Insets(10, 0, 0, 0));
-        
-        // Insert action buttons after body
+
         if (bodyIndex >= 0) {
             card.getChildren().add(bodyIndex + 1, editActions);
         }
@@ -947,7 +970,6 @@ public class PostsFeedController {
      * Restore post card to normal view (cancel edit without saving)
      */
     private void exitEditMode(VBox card, TextField titleField, TextArea contentArea, Label titleLbl, TextFlow bodyFlow) {
-        // Simply refresh the entire feed to restore original state from database
         refreshFeed();
     }
 
@@ -957,16 +979,16 @@ public class PostsFeedController {
     private void savePost(VBox card, Post post, TextField titleField, TextArea contentArea, Label titleLbl, TextFlow bodyFlow) throws SQLException {
         String newTitle = titleField.getText() != null ? titleField.getText().trim() : "";
         String newContent = contentArea.getText() != null ? contentArea.getText().trim() : "";
-        
+
         if (newTitle.isEmpty()) {
             new Alert(Alert.AlertType.WARNING, "Le titre est obligatoire.").showAndWait();
             return;
         }
-        
+
         post.setTitle(newTitle);
         post.setContent(newContent.isEmpty() ? null : newContent);
         post.setUpdatedAt(java.time.LocalDateTime.now());
-        
+
         try {
             postService.update(post);
             refreshFeed();
@@ -988,7 +1010,7 @@ public class PostsFeedController {
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                // Mark post as HIDDEN instead of deleting from database
+                // Soft delete : statut masqué plutôt que suppression en base
                 post.setStatus(PostStatus.HIDDEN);
                 post.setUpdatedAt(java.time.LocalDateTime.now());
                 postService.update(post);
