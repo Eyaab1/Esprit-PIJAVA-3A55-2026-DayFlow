@@ -3,6 +3,8 @@ package controllers.coach;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -25,11 +27,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 public class CoachRequestsController implements Initializable {
 
@@ -68,7 +72,8 @@ public class CoachRequestsController implements Initializable {
 
     // Données
     private final ObservableList<CoachingRequest> requestsList;
-    private final ObservableList<CoachingRequest> filteredList;
+    private final FilteredList<CoachingRequest> filteredList;
+    private final Map<Integer, String> searchableTextByRequestId = new HashMap<>();
     private int currentCoachId;
 
     public CoachRequestsController() {
@@ -77,7 +82,7 @@ public class CoachRequestsController implements Initializable {
         this.sessionService = new SessionService();
         this.userService = new UserService();
         this.requestsList = FXCollections.observableArrayList();
-        this.filteredList = FXCollections.observableArrayList();
+        this.filteredList = new FilteredList<>(requestsList, r -> true);
     }
 
     @Override
@@ -114,6 +119,18 @@ public class CoachRequestsController implements Initializable {
         // Recherche en temps réel
         if (searchField != null) {
             searchField.textProperty().addListener((observable, oldValue, newValue) -> applyFilters());
+        }
+        if (dateFromPicker != null) {
+            dateFromPicker.valueProperty().addListener((obs, oldVal, newVal) -> applyFilters());
+        }
+        if (dateToPicker != null) {
+            dateToPicker.valueProperty().addListener((obs, oldVal, newVal) -> applyFilters());
+        }
+        if (statusFilterCombo != null) {
+            statusFilterCombo.valueProperty().addListener((obs, oldVal, newVal) -> applyFilters());
+        }
+        if (priorityFilterCombo != null) {
+            priorityFilterCombo.valueProperty().addListener((obs, oldVal, newVal) -> applyFilters());
         }
     }
 
@@ -226,7 +243,9 @@ public class CoachRequestsController implements Initializable {
             }
         });
 
-        requestsTable.setItems(filteredList);
+        SortedList<CoachingRequest> sortedList = new SortedList<>(filteredList);
+        sortedList.comparatorProperty().bind(requestsTable.comparatorProperty());
+        requestsTable.setItems(sortedList);
     }
 
     private void setupButtons() {
@@ -245,6 +264,7 @@ public class CoachRequestsController implements Initializable {
             List<CoachingRequest> requests = requestService.getRequestsByCoach(currentCoachId);
             requestsList.clear();
             requestsList.addAll(requests);
+            buildSearchCache(requests);
             applyFilters();
         } catch (SQLException e) {
             showError("Erreur lors du chargement des demandes", e.getMessage());
@@ -252,84 +272,88 @@ public class CoachRequestsController implements Initializable {
     }
 
     private void applyFilters() {
-        String statusValue = statusFilterCombo.getValue();
+        String statusValue = statusFilterCombo != null ? statusFilterCombo.getValue() : "Tous";
         String priorityValue = priorityFilterCombo != null ? priorityFilterCombo.getValue() : "Toutes";
-        String searchText = searchField != null ? searchField.getText().toLowerCase().trim() : "";
+        String searchText = searchField != null && searchField.getText() != null
+                ? searchField.getText().toLowerCase().trim()
+                : "";
+        LocalDate fromDate = dateFromPicker != null ? dateFromPicker.getValue() : null;
+        LocalDate toDate = dateToPicker != null ? dateToPicker.getValue() : null;
 
-        List<CoachingRequest> filtered = requestsList.stream()
-                .filter(request -> {
-                    // Filtre recherche
-                    if (!searchText.isEmpty()) {
-                        try {
-                            Optional<User> user = userService.findById(request.getUserId());
-                            if (user.isPresent()) {
-                                String fullName = (user.get().getFirstName() + " " + user.get().getLastName()).toLowerCase();
-                                String email = user.get().getEmail() != null ? user.get().getEmail().toLowerCase() : "";
-                                String message = request.getMessage().toLowerCase();
-                                
-                                if (!fullName.contains(searchText) && !email.contains(searchText) && !message.contains(searchText)) {
-                                    return false;
-                                }
-                            }
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    
-                    // Filtre statut
-                    if (statusValue != null && !statusValue.equals("Tous")) {
-                        String status = switch (statusValue) {
-                            case "En attente" -> CoachingRequest.STATUS_PENDING;
-                            case "Acceptée" -> CoachingRequest.STATUS_ACCEPTED;
-                            case "Refusée" -> CoachingRequest.STATUS_DECLINED;
-                            default -> null;
-                        };
-                        if (status != null && !request.getStatus().equals(status)) {
-                            return false;
-                        }
-                    }
-                    
-                    // Filtre priorité
-                    if (priorityValue != null && !priorityValue.equals("Toutes")) {
-                        String priority = switch (priorityValue) {
-                            case "Normal" -> CoachingRequest.PRIORITY_NORMAL;
-                            case "Moyen" -> CoachingRequest.PRIORITY_MEDIUM;
-                            case "Urgent" -> CoachingRequest.PRIORITY_URGENT;
-                            default -> null;
-                        };
-                        if (priority != null && !request.getPriority().equals(priority)) {
-                            return false;
-                        }
-                    }
-                    
-                    // Filtre date
-                    if (dateFromPicker != null && dateFromPicker.getValue() != null) {
-                        java.time.LocalDate fromDate = dateFromPicker.getValue();
-                        java.time.LocalDate requestDate = new java.sql.Date(request.getCreatedAt().getTime()).toLocalDate();
-                        if (requestDate.isBefore(fromDate)) {
-                            return false;
-                        }
-                    }
-                    
-                    if (dateToPicker != null && dateToPicker.getValue() != null) {
-                        java.time.LocalDate toDate = dateToPicker.getValue();
-                        java.time.LocalDate requestDate = new java.sql.Date(request.getCreatedAt().getTime()).toLocalDate();
-                        if (requestDate.isAfter(toDate)) {
-                            return false;
-                        }
-                    }
-                    
-                    return true;
-                })
-                .collect(Collectors.toList());
-
-        filteredList.clear();
-        filteredList.addAll(filtered);
+        filteredList.setPredicate(request -> matchesSearch(request, searchText)
+                && matchesStatus(request, statusValue)
+                && matchesPriority(request, priorityValue)
+                && matchesDateRange(request, fromDate, toDate));
         
         // Mettre à jour le label de pagination
         if (paginationLabel != null) {
-            paginationLabel.setText("Affichage de " + filtered.size() + " demande(s)");
+            paginationLabel.setText("Affichage de " + filteredList.size() + " demande(s)");
         }
+    }
+
+    private void buildSearchCache(List<CoachingRequest> requests) {
+        searchableTextByRequestId.clear();
+        for (CoachingRequest request : requests) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(request.getMessage() != null ? request.getMessage() : "").append(' ');
+            try {
+                Optional<User> user = userService.findById(request.getUserId());
+                if (user.isPresent()) {
+                    User u = user.get();
+                    sb.append(u.getFirstName() != null ? u.getFirstName() : "").append(' ');
+                    sb.append(u.getLastName() != null ? u.getLastName() : "").append(' ');
+                    sb.append(u.getEmail() != null ? u.getEmail() : "");
+                }
+            } catch (SQLException ignored) {
+                // On garde juste le message en cache si la jointure échoue.
+            }
+            searchableTextByRequestId.put(request.getId(), sb.toString().toLowerCase());
+        }
+    }
+
+    private boolean matchesSearch(CoachingRequest request, String searchText) {
+        if (searchText == null || searchText.isBlank()) {
+            return true;
+        }
+        String haystack = searchableTextByRequestId.getOrDefault(request.getId(), "");
+        return haystack.contains(searchText);
+    }
+
+    private boolean matchesStatus(CoachingRequest request, String statusValue) {
+        if (statusValue == null || "Tous".equals(statusValue)) {
+            return true;
+        }
+        String mapped = switch (statusValue) {
+            case "En attente" -> CoachingRequest.STATUS_PENDING;
+            case "Acceptée" -> CoachingRequest.STATUS_ACCEPTED;
+            case "Refusée" -> CoachingRequest.STATUS_DECLINED;
+            default -> statusValue;
+        };
+        return mapped.equals(request.getStatus());
+    }
+
+    private boolean matchesPriority(CoachingRequest request, String priorityValue) {
+        if (priorityValue == null || "Toutes".equals(priorityValue)) {
+            return true;
+        }
+        String mapped = switch (priorityValue) {
+            case "Normal" -> CoachingRequest.PRIORITY_NORMAL;
+            case "Moyen" -> CoachingRequest.PRIORITY_MEDIUM;
+            case "Urgent" -> CoachingRequest.PRIORITY_URGENT;
+            default -> priorityValue;
+        };
+        return mapped.equals(request.getPriority());
+    }
+
+    private boolean matchesDateRange(CoachingRequest request, LocalDate fromDate, LocalDate toDate) {
+        if (request.getCreatedAt() == null) {
+            return fromDate == null && toDate == null;
+        }
+        LocalDate createdDate = new java.sql.Date(request.getCreatedAt().getTime()).toLocalDate();
+        if (fromDate != null && createdDate.isBefore(fromDate)) {
+            return false;
+        }
+        return toDate == null || !createdDate.isAfter(toDate);
     }
 
     private void updateStatistics() {

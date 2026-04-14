@@ -101,6 +101,11 @@ public class EditSessionController implements Initializable {
                 return;
             }
 
+            if (sessionDatePicker.getValue().isBefore(LocalDate.now())) {
+                showWarning("La date ne peut pas être dans le passé.");
+                return;
+            }
+
             if (sessionTimeField.getText() == null || sessionTimeField.getText().trim().isEmpty()) {
                 showWarning("Veuillez saisir une heure");
                 return;
@@ -119,19 +124,34 @@ public class EditSessionController implements Initializable {
             }
 
             LocalDateTime dateTime = LocalDateTime.of(date, time);
+            if (dateTime.isBefore(LocalDateTime.now())) {
+                showWarning("Le créneau (date + heure) ne doit pas être dans le passé.");
+                return;
+            }
             session.setScheduledAt(Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant()));
 
-            if (durationCombo.getValue() != null) {
-                session.setDuration(durationCombo.getValue());
+            if (durationCombo.getValue() == null || durationCombo.getValue() <= 0) {
+                showWarning("La durée doit être supérieure à 0.");
+                return;
             }
+            session.setDuration(durationCombo.getValue());
 
-            if (objectiveField.getText() != null && !objectiveField.getText().trim().isEmpty()) {
-                session.setObjective(objectiveField.getText().trim());
+            if (objectiveField.getText() == null || objectiveField.getText().trim().isEmpty()) {
+                showWarning("L'objectif est obligatoire.");
+                return;
             }
+            session.setObjective(objectiveField.getText().trim());
 
-            if (priceField.getText() != null && !priceField.getText().trim().isEmpty()) {
-                session.setPrice(Double.parseDouble(priceField.getText().trim()));
+            if (priceField.getText() == null || priceField.getText().trim().isEmpty()) {
+                showWarning("Le prix est obligatoire.");
+                return;
             }
+            double price = Double.parseDouble(priceField.getText().trim());
+            if (price <= 0) {
+                showWarning("Le prix doit être supérieur à 0.");
+                return;
+            }
+            session.setPrice(price);
 
             if (statusCombo.getValue() != null) {
                 session.setStatus(statusCombo.getValue());

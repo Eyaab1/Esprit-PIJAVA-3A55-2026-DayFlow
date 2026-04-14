@@ -103,6 +103,11 @@
             <ComboBox fx:id="priorityFilter" promptText="Priorité" 
                       style="-fx-background-color: #f8f9fa; -fx-border-color: #dfe6e9; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10;">
             </ComboBox>
+
+            <DatePicker fx:id="dateFromFilter" promptText="Du"
+                        style="-fx-background-color: #f8f9fa; -fx-border-color: #dfe6e9; -fx-border-radius: 8; -fx-background-radius: 8;"/>
+            <DatePicker fx:id="dateToFilter" promptText="Au"
+                        style="-fx-background-color: #f8f9fa; -fx-border-color: #dfe6e9; -fx-border-radius: 8; -fx-background-radius: 8;"/>
             
             <Button fx:id="filterBtn" text="Filtrer" 
                     style="-fx-background-color: #6c5ce7; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 20 10 20; -fx-cursor: hand;">

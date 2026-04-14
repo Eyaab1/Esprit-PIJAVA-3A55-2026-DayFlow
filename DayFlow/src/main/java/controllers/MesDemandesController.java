@@ -4,6 +4,8 @@ import controllers.navigation.NavigationManager;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -23,10 +25,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 public class MesDemandesController implements Initializable {
 
@@ -40,6 +44,8 @@ public class MesDemandesController implements Initializable {
     @FXML private TextField searchField;
     @FXML private ComboBox<String> statusFilter;
     @FXML private ComboBox<String> priorityFilter;
+    @FXML private DatePicker dateFromFilter;
+    @FXML private DatePicker dateToFilter;
     @FXML private Button filterBtn;
 
     // TableView
@@ -66,7 +72,8 @@ public class MesDemandesController implements Initializable {
 
     // Données
     private final ObservableList<CoachingRequest> requestsList;
-    private final ObservableList<CoachingRequest> filteredList;
+    private final FilteredList<CoachingRequest> filteredList;
+    private final Map<Integer, String> searchableTextByRequestId = new HashMap<>();
     private CoachingRequest selectedRequest;
     private int currentUserId = 1; // TODO: Récupérer l'utilisateur connecté
 
@@ -74,7 +81,7 @@ public class MesDemandesController implements Initializable {
         this.requestService = new CoachingRequestService();
         this.userService = new UserService();
         this.requestsList = FXCollections.observableArrayList();
-        this.filteredList = FXCollections.observableArrayList();
+        this.filteredList = new FilteredList<>(requestsList, r -> true);
     }
 
     @Override
@@ -110,6 +117,14 @@ public class MesDemandesController implements Initializable {
 
         // Listener pour la recherche en temps réel
         searchField.textProperty().addListener((observable, oldValue, newValue) -> applyFilters());
+        statusFilter.valueProperty().addListener((obs, oldVal, newVal) -> applyFilters());
+        priorityFilter.valueProperty().addListener((obs, oldVal, newVal) -> applyFilters());
+        if (dateFromFilter != null) {
+            dateFromFilter.valueProperty().addListener((obs, oldVal, newVal) -> applyFilters());
+        }
+        if (dateToFilter != null) {
+            dateToFilter.valueProperty().addListener((obs, oldVal, newVal) -> applyFilters());
+        }
     }
 
     private void setupTableView() {
@@ -172,7 +187,9 @@ public class MesDemandesController implements Initializable {
         });
 
         // Lier les données
-        tableRequests.setItems(filteredList);
+        SortedList<CoachingRequest> sortedList = new SortedList<>(filteredList);
+        sortedList.comparatorProperty().bind(tableRequests.comparatorProperty());
+        tableRequests.setItems(sortedList);
 
         // Gérer la sélection
         tableRequests.getSelectionModel().selectedItemProperty().addListener(
@@ -206,6 +223,7 @@ public class MesDemandesController implements Initializable {
             List<CoachingRequest> requests = requestService.getRequestsByUser(currentUser);
             requestsList.clear();
             requestsList.addAll(requests);
+            buildSearchCache(requests);
             applyFilters();
         } catch (SQLException e) {
             showError("Erreur lors du chargement des demandes", e.getMessage());
@@ -213,40 +231,68 @@ public class MesDemandesController implements Initializable {
     }
 
     private void applyFilters() {
-        String searchText = searchField.getText().toLowerCase().trim();
+        String searchText = searchField.getText() != null ? searchField.getText().toLowerCase().trim() : "";
         String statusValue = statusFilter.getValue();
         String priorityValue = priorityFilter.getValue();
+        LocalDate from = dateFromFilter != null ? dateFromFilter.getValue() : null;
+        LocalDate to = dateToFilter != null ? dateToFilter.getValue() : null;
 
-        List<CoachingRequest> filtered = requestsList.stream()
-                .filter(request -> {
-                    // Filtre recherche
-                    if (!searchText.isEmpty()) {
-                        String message = request.getMessage().toLowerCase();
-                        if (!message.contains(searchText)) {
-                            return false;
-                        }
-                    }
+        filteredList.setPredicate(request -> matchesSearch(request, searchText)
+                && matchesStatus(request, statusValue)
+                && matchesPriority(request, priorityValue)
+                && matchesDateRange(request, from, to));
+    }
 
-                    // Filtre statut
-                    if (statusValue != null && !statusValue.equals("Tous")) {
-                        if (!request.getStatus().equals(statusValue)) {
-                            return false;
-                        }
-                    }
+    private void buildSearchCache(List<CoachingRequest> requests) {
+        searchableTextByRequestId.clear();
+        for (CoachingRequest request : requests) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(request.getMessage() != null ? request.getMessage() : "").append(' ');
+            try {
+                Optional<User> coach = userService.findById(request.getCoachId());
+                if (coach.isPresent()) {
+                    User c = coach.get();
+                    sb.append(c.getFirstName() != null ? c.getFirstName() : "").append(' ');
+                    sb.append(c.getLastName() != null ? c.getLastName() : "").append(' ');
+                    sb.append(c.getEmail() != null ? c.getEmail() : "");
+                }
+            } catch (SQLException ignored) {
+                // On garde juste le message en cas d'erreur sur la jointure utilisateur.
+            }
+            searchableTextByRequestId.put(request.getId(), sb.toString().toLowerCase());
+        }
+    }
 
-                    // Filtre priorité
-                    if (priorityValue != null && !priorityValue.equals("Toutes")) {
-                        if (!request.getPriority().equals(priorityValue)) {
-                            return false;
-                        }
-                    }
+    private boolean matchesSearch(CoachingRequest request, String searchText) {
+        if (searchText == null || searchText.isBlank()) {
+            return true;
+        }
+        return searchableTextByRequestId.getOrDefault(request.getId(), "").contains(searchText);
+    }
 
-                    return true;
-                })
-                .collect(Collectors.toList());
+    private boolean matchesStatus(CoachingRequest request, String statusValue) {
+        if (statusValue == null || "Tous".equals(statusValue)) {
+            return true;
+        }
+        return statusValue.equals(request.getStatus());
+    }
 
-        filteredList.clear();
-        filteredList.addAll(filtered);
+    private boolean matchesPriority(CoachingRequest request, String priorityValue) {
+        if (priorityValue == null || "Toutes".equals(priorityValue)) {
+            return true;
+        }
+        return priorityValue.equals(request.getPriority());
+    }
+
+    private boolean matchesDateRange(CoachingRequest request, LocalDate from, LocalDate to) {
+        if (request.getCreatedAt() == null) {
+            return from == null && to == null;
+        }
+        LocalDate createdDate = new java.sql.Date(request.getCreatedAt().getTime()).toLocalDate();
+        if (from != null && createdDate.isBefore(from)) {
+            return false;
+        }
+        return to == null || !createdDate.isAfter(to);
     }
 
     private void updateStatistics() {
