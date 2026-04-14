@@ -21,9 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-/**
- * Liste des réclamations de l'utilisateur connecté.
- */
+
 public class MesReclamationsController {
 
     private static final DateTimeFormatter DATE_FMT =
