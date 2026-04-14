@@ -1,6 +1,7 @@
 package services.coaching_session_module;
 
 import model.coaching_session.CoachingRequest;
+import model.user.User;
 import services.CRUD;
 import utils.DbConnexion;
 
@@ -132,6 +133,34 @@ public class CoachingRequestService implements CRUD<CoachingRequest, Integer> {
 
     public List<CoachingRequest> findByUserId(int userId) throws SQLException {
         return findByColumn("user_id", userId);
+    }
+
+    public CoachingRequest createRequest(User coach, User user, String message, String status) throws SQLException {
+        if (coach == null || coach.getId() == null) {
+            throw new IllegalArgumentException("Coach invalide");
+        }
+        if (user == null || user.getId() == null) {
+            throw new IllegalArgumentException("Utilisateur invalide");
+        }
+
+        String safeMessage = (message == null || message.trim().isEmpty())
+                ? "Demande sans créneau."
+                : message.trim();
+
+        CoachingRequest request = new CoachingRequest();
+        request.setCoachId(coach.getId());
+        request.setUserId(user.getId());
+        request.setMessage(safeMessage);
+        request.setStatus((status == null || status.isBlank()) ? CoachingRequest.STATUS_PENDING : status);
+        insert(request);
+        return request;
+    }
+
+    public List<CoachingRequest> getRequestsByUser(User user) throws SQLException {
+        if (user == null || user.getId() == null) {
+            throw new IllegalArgumentException("Utilisateur invalide");
+        }
+        return findByUserId(user.getId());
     }
 
     public List<CoachingRequest> findByCoachId(int coachId) throws SQLException {
@@ -309,4 +338,24 @@ public class CoachingRequestService implements CRUD<CoachingRequest, Integer> {
     private static Timestamp toTimestamp(Date d) {
         return d == null ? null : new Timestamp(d.getTime());
     }
+
+    /**
+     * Récupère toutes les demandes pour un coach spécifique.
+     */
+    public List<CoachingRequest> getRequestsByCoach(int coachId) throws SQLException {
+        return findByCoachId(coachId);
+    }
+
+    /**
+     * Met à jour le statut d'une demande.
+     */
+    public void updateStatus(int requestId, String newStatus) throws SQLException {
+        String sql = "UPDATE coaching_request SET status = ?, responded_at = CURRENT_TIMESTAMP WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setString(1, newStatus);
+            ps.setInt(2, requestId);
+            ps.executeUpdate();
+        }
+    }
 }
+

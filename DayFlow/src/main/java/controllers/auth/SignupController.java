@@ -64,15 +64,8 @@ public class SignupController {
                     passwordField.getText(),
                     role
             );
-            String extra = "";
-            if (usernameField.getText() != null && !usernameField.getText().isBlank()) {
-                extra += "\n(Pseudo : non enregistré en base pour l'instant.)";
-            }
-            if (birthDatePicker.getValue() != null) {
-                extra += "\n(Date de naissance : non enregistrée en base pour l'instant.)";
-            }
             new Alert(Alert.AlertType.INFORMATION,
-                    "Compte créé, id = " + created.getId() + ". Vous pouvez vous connecter." + extra).showAndWait();
+                    "Compte créé, id = " + created.getId() + ". Vous pouvez vous connecter.").showAndWait();
             navigateToLogin();
         } catch (IllegalArgumentException ex) {
             new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();

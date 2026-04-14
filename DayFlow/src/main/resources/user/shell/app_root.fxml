@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ShellController">
+<BorderPane fx:id="shellRoot" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ShellController">
    <top>
       <VBox fx:id="navbarContainer" managed="false" visible="false">
          <children>
@@ -13,6 +12,6 @@
       </VBox>
    </top>
    <center>
-      <StackPane fx:id="contentPane" BorderPane.alignment="CENTER" />
+      <VBox BorderPane.alignment="CENTER" />
    </center>
 </BorderPane>

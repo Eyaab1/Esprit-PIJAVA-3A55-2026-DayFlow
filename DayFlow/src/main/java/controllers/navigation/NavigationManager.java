@@ -2,10 +2,9 @@ package controllers.navigation;
 
 import controllers.ShellController;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -19,7 +18,7 @@ import java.util.Objects;
 public final class NavigationManager {
 
     private static Stage primaryStage;
-    private static StackPane contentHolder;
+    private static BorderPane shellRoot;
     private static ShellController shellController;
 
     private NavigationManager() {
@@ -28,14 +27,18 @@ public final class NavigationManager {
     public static void init(Stage stage, ShellController shell) {
         primaryStage = Objects.requireNonNull(stage);
         shellController = Objects.requireNonNull(shell);
-        contentHolder = Objects.requireNonNull(shell.getContentPane());
+        shellRoot = Objects.requireNonNull(shell.getShellRoot());
     }
 
     public static boolean isInitialized() {
-        return contentHolder != null && primaryStage != null;
+        return shellRoot != null && primaryStage != null;
     }
 
     public static void show(String resourcePath, String title) throws IOException {
+        showAndGetController(resourcePath, title);
+    }
+
+    public static <T> T showAndGetController(String resourcePath, String title) throws IOException {
         if (!isInitialized()) {
             throw new IllegalStateException("NavigationManager.init() doit être appelé au démarrage.");
         }
@@ -49,12 +52,12 @@ public final class NavigationManager {
             r.setMaxWidth(Double.MAX_VALUE);
             r.setMaxHeight(Double.MAX_VALUE);
         }
-        StackPane.setAlignment(view, Pos.TOP_LEFT);
-        contentHolder.getChildren().setAll(view);
+        shellRoot.setCenter(view);
         if (title != null && !title.isBlank()) {
             primaryStage.setTitle(title);
         }
         applyNavbarVisibilityForPath(resourcePath);
+        return loader.getController();
     }
 
     private static void applyNavbarVisibilityForPath(String resourcePath) {
