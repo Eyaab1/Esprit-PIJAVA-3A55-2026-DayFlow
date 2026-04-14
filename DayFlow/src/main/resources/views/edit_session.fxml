@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.coach.EditSessionController"
+            fitToWidth="true" style="-fx-background-color: #f5f7fb; -fx-background: #f5f7fb;">
+    <content>
+    <VBox spacing="24" alignment="TOP_CENTER" style="-fx-background-color: #f5f7fb;">
+        <padding>
+            <Insets top="28" right="30" bottom="32" left="30"/>
+        </padding>
+
+        <!-- En-tête -->
+        <VBox spacing="8" alignment="CENTER" maxWidth="900">
+            <Label text="Modifier la session" 
+                   style="-fx-font-size: 44px; -fx-font-weight: bold; -fx-text-fill: #2d3436;">
+                <font>
+                    <Font name="System Bold" size="44"/>
+                </font>
+            </Label>
+            <Label fx:id="sessionInfoLabel" text="Session #..." 
+                   style="-fx-font-size: 16px; -fx-text-fill: #64748b;">
+                <font>
+                    <Font size="16"/>
+                </font>
+            </Label>
+        </VBox>
+
+        <!-- Formulaire -->
+        <VBox spacing="18" maxWidth="860" prefWidth="860"
+              style="-fx-background-color: white; -fx-background-radius: 14; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 16, 0, 0, 3);">
+            <padding>
+                <Insets top="28" right="28" bottom="24" left="28"/>
+            </padding>
+        
+        <!-- Date -->
+        <VBox spacing="8">
+            <Label text="Date de la session" 
+                   style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #34495e;">
+                <font>
+                    <Font name="System Bold" size="14"/>
+                </font>
+            </Label>
+            <DatePicker fx:id="sessionDatePicker" promptText="Sélectionner une date" 
+                        maxWidth="Infinity"
+                        style="-fx-background-color: #f8fafc; -fx-border-color: #dbe2ea; -fx-border-radius: 8; -fx-background-radius: 8;">
+            </DatePicker>
+        </VBox>
+        
+        <!-- Heure -->
+        <VBox spacing="8">
+            <Label text="Heure de début" 
+                   style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #34495e;">
+                <font>
+                    <Font name="System Bold" size="14"/>
+                </font>
+            </Label>
+            <TextField fx:id="sessionTimeField" promptText="Ex: 14:30" 
+                       style="-fx-border-color: #dbe2ea; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10; -fx-font-size: 13px;">
+            </TextField>
+        </VBox>
+        
+        <!-- Durée -->
+        <VBox spacing="8">
+            <Label text="Durée (en minutes)" 
+                   style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #34495e;">
+                <font>
+                    <Font name="System Bold" size="14"/>
+                </font>
+            </Label>
+            <ComboBox fx:id="durationCombo" promptText="Sélectionner..." 
+                      maxWidth="Infinity"
+                      style="-fx-background-color: #f8fafc; -fx-border-color: #dbe2ea; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10;">
+            </ComboBox>
+        </VBox>
+        
+        <!-- Objectif -->
+        <VBox spacing="8">
+            <Label text="Objectif de la session" 
+                   style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #34495e;">
+                <font>
+                    <Font name="System Bold" size="14"/>
+                </font>
+            </Label>
+            <TextField fx:id="objectiveField" promptText="Ex: Améliorer la confiance en soi" 
+                       style="-fx-border-color: #dbe2ea; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10; -fx-font-size: 13px;">
+            </TextField>
+        </VBox>
+        
+        <!-- Prix -->
+        <VBox spacing="8">
+            <Label text="Prix de la session (€)" 
+                   style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #34495e;">
+                <font>
+                    <Font name="System Bold" size="14"/>
+                </font>
+            </Label>
+            <TextField fx:id="priceField" promptText="Ex: 50" 
+                       style="-fx-border-color: #dbe2ea; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10; -fx-font-size: 13px;">
+            </TextField>
+        </VBox>
+        
+        <!-- Statut -->
+        <VBox spacing="8">
+            <Label text="Statut" 
+                   style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #34495e;">
+                <font>
+                    <Font name="System Bold" size="14"/>
+                </font>
+            </Label>
+            <ComboBox fx:id="statusCombo" promptText="Sélectionner..." 
+                      maxWidth="Infinity"
+                      style="-fx-background-color: #f8fafc; -fx-border-color: #dbe2ea; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10;">
+            </ComboBox>
+        </VBox>
+        
+        <!-- Boutons -->
+        <HBox spacing="12" alignment="CENTER_RIGHT">
+            <Button fx:id="cancelBtn" text="Annuler" 
+                    style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12 22 12 22; -fx-cursor: hand;">
+                <font>
+                    <Font name="System Bold" size="14"/>
+                </font>
+            </Button>
+            <Button fx:id="saveBtn" text="Enregistrer" 
+                    style="-fx-background-color: #4f46e5; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12 24 12 24; -fx-cursor: hand;">
+                <font>
+                    <Font name="System Bold" size="14"/>
+                </font>
+            </Button>
+        </HBox>
+        
+    </VBox>
+    </VBox>
+    </content>
+</ScrollPane>

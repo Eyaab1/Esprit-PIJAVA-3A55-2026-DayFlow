@@ -16,8 +16,8 @@ import java.util.List;
 public class SessionService implements CRUD<Session, Integer> {
 
     private static final String COLUMNS = """
-            id, coaching_request_id, status, proposed_time_by_user, proposed_time_by_coach,
-            scheduled_at, duration, priority, objective, created_at, updated_at, price, payment_status
+            s.id, s.coaching_request_id, s.status, s.proposed_time_by_user, s.proposed_time_by_coach,
+            s.scheduled_at, s.duration, s.priority, s.objective, s.created_at, s.updated_at, s.price, s.payment_status
             """;
 
     @Override
@@ -139,7 +139,7 @@ public class SessionService implements CRUD<Session, Integer> {
     }
 
     public Session findById(int id) throws SQLException {
-        String sql = "SELECT " + COLUMNS + " FROM session WHERE id = ?";
+        String sql = "SELECT " + COLUMNS + " FROM session s WHERE s.id = ?";
         Connection cnx = DbConnexion.getConnection();
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -153,7 +153,7 @@ public class SessionService implements CRUD<Session, Integer> {
     }
 
     public Session findByCoachingRequestId(int coachingRequestId) throws SQLException {
-        String sql = "SELECT " + COLUMNS + " FROM session WHERE coaching_request_id = ?";
+        String sql = "SELECT " + COLUMNS + " FROM session s WHERE s.coaching_request_id = ?";
         Connection cnx = DbConnexion.getConnection();
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, coachingRequestId);
@@ -252,5 +252,111 @@ public class SessionService implements CRUD<Session, Integer> {
 
     private static Timestamp toTimestamp(Date d) {
         return d == null ? null : new Timestamp(d.getTime());
+    }
+
+    /**
+     * Récupère toutes les sessions d'un coach spécifique.
+     */
+    public List<Session> getSessionsByCoach(int coachId) throws SQLException {
+        System.out.println("[SessionService] getSessionsByCoach() coachId=" + coachId);
+        String sql = "SELECT " + COLUMNS + """
+                 FROM session s
+                INNER JOIN coaching_request cr ON cr.id = s.coaching_request_id
+                WHERE cr.coach_id = ?
+                ORDER BY s.scheduled_at DESC NULLS LAST, s.updated_at DESC
+                """;
+        List<Session> list = new ArrayList<>();
+        Connection cnx = DbConnexion.getConnection();
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, coachId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
+            }
+        }
+        System.out.println("[SessionService] sessions found for coachId=" + coachId + " -> " + list.size());
+        if (list.isEmpty()) {
+            debugRawSessionsForCoach(coachId);
+        }
+        return list;
+    }
+
+    /**
+     * Debug SQL manuel quand la liste est vide, pour vérifier les données brutes.
+     */
+    private void debugRawSessionsForCoach(int coachId) {
+        String sql = """
+                SELECT s.id, s.coaching_request_id, s.status, s.scheduled_at, s.duration, s.objective
+                FROM session s
+                INNER JOIN coaching_request cr ON cr.id = s.coaching_request_id
+                WHERE cr.coach_id = ?
+                ORDER BY s.id DESC
+                """;
+        try {
+            Connection cnx = DbConnexion.getConnection();
+            try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+                ps.setInt(1, coachId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    int rows = 0;
+                    while (rs.next()) {
+                        rows++;
+                        System.out.println("[SessionService][debug] row#" + rows
+                                + " sessionId=" + rs.getInt("id")
+                                + ", requestId=" + rs.getInt("coaching_request_id")
+                                + ", status=" + rs.getString("status")
+                                + ", scheduledAt=" + rs.getTimestamp("scheduled_at")
+                                + ", duration=" + rs.getInt("duration"));
+                    }
+                    System.out.println("[SessionService][debug] raw rows for coachId=" + coachId + " -> " + rows);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("[SessionService][debug] erreur SQL debug coachId=" + coachId + " : " + e.getMessage());
+        }
+    }
+
+    /**
+     * Récupère toutes les sessions d'un utilisateur spécifique.
+     */
+    public List<Session> getSessionsByUser(int userId) throws SQLException {
+        String sql = "SELECT " + COLUMNS + """
+                 FROM session s
+                INNER JOIN coaching_request cr ON cr.id = s.coaching_request_id
+                WHERE cr.user_id = ?
+                ORDER BY s.scheduled_at DESC NULLS LAST, s.updated_at DESC
+                """;
+        List<Session> list = new ArrayList<>();
+        Connection cnx = DbConnexion.getConnection();
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
+     * Ajoute une nouvelle session (alias pour create).
+     */
+    public void addSession(Session session) throws SQLException {
+        create(session);
+    }
+
+    /**
+     * Met à jour une session existante (alias pour update).
+     */
+    public void updateSession(Session session) throws SQLException {
+        update(session);
+    }
+
+    /**
+     * Supprime une session (alias pour delete).
+     */
+    public void deleteSession(int sessionId) throws SQLException {
+        delete(sessionId);
     }
 }

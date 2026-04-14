@@ -10,6 +10,7 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -31,7 +32,7 @@
                         <Label styleClass="coach-hero-sub" text="Gérez les demandes reçues et planifiez vos sessions." />
                      </children>
                   </VBox>
-                  <HBox alignment="CENTER" spacing="16.0" styleClass="coach-stats-row">
+                  <FlowPane alignment="CENTER_LEFT" hgap="16.0" vgap="16.0" prefWrapLength="980.0" styleClass="coach-stats-row">
                      <children>
                         <VBox alignment="TOP_LEFT" spacing="8.0" styleClass="coach-stat-card">
                            <children>
@@ -55,7 +56,7 @@
                            </children>
                         </VBox>
                      </children>
-                  </HBox>
+                  </FlowPane>
                   <VBox styleClass="coach-filters-wrap">
                      <children>
                         <VBox spacing="14.0" styleClass="coach-filters-card">
@@ -107,7 +108,7 @@
                            </children>
                         </HBox>
                         <VBox fx:id="pendingBox" spacing="12.0" />
-                        <Label fx:id="pendingEmptyLabel" styleClass="coach-empty" text="Aucune demande en attente (selon filtres)." visible="false" />
+                        <Label fx:id="pendingEmptyLabel" styleClass="coach-empty" text="Aucune demande." visible="false" />
                      </children>
                   </VBox>
                   <Separator />
@@ -115,12 +116,26 @@
                      <children>
                         <HBox alignment="CENTER_LEFT" spacing="8.0">
                            <children>
-                              <Label styleClass="coach-section-title" text="Toutes les demandes" />
-                              <Label style="-fx-text-fill: #6366f1;" text="➜" />
+                              <Label styleClass="coach-section-title" text="Demandes acceptées" />
+                              <Label style="-fx-text-fill: #16a34a;" text="●" />
                            </children>
                         </HBox>
                         <VBox fx:id="allRequestsBox" spacing="10.0" />
-                        <Label fx:id="allEmptyLabel" styleClass="coach-empty" text="Aucune autre demande." visible="false" />
+                        <Label fx:id="allEmptyLabel" styleClass="coach-empty" text="Aucune demande acceptée." visible="false" />
+                     </children>
+                  </VBox>
+                  <Separator />
+                  <VBox spacing="12.0" styleClass="coach-section">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <children>
+                              <Label styleClass="coach-section-title" text="Sessions" />
+                              <Label style="-fx-text-fill: #0ea5e9;" text="●" />
+                              <Hyperlink onAction="#onGoToSessions" styleClass="coach-back-link" text="Voir tout" />
+                           </children>
+                        </HBox>
+                        <VBox fx:id="sessionsPreviewBox" spacing="10.0" />
+                        <Label fx:id="sessionsEmptyLabel" styleClass="coach-empty" text="Aucune session pour le moment." visible="false" />
                      </children>
                   </VBox>
                </children>

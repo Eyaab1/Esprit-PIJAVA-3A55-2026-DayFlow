@@ -30,7 +30,7 @@
             <Hyperlink onAction="#onCalendrier" styleClass="nav-link" text="Calendrier" />
             <Hyperlink onAction="#onFavoris" styleClass="nav-link" text="Favoris" />
             <Hyperlink onAction="#onPosts" styleClass="nav-link" text="Posts" />
-            <Hyperlink onAction="#onMesDemandes" styleClass="nav-link" text="Mes demandes" />
+            <Hyperlink onAction="#handleMesDemandes" styleClass="nav-link" text="Mes demandes" />
             <Hyperlink fx:id="manageSessionsLink" onAction="#onGererSessions" styleClass="nav-link" text="Gérer sessions" />
          </children>
       </HBox>

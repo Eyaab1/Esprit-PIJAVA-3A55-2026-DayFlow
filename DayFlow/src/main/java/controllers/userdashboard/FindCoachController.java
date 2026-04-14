@@ -19,7 +19,7 @@ import model.coaching_session.CoachingRequest;
 import model.user.User;
 import services.UserServices.UserService;
 import services.coaching_session_module.CoachSearchParams;
-import services.coaching_session_module.CoachingWorkflowService;
+import services.coaching_session_module.CoachingRequestService;
 import session.AppSession;
 
 import java.io.IOException;
@@ -35,7 +35,7 @@ import java.util.Optional;
 public class FindCoachController {
 
     private final UserService userService = new UserService();
-    private final CoachingWorkflowService workflow = new CoachingWorkflowService();
+    private final CoachingRequestService coachingRequestService = new CoachingRequestService();
 
     @FXML
     private TextField searchField;
@@ -305,7 +305,7 @@ public class FindCoachController {
         b2.setMaxWidth(Double.MAX_VALUE);
         b2.setOnAction(e -> {
             coachCombo.setValue(u);
-            messageArea.requestFocus();
+            createRequestWithoutSlot(u);
         });
 
         card.getChildren().addAll(head, specBadge, rate, priceL, avL, b1, b2);
@@ -343,39 +343,33 @@ public class FindCoachController {
             return;
         }
 
-        String priority = CoachingRequest.PRIORITY_NORMAL;
-        if (radioUrgent.isSelected()) {
-            priority = CoachingRequest.PRIORITY_URGENT;
-        } else if (radioMedium.isSelected()) {
-            priority = CoachingRequest.PRIORITY_MEDIUM;
-        }
-
-        String goal = goalCombo.getValue();
-        if (goal != null && goal.startsWith("Sélectionnez")) {
-            goal = null;
-        }
-        String level = levelCombo.getValue();
-        if (level != null && level.startsWith("Sélectionnez")) {
-            level = null;
-        }
-        String freq = frequencyCombo.getValue();
-        if (freq != null && freq.startsWith("Sélectionnez")) {
-            freq = null;
-        }
-        Double budget = parseDoubleOrNull(budgetField.getText());
-
         try {
-            workflow.createCoachingRequestFromUser(
-                    me.get().getId(),
-                    coach.getId(),
-                    msg,
-                    goal,
-                    level,
-                    freq,
-                    budget,
-                    priority
-            );
+            coachingRequestService.createRequest(coach, me.get(), msg, CoachingRequest.STATUS_PENDING);
             new Alert(Alert.AlertType.INFORMATION, "Votre demande a été envoyée avec succès !").showAndWait();
+            messageArea.clear();
+            updateCharCount();
+        } catch (SQLException e) {
+            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+        } catch (IllegalArgumentException ex) {
+            new Alert(Alert.AlertType.WARNING, ex.getMessage()).showAndWait();
+        }
+    }
+
+    private void createRequestWithoutSlot(User coach) {
+        Optional<User> me = AppSession.getCurrentUser();
+        if (me.isEmpty() || me.get().getId() == null) {
+            new Alert(Alert.AlertType.WARNING, "Session expirée. Reconnectez-vous.").showAndWait();
+            return;
+        }
+        if (coach == null || coach.getId() == null) {
+            new Alert(Alert.AlertType.WARNING, "Coach invalide.").showAndWait();
+            return;
+        }
+
+        String msg = messageArea.getText() != null ? messageArea.getText().trim() : "";
+        try {
+            coachingRequestService.createRequest(coach, me.get(), msg, CoachingRequest.STATUS_PENDING);
+            new Alert(Alert.AlertType.INFORMATION, "Demande sans créneau créée avec succès.").showAndWait();
             messageArea.clear();
             updateCharCount();
         } catch (SQLException e) {

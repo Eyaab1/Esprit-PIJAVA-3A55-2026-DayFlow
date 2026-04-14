@@ -2,8 +2,11 @@ package controllers.coach;
 
 import controllers.navigation.NavigationManager;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -14,7 +17,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import model.coaching_session.CoachingRequest;
+import model.coaching_session.Session;
 import model.user.User;
 import services.UserServices.UserService;
 import services.coaching_session_module.CoachRequestListFilters;
@@ -72,6 +77,10 @@ public class CoachDashboardController {
     private Label pendingEmptyLabel;
     @FXML
     private Label allEmptyLabel;
+    @FXML
+    private VBox sessionsPreviewBox;
+    @FXML
+    private Label sessionsEmptyLabel;
 
     private int coachId;
 
@@ -140,6 +149,7 @@ public class CoachDashboardController {
 
     private void reloadAll() {
         try {
+            System.out.println("[CoachDashboardController] reloadAll coachId=" + coachId);
             CoachStats stats = coachingRequests.buildCoachStats(coachId, sessionService);
             statPendingLabel.setText(String.valueOf(stats.pending()));
             statAcceptedLabel.setText(String.valueOf(stats.accepted()));
@@ -147,12 +157,13 @@ public class CoachDashboardController {
 
             CoachRequestListFilters filters = currentFilters();
             List<CoachingRequest> all = coachingRequests.findForCoachWithFilters(coachId, filters);
+            System.out.println("[CoachDashboardController] demandes chargées=" + all.size());
 
             List<CoachingRequest> pending = all.stream()
                     .filter(r -> CoachingRequest.STATUS_PENDING.equals(r.getStatus()))
                     .collect(Collectors.toList());
-            List<CoachingRequest> others = all.stream()
-                    .filter(r -> !CoachingRequest.STATUS_PENDING.equals(r.getStatus()))
+            List<CoachingRequest> accepted = all.stream()
+                    .filter(r -> CoachingRequest.STATUS_ACCEPTED.equals(r.getStatus()))
                     .collect(Collectors.toList());
 
             pendingBox.getChildren().clear();
@@ -163,12 +174,25 @@ public class CoachDashboardController {
             }
 
             allRequestsBox.getChildren().clear();
-            allEmptyLabel.setVisible(others.isEmpty());
-            for (CoachingRequest cr : others) {
+            allEmptyLabel.setVisible(accepted.isEmpty());
+            for (CoachingRequest cr : accepted) {
                 allRequestsBox.getChildren().add(buildRequestCard(cr, false));
             }
+
+            refreshSessionsPreview();
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Erreur base de données : " + e.getMessage()).showAndWait();
+        }
+    }
+
+    private void refreshSessionsPreview() throws SQLException {
+        List<Session> sessions = sessionService.getSessionsByCoach(coachId);
+        System.out.println("[CoachDashboardController] sessions chargées=" + sessions.size());
+        sessionsPreviewBox.getChildren().clear();
+        sessionsEmptyLabel.setVisible(sessions.isEmpty());
+        int max = Math.min(5, sessions.size());
+        for (int i = 0; i < max; i++) {
+            sessionsPreviewBox.getChildren().add(buildSessionCard(sessions.get(i)));
         }
     }
 
@@ -360,14 +384,83 @@ public class CoachDashboardController {
 
     private void onAccept(CoachingRequest cr) {
         try {
+            System.out.println("[CoachDashboardController] accept requestId=" + cr.getId() + ", coachId=" + coachId);
             int sessionId = workflow.acceptCoachingRequest(cr.getId(), coachId);
+            Session existing = sessionService.findByCoachingRequestId(cr.getId());
+            if (existing == null) {
+                Session session = new Session();
+                session.setCoachingRequestId(cr.getId());
+                session.setScheduledAt(new Date());
+                session.setDuration(60);
+                session.setObjective("Coaching session");
+                session.setStatus(Session.STATUS_CONFIRMED);
+                sessionService.addSession(session);
+                coachingRequests.updateStatus(cr.getId(), CoachingRequest.STATUS_ACCEPTED);
+                System.out.println("Session created for coach: " + coachId);
+            }
+            System.out.println("[CoachDashboardController] session created/linked sessionId=" + sessionId);
             new Alert(Alert.AlertType.INFORMATION,
                     "Demande acceptée. Session #" + sessionId + " créée. Vous pourrez proposer un créneau ensuite.").showAndWait();
             reloadAll();
+            openAddSessionForm(cr);
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
         } catch (IllegalStateException | IllegalArgumentException ex) {
             new Alert(Alert.AlertType.WARNING, ex.getMessage()).showAndWait();
+        }
+    }
+
+    @FXML
+    private void onGoToSessions() {
+        try {
+            NavigationManager.show("/views/mes_sessions.fxml", "DayFlow — Mes sessions");
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+        }
+    }
+
+    private VBox buildSessionCard(Session s) throws SQLException {
+        VBox card = new VBox(8);
+        card.getStyleClass().add("coach-request-card");
+        card.setPadding(new Insets(4, 0, 4, 0));
+
+        Optional<CoachingRequest> crOpt = coachingRequests.findById(s.getCoachingRequestId());
+        String clientName = "Utilisateur inconnu";
+        if (crOpt.isPresent()) {
+            Optional<User> user = userService.findById(crOpt.get().getUserId());
+            if (user.isPresent()) {
+                clientName = (user.get().getFirstName() + " " + user.get().getLastName()).trim();
+            } else {
+                clientName = "Utilisateur #" + crOpt.get().getUserId();
+            }
+        }
+
+        Label title = new Label("Session #" + s.getId() + " — " + clientName);
+        title.getStyleClass().add("coach-name");
+        String when = s.getDisplayTime() == null ? "Date non planifiée" : formatFrench(s.getDisplayTime());
+        Label meta = new Label(when + " · " + (s.getDuration() == null ? "-" : s.getDuration() + " min"));
+        meta.getStyleClass().add("coach-meta");
+        String objective = s.getObjective() == null || s.getObjective().isBlank() ? "Sans description" : s.getObjective();
+        Label description = new Label(objective);
+        description.getStyleClass().add("coach-msg-box");
+        description.setWrapText(true);
+        card.getChildren().addAll(title, meta, description);
+        return card;
+    }
+
+    private void openAddSessionForm(CoachingRequest request) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/add_session.fxml"));
+            Parent root = loader.load();
+            AddSessionController controller = loader.getController();
+            controller.setRequest(request);
+            controller.setOnSaved(this::reloadAll);
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Créer une session");
+            stage.show();
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, "Impossible d'ouvrir le formulaire session: " + e.getMessage()).showAndWait();
         }
     }
 

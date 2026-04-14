@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.components.CoachCardController"
+      alignment="CENTER_LEFT" spacing="14.0"
+      minWidth="280.0" prefWidth="320.0" maxWidth="380.0"
+      style="-fx-background-color: #ffffff; -fx-background-radius: 16; -fx-border-color: #e0e7ff; -fx-border-radius: 16; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.12), 10, 0, 0, 2);">
+   <children>
+      <StackPane minWidth="52.0" maxWidth="52.0" minHeight="52.0" maxHeight="52.0"
+                 style="-fx-background-radius: 26; -fx-background-color: linear-gradient(to bottom right, #c7d2fe, #fbcfe8);">
+         <Label fx:id="initialsLabel" text="?"
+                style="-fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: #4f46e5;"/>
+      </StackPane>
+      <VBox spacing="4.0" HBox.hgrow="ALWAYS" alignment="TOP_LEFT">
+         <Label fx:id="nameLabel" text="-"
+                style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+         <Label fx:id="specialityLabel" text="-"
+                style="-fx-font-size: 12px; -fx-text-fill: #6b7280;" wrapText="true"/>
+         <HBox spacing="10.0" alignment="CENTER_LEFT">
+            <Label fx:id="ratingLabel" text="-"
+                   style="-fx-font-size: 12px; -fx-text-fill: #92400e; -fx-background-color: #fef3c7; -fx-background-radius: 8; -fx-padding: 2 8 2 8;"/>
+            <Label fx:id="priceLabel" text="-"
+                   style="-fx-font-size: 12px; -fx-text-fill: #047857; -fx-background-color: #d1fae5; -fx-background-radius: 8; -fx-padding: 2 8 2 8;"/>
+         </HBox>
+         <Label fx:id="emailLabel" text="-" wrapText="true"
+                style="-fx-font-size: 11px; -fx-text-fill: #9ca3af;"/>
+      </VBox>
+   </children>
+   <padding>
+      <Insets bottom="16.0" left="16.0" right="16.0" top="16.0"/>
+   </padding>
+</HBox>

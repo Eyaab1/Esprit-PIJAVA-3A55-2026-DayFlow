@@ -2,7 +2,6 @@ package controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 public class ShellController {
@@ -11,11 +10,9 @@ public class ShellController {
     private BorderPane shellRoot;
     @FXML
     private VBox navbarContainer;
-    @FXML
-    private StackPane contentPane;
 
-    public StackPane getContentPane() {
-        return contentPane;
+    public BorderPane getShellRoot() {
+        return shellRoot;
     }
 
     /**
