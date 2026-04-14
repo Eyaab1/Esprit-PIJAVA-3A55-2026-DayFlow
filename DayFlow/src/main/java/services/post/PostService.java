@@ -48,6 +48,12 @@ public class PostService implements CRUD<Post, Integer> {
             FROM post
             """;
 
+    private static final String PUBLISH_DUE_SCHEDULED_POSTS = """
+            UPDATE post
+            SET status = ?, updated_at = ?
+            WHERE status = ? AND scheduled_at IS NOT NULL AND scheduled_at <= ?
+            """;
+
     @Override
     public void create(Post post) throws SQLException {
         insert(post);
@@ -173,6 +179,7 @@ public class PostService implements CRUD<Post, Integer> {
     }
 
     public List<Post> getAllPosts() throws SQLException {
+        publishDueScheduledPosts();
         return findAll();
     }
 
@@ -182,6 +189,18 @@ public class PostService implements CRUD<Post, Integer> {
 
     public void deletePost(int id) throws SQLException {
         delete(id);
+    }
+
+    public void publishDueScheduledPosts() throws SQLException {
+        Connection c = DbConnexion.getConnection();
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        try (PreparedStatement ps = c.prepareStatement(PUBLISH_DUE_SCHEDULED_POSTS)) {
+            ps.setString(1, PostStatus.PUBLISHED.value);
+            ps.setTimestamp(2, Timestamp.valueOf(now));
+            ps.setString(3, PostStatus.SCHEDULED.value);
+            ps.setTimestamp(4, Timestamp.valueOf(now));
+            ps.executeUpdate();
+        }
     }
 
     // Helper methods
