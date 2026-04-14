@@ -24,8 +24,8 @@ public class GoalService implements CRUD<Goal, Integer> {
     private static final String INSERT_GOAL = """
             INSERT INTO goal (
                 title, description, start_date, end_date, deadline, status, priority,
-                is_favorite, progress, required_tasks, trello_board_id, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                is_favorite, progress, required_tasks, trello_board_id, user_id, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
 
     private static final String UPDATE_GOAL = """
@@ -46,6 +46,9 @@ public class GoalService implements CRUD<Goal, Integer> {
 
     @Override
     public void insert(Goal goal) throws SQLException {
+        if (goal.getStartDate() != null && goal.getEndDate() != null && goal.getEndDate().isBefore(goal.getStartDate())) {
+            throw new IllegalArgumentException("La date de fin ne peut pas être avant la date de début");
+        }
         try (PreparedStatement ps = cnx.prepareStatement(INSERT_GOAL, Statement.RETURN_GENERATED_KEYS)) {
             int i = 1;
             ps.setString(i++, goal.getTitle());
@@ -71,6 +74,12 @@ public class GoalService implements CRUD<Goal, Integer> {
             } else {
                 ps.setString(i++, goal.getTrelloBoardId());
             }
+            // Add user_id
+            if (goal.getUser() != null && goal.getUser().getId() != null) {
+                ps.setInt(i++, goal.getUser().getId());
+            } else {
+                ps.setNull(i++, Types.INTEGER);
+            }
             ps.setTimestamp(i++, goal.getCreatedAt() != null ? Timestamp.valueOf(goal.getCreatedAt()) : null);
             ps.setTimestamp(i++, goal.getUpdatedAt() != null ? Timestamp.valueOf(goal.getUpdatedAt()) : null);
             ps.executeUpdate();
@@ -84,6 +93,9 @@ public class GoalService implements CRUD<Goal, Integer> {
 
     @Override
     public void update(Goal goal) throws SQLException {
+        if (goal.getStartDate() != null && goal.getEndDate() != null && goal.getEndDate().isBefore(goal.getStartDate())) {
+            throw new IllegalArgumentException("La date de fin ne peut pas être avant la date de début");
+        }
         try (PreparedStatement ps = cnx.prepareStatement(UPDATE_GOAL)) {
             int i = 1;
             ps.setString(i++, goal.getTitle());
@@ -240,5 +252,24 @@ public class GoalService implements CRUD<Goal, Integer> {
         int archived = m.getOrDefault("archived", 0);
         int total = active + completed + paused + failed + draft + archived;
         return new GoalStatusCounts(active, completed, paused, failed, draft, archived, total);
+    }
+
+    public List<Goal> findByUserId(int userId) throws SQLException {
+        String sql = """
+                SELECT id, title, description, start_date, end_date, deadline, status, priority,
+                       is_favorite, progress, required_tasks, trello_board_id, created_at, updated_at
+                FROM goal WHERE user_id = ?
+                ORDER BY created_at DESC
+                """;
+        List<Goal> goals = new ArrayList<>();
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    goals.add(mapGoal(rs));
+                }
+            }
+        }
+        return goals;
     }
 }

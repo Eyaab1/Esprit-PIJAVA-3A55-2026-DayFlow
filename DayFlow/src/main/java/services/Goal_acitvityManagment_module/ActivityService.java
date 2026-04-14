@@ -196,9 +196,10 @@ public class ActivityService implements CRUD<Activity, Integer> {
     @Override
     public void delete(Integer id) throws SQLException {
         String sql = "DELETE FROM activity WHERE id=?";
-        PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setInt(1, id);
-        ps.executeUpdate();
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
     }
 
     /**

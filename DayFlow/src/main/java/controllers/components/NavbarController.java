@@ -63,7 +63,7 @@ public class NavbarController {
 
     @FXML
     private void onObjectifs() {
-        navigate("/user/goals/goals_dashboard.fxml", "DayFlow — Goals");
+        navigate("/Goals_Routines/goals-dashboard.fxml", "DayFlow — Mes objectifs");
     }
 
     @FXML

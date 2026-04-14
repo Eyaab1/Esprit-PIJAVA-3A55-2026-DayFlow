@@ -57,9 +57,8 @@ public class UserService implements CRUD<User, Integer> {
             UPDATE "user" SET
                 first_name = ?, last_name = ?, email = ?, password = ?,
                 roles = ?, phone_number = ?, age = ?, status = ?, speciality = ?,
-                specialities = ?, availability = ?, rating = ?, review_count = ?,
-                price_per_session = ?, bio = ?, photo_url = ?,
-                profile_picture_name = ?, profile_picture_size = ?
+                availability = ?, rating = ?, review_count = ?,
+                price_per_session = ?, bio = ?, photo_url = ?
             WHERE id = ?
             """;
 
@@ -202,11 +201,6 @@ public class UserService implements CRUD<User, Integer> {
             } else {
                 ps.setString(i++, user.getSpeciality());
             }
-            if (user.getSpecialities() == null) {
-                ps.setNull(i++, Types.OTHER);
-            } else {
-                ps.setObject(i++, toJsonList(user.getSpecialities()));
-            }
             if (user.getAvailability() == null) {
                 ps.setNull(i++, Types.VARCHAR);
             } else {
@@ -236,16 +230,6 @@ public class UserService implements CRUD<User, Integer> {
                 ps.setNull(i++, Types.VARCHAR);
             } else {
                 ps.setString(i++, user.getPhotoUrl());
-            }
-            if (user.getProfilePictureName() == null) {
-                ps.setNull(i++, Types.VARCHAR);
-            } else {
-                ps.setString(i++, user.getProfilePictureName());
-            }
-            if (user.getProfilePictureSize() == null) {
-                ps.setNull(i++, Types.INTEGER);
-            } else {
-                ps.setInt(i++, user.getProfilePictureSize());
             }
             ps.setInt(i, user.getId());
             ps.executeUpdate();
@@ -332,7 +316,6 @@ public class UserService implements CRUD<User, Integer> {
         if (rs.wasNull()) {
             u.setSpeciality(null);
         }
-        u.setSpecialities(readStringListNullable(rs.getString("specialities")));
         u.setAvailability(rs.getString("availability"));
         if (rs.wasNull()) {
             u.setAvailability(null);
@@ -351,12 +334,6 @@ public class UserService implements CRUD<User, Integer> {
         if (rs.wasNull()) {
             u.setPhotoUrl(null);
         }
-        u.setProfilePictureName(rs.getString("profile_picture_name"));
-        if (rs.wasNull()) {
-            u.setProfilePictureName(null);
-        }
-        int picSize = rs.getInt("profile_picture_size");
-        u.setProfilePictureSize(rs.wasNull() ? null : picSize);
         return u;
     }
 
