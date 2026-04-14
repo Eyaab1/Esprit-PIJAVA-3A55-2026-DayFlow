@@ -87,14 +87,14 @@ public class NavbarController {
     }
 
     @FXML
-    private void onMesDemandes() {
-        toastSoon("Mes demandes");
+    private void handleMesDemandes() {
+        navigate("/views/mes_demandes.fxml", "DayFlow — Mes demandes");
     }
 
     @FXML
     private void onGererSessions() {
         if (AppSession.isCoach()) {
-            navigate("/user/coachdashboard/coach_dashboard.fxml", "DayFlow — Coach");
+            navigate("/views/mes_sessions.fxml", "DayFlow — Mes sessions");
         } else {
             toastSoon("Gérer sessions");
         }
