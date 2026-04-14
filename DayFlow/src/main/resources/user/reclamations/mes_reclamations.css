@@ -95,16 +95,16 @@
     -fx-font-size: 12px;
     -fx-font-weight: 600;
 }
+.badge-status.pending {
+    -fx-background-color: #fef3c7;
+    -fx-text-fill: #92400e;
+}
 
 .badge-status.answered {
     -fx-background-color: #dcfce7;
     -fx-text-fill: #166534;
 }
 
-.badge-status.pending {
-    -fx-background-color: #fef3c7;
-    -fx-text-fill: #92400e;
-}
 
 .badge-status.in_progress {
     -fx-background-color: #dbeafe;
