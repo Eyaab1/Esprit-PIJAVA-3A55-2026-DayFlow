@@ -1,8 +1,6 @@
 package enums;
 
-/**
- * Équivalent de {@code ReclamationStatusEnum} côté Symfony / Doctrine.
- */
+
 public enum ReclamationStatus {
     PENDING("PENDING"),
     IN_PROGRESS("IN_PROGRESS"),
