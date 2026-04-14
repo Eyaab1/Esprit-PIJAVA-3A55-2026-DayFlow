@@ -16,6 +16,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.coaching_session.CoachingRequest;
 import model.user.User;
+import session.AppSession;
 import services.UserServices.CoachService;
 import services.UserServices.UserService;
 import services.coaching_session_module.CoachingRequestService;
@@ -61,8 +62,6 @@ public class CoachingRequestController implements Initializable {
     private final CoachingRequestService requestService;
     private final UserService userService;
     private final CoachService coachService;
-
-    private int currentUserId = 1; // TODO: Récupérer l'utilisateur connecté
 
     public CoachingRequestController() {
         this.requestService = new CoachingRequestService();
@@ -295,9 +294,16 @@ public class CoachingRequestController implements Initializable {
                 return;
             }
 
+            Optional<User> sessionUser = AppSession.getCurrentUser();
+            Integer uid = sessionUser.map(User::getId).orElse(null);
+            if (uid == null || uid <= 0) {
+                showWarning("Vous devez être connecté pour envoyer une demande.");
+                return;
+            }
+
             // Créer la demande
             CoachingRequest request = new CoachingRequest();
-            request.setUserId(currentUserId);
+            request.setUserId(uid);
             request.setCoachId(coachComboBox.getValue().getId());
             request.setMessage(messageTextArea.getText().trim());
 

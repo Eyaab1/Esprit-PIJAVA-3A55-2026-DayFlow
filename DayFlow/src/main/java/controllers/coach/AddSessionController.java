@@ -109,7 +109,11 @@ public class AddSessionController implements Initializable {
             }
 
             String message = coachingRequest.getMessage();
-            requestInfoLabel.setText("Message: " + (message.length() > 100 ? message.substring(0, 97) + "..." : message));
+            if (message == null || message.isBlank()) {
+                requestInfoLabel.setText("Message: (aucun)");
+            } else {
+                requestInfoLabel.setText("Message: " + (message.length() > 100 ? message.substring(0, 97) + "..." : message));
+            }
 
             // Pré-remplir l'objectif si disponible
             if (coachingRequest.getGoal() != null && !coachingRequest.getGoal().isEmpty()) {

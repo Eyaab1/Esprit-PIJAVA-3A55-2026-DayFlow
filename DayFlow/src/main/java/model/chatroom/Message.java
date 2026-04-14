@@ -14,12 +14,16 @@ public class Message {
     private int authorId;
 
     public Message() {
+        this.content = "";
         this.createdAt = LocalDateTime.now();
         this.isPinned = false;
         this.isEdited = false;
     }
 
     public Message(String content, int chatroomId, int authorId) {
+        if (content == null || content.trim().isEmpty()) {
+            throw new IllegalArgumentException("Content required");
+        }
         setContent(content);
         setChatroomId(chatroomId);
         setAuthorId(authorId);
@@ -28,14 +32,19 @@ public class Message {
         this.isEdited = false;
     }
 
+    /**
+     * Accepte un contenu vide pour l’hydratation depuis la BD (NULL ou chaîne vide).
+     * Les nouveaux messages sont validés côté service avant insertion.
+     */
     public void setContent(String content) {
         if (content == null || content.trim().isEmpty()) {
-            throw new IllegalArgumentException("Content required");
+            this.content = "";
+            return;
         }
         if (content.length() > 1000) {
             throw new IllegalArgumentException("Message too long");
         }
-        this.content = content;
+        this.content = content.trim();
     }
 
     public void setChatroomId(int chatroomId) {

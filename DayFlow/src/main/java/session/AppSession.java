@@ -38,4 +38,12 @@ public final class AppSession {
                         && u.getRoles().stream().anyMatch(UserRole.COACH.getValue()::equals))
                 .orElse(false);
     }
+
+    /** Vrai si l'utilisateur a le rôle application {@code ROLE_ADMIN}. */
+    public static boolean isAdmin() {
+        return getCurrentUser()
+                .map(u -> u.getRoles() != null
+                        && u.getRoles().stream().anyMatch(UserRole.ADMIN.getValue()::equals))
+                .orElse(false);
+    }
 }

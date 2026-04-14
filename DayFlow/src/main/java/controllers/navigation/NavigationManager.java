@@ -72,6 +72,7 @@ public final class NavigationManager {
     private static boolean isPublicMarketingOrAuthScreen(String path) {
         return path.contains("/user/landingpage")
                 || path.contains("/user/login")
-                || path.contains("/user/signup");
+                || path.contains("/user/signup")
+                || path.contains("/admin/");
     }
 }

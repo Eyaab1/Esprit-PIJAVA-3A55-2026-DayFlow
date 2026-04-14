@@ -46,7 +46,9 @@ public class LoginController {
                 AppSession.setCurrentUser(u);
                 NavbarController.refreshFromSession();
                 try {
-                    if (AppSession.isCoach()) {
+                    if (AppSession.isAdmin()) {
+                        NavigationManager.show("/admin/admin_shell.fxml", "DayFlow — Administration");
+                    } else if (AppSession.isCoach()) {
                         NavigationManager.show("/user/coachdashboard/coach_dashboard.fxml", "DayFlow — Coach");
                     } else {
                         NavigationManager.show("/user/userdashboard/user_dashboard.fxml", "DayFlow — Accueil");

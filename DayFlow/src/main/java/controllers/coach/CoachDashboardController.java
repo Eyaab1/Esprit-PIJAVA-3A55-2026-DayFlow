@@ -30,6 +30,7 @@ import services.coaching_session_module.SessionService;
 import session.AppSession;
 
 import java.io.IOException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -450,18 +451,46 @@ public class CoachDashboardController {
 
     private void openAddSessionForm(CoachingRequest request) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/add_session.fxml"));
+            URL formUrl = getClass().getResource("/views/add_session.fxml");
+            if (formUrl == null) {
+                new Alert(Alert.AlertType.ERROR,
+                        "Fichier FXML introuvable sur le classpath : /views/add_session.fxml\n"
+                                + "Recompilez le projet (mvn compile) ou faites Build > Rebuild.").showAndWait();
+                return;
+            }
+            FXMLLoader loader = new FXMLLoader(formUrl);
             Parent root = loader.load();
             AddSessionController controller = loader.getController();
             controller.setRequest(request);
             controller.setOnSaved(this::reloadAll);
             Stage stage = new Stage();
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
             stage.setTitle("Créer une session");
+            stage.setMinWidth(400);
+            stage.setMinHeight(480);
+            stage.sizeToScene();
             stage.show();
         } catch (IOException e) {
-            new Alert(Alert.AlertType.ERROR, "Impossible d'ouvrir le formulaire session: " + e.getMessage()).showAndWait();
+            new Alert(Alert.AlertType.ERROR, formatFxmlLoadFailure(e)).showAndWait();
+            e.printStackTrace();
+        } catch (RuntimeException e) {
+            new Alert(Alert.AlertType.ERROR,
+                    "Erreur lors de l'ouverture du formulaire session :\n" + e.getClass().getSimpleName() + ": " + e.getMessage()).showAndWait();
+            e.printStackTrace();
         }
+    }
+
+    /** Utilisé aussi par {@link CoachRequestsController} pour un message d'erreur FXML lisible. */
+    public static String formatFxmlLoadFailure(IOException e) {
+        StringBuilder sb = new StringBuilder("Impossible de charger le formulaire (FXML).\n\n");
+        sb.append(e.getClass().getSimpleName()).append(": ").append(e.getMessage());
+        Throwable c = e.getCause();
+        if (c != null) {
+            sb.append("\n\nCause : ").append(c.getClass().getSimpleName()).append(": ").append(c.getMessage());
+        }
+        sb.append("\n\nSi le message mentionne une ligne dans add_session.fxml, corrigez ce fichier ou faites mvn clean compile.");
+        return sb.toString();
     }
 
     private void onDecline(CoachingRequest cr) {

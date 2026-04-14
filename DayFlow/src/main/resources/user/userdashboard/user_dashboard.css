@@ -81,10 +81,11 @@
     -fx-alignment: center;
 }
 
-.stat-svg {
-    -fx-fill: #111827;
-    -fx-scale-x: 0.92;
-    -fx-scale-y: 0.92;
+.stat-icon-symbol {
+    -fx-font-size: 20px;
+    -fx-text-fill: #111827;
+    -fx-alignment: center;
+    -fx-padding: 0;
 }
 
 .stat-value {

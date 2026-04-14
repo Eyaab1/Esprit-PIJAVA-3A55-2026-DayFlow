@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.admin.AdminGoalsController" styleClass="admin-root" stylesheets="@admin.css">
+    <content>
+        <VBox styleClass="admin-content" spacing="18">
+            <VBox spacing="6">
+                <Label styleClass="admin-page-title" text="Objectifs"/>
+                <Label styleClass="admin-page-sub" text="Vue globale des objectifs, propriétaires et routines associées"/>
+            </VBox>
+            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="admin-filter-bar">
+                <TextField fx:id="ownerNameField" promptText="Propriétaire (nom)…" styleClass="admin-filter-field" prefWidth="200"
+                           onAction="#onFilter"/>
+                <TextField fx:id="ownerEmailField" promptText="Propriétaire (e-mail)…" styleClass="admin-filter-field" prefWidth="200"
+                           onAction="#onFilter"/>
+                <ComboBox fx:id="statusCombo" prefWidth="170"/>
+                <ComboBox fx:id="sortCombo" prefWidth="150"/>
+                <Button text="Filtrer" styleClass="admin-filter-btn" onAction="#onFilter"/>
+                <Region HBox.hgrow="ALWAYS"/>
+            </HBox>
+            <VBox styleClass="admin-posts-table-wrap" spacing="0">
+                <HBox spacing="12" styleClass="admin-posts-header" alignment="CENTER_LEFT">
+                    <Label minWidth="260" text="Objectif" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="160" text="Propriétaire" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="100" text="Période" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="72" text="Progrès" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="56" text="Routines" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="96" text="Statut" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="56" text="" style="-fx-font-weight:bold;"/>
+                </HBox>
+                <ScrollPane fitToWidth="true" maxHeight="720" style="-fx-background-color:transparent;">
+                    <VBox fx:id="goalsRowsBox" spacing="0"/>
+                </ScrollPane>
+            </VBox>
+        </VBox>
+    </content>
+</ScrollPane>

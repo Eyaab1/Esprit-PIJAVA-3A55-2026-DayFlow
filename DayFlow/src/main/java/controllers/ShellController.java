@@ -22,6 +22,9 @@ public class ShellController {
         if (navbarContainer != null) {
             navbarContainer.setVisible(visible);
             navbarContainer.setManaged(visible);
+            if (shellRoot != null) {
+                shellRoot.requestLayout();
+            }
         }
     }
 }

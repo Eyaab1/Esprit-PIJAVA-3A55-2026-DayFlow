@@ -449,7 +449,13 @@ public class CoachRequestsController implements Initializable {
 
     private void openAddSessionForm(CoachingRequest request) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/add_session.fxml"));
+            URL formUrl = getClass().getResource("/views/add_session.fxml");
+            if (formUrl == null) {
+                showError("Erreur de navigation",
+                        "Fichier FXML introuvable : /views/add_session.fxml. Recompilez le projet.");
+                return;
+            }
+            FXMLLoader loader = new FXMLLoader(formUrl);
             Parent root = loader.load();
 
             AddSessionController controller = loader.getController();
@@ -460,12 +466,19 @@ public class CoachRequestsController implements Initializable {
             });
 
             Stage stage = new Stage();
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
             stage.setTitle("Créer une session");
+            stage.setMinWidth(400);
+            stage.setMinHeight(480);
+            stage.sizeToScene();
             stage.show();
 
         } catch (IOException e) {
-            showError("Erreur de navigation", "Impossible de charger le formulaire de session");
+            showError("Erreur FXML", CoachDashboardController.formatFxmlLoadFailure(e));
+            e.printStackTrace();
+        } catch (RuntimeException e) {
+            showError("Erreur", e.getClass().getSimpleName() + ": " + e.getMessage());
             e.printStackTrace();
         }
     }

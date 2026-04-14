@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.admin.AdminCoachRequestsController" styleClass="admin-root" stylesheets="@admin.css">
+    <content>
+        <VBox styleClass="admin-content" spacing="18">
+            <VBox spacing="6">
+                <Label styleClass="admin-page-title" text="Demandes coaching"/>
+                <Label styleClass="admin-page-sub" text="Demandes entre utilisateurs et coachs"/>
+            </VBox>
+            <VBox styleClass="admin-posts-table-wrap" spacing="0">
+                <HBox spacing="12" styleClass="admin-posts-header" alignment="CENTER_LEFT">
+                    <Label minWidth="260" text="Demandeur" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="260" text="Coach" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="200" text="Action" style="-fx-font-weight:bold;"/>
+                </HBox>
+                <ScrollPane fitToWidth="true" maxHeight="720" style="-fx-background-color:transparent;">
+                    <VBox fx:id="requestsRowsBox" spacing="0"/>
+                </ScrollPane>
+            </VBox>
+        </VBox>
+    </content>
+</ScrollPane>

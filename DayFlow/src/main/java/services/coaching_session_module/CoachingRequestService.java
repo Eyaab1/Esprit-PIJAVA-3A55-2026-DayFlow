@@ -357,5 +357,61 @@ public class CoachingRequestService implements CRUD<CoachingRequest, Integer> {
             ps.executeUpdate();
         }
     }
+
+    /** Ligne enrichie pour l’écran admin « Demandes coach » (client + coach + spécialité). */
+    public record AdminCoachRequestRow(
+            int id,
+            String clientFirstName,
+            String clientLastName,
+            String coachFirstName,
+            String coachLastName,
+            String coachSpeciality,
+            String status,
+            String message,
+            Date createdAt
+    ) {
+        public String clientFullName() {
+            return (nz(clientFirstName) + " " + nz(clientLastName)).trim();
+        }
+
+        public String coachFullName() {
+            return (nz(coachFirstName) + " " + nz(coachLastName)).trim();
+        }
+
+        private static String nz(String s) {
+            return s == null ? "" : s;
+        }
+    }
+
+    public List<AdminCoachRequestRow> findAllForAdmin() throws SQLException {
+        String sql = """
+                SELECT cr.id, cr.status, cr.message, cr.created_at,
+                       uf.first_name AS ufn, uf.last_name AS uln,
+                       cf.first_name AS cfn, cf.last_name AS cln, cf.speciality AS cspec
+                FROM coaching_request cr
+                INNER JOIN "user" uf ON uf.id = cr.user_id
+                INNER JOIN "user" cf ON cf.id = cr.coach_id
+                ORDER BY cr.created_at DESC
+                """;
+        List<AdminCoachRequestRow> list = new ArrayList<>();
+        try (PreparedStatement ps = cnx.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Timestamp ts = rs.getTimestamp("created_at");
+                list.add(new AdminCoachRequestRow(
+                        rs.getInt("id"),
+                        rs.getString("ufn"),
+                        rs.getString("uln"),
+                        rs.getString("cfn"),
+                        rs.getString("cln"),
+                        rs.getString("cspec"),
+                        rs.getString("status"),
+                        rs.getString("message"),
+                        ts != null ? new Date(ts.getTime()) : null
+                ));
+            }
+        }
+        return list;
+    }
 }
 

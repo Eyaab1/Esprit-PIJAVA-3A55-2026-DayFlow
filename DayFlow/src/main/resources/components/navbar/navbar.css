@@ -1,92 +1,45 @@
-/* Navbar globale DayFlow — user & coach */
 .navbar-root {
     -fx-background-color: #ffffff;
-    -fx-border-color: #e5e7eb;
+    -fx-border-color: #e9ecef;
     -fx-border-width: 0 0 1 0;
-    -fx-padding: 12 28 12 28;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 6, 0, 0, 1);
+    -fx-padding: 10 20;
+    -fx-spacing: 8;
+    -fx-alignment: CENTER_LEFT;
 }
 
-.navbar-logo-box {
-    -fx-min-width: 36px;
-    -fx-min-height: 36px;
-    -fx-max-width: 36px;
-    -fx-max-height: 36px;
-    -fx-background-color: linear-gradient(to bottom right, #a78bfa, #60a5fa);
-    -fx-background-radius: 8px;
-    -fx-alignment: center;
+.navbar-root .hyperlink {
+    -fx-underline: false;
+    -fx-text-fill: #495057;
+    -fx-font-size: 13px;
 }
 
-.navbar-logo-text {
-    -fx-text-fill: white;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
+.navbar-root .hyperlink:hover {
+    -fx-text-fill: #6c5ce7;
 }
 
 .navbar-brand {
+    -fx-text-fill: #6c5ce7;
     -fx-font-size: 18px;
     -fx-font-weight: bold;
-    -fx-text-fill: #111827;
+    -fx-padding: 0 8 0 0;
 }
 
-.nav-link {
-    -fx-text-fill: #6b7280;
-    -fx-font-size: 14px;
-    -fx-underline: false;
-    -fx-border-color: transparent;
-    -fx-background-color: transparent;
-    -fx-padding: 6 10;
-    -fx-cursor: hand;
-}
-
-.nav-link:hover {
-    -fx-text-fill: #7c3aed;
-}
-
-.nav-icon-btn {
-    -fx-background-color: transparent;
-    -fx-text-fill: #4b5563;
-    -fx-font-size: 18px;
-    -fx-padding: 6 8;
-    -fx-cursor: hand;
-}
-
-.nav-icon-btn:hover {
-    -fx-text-fill: #7c3aed;
-}
-
-.notif-badge {
-    -fx-background-color: #ef4444;
-    -fx-background-radius: 8px;
-    -fx-min-width: 8px;
-    -fx-min-height: 8px;
-    -fx-max-width: 8px;
-    -fx-max-height: 8px;
+.navbar-brand-sep {
+    -fx-padding: 0 10 0 0;
 }
 
 .navbar-avatar {
+    -fx-background-color: #6c5ce7;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
     -fx-min-width: 36px;
     -fx-min-height: 36px;
-    -fx-max-width: 36px;
-    -fx-max-height: 36px;
-    -fx-background-radius: 18px;
-    -fx-background-color: #ea580c;
-    -fx-text-fill: white;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
     -fx-alignment: center;
+    -fx-background-radius: 18px;
+    -fx-padding: 0;
 }
 
-.btn-logout {
-    -fx-background-color: #ef4444;
-    -fx-text-fill: white;
-    -fx-background-radius: 8px;
-    -fx-padding: 8 16;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-    -fx-cursor: hand;
-}
-
-.btn-logout:hover {
-    -fx-background-color: #dc2626;
+.navbar-spacer {
+    -fx-min-width: 12px;
 }

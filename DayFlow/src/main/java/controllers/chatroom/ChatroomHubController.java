@@ -162,7 +162,8 @@ public class ChatroomHubController {
                 String author = userService.findById(m.getAuthorId())
                         .map(u -> formatUser(u))
                         .orElse("Utilisateur #" + m.getAuthorId());
-                String line = "[" + m.getCreatedAt().format(TF) + "] " + author + " : " + m.getContent();
+                String body = m.getContent() == null || m.getContent().isBlank() ? "(vide)" : m.getContent();
+                String line = "[" + m.getCreatedAt().format(TF) + "] " + author + " : " + body;
                 Label l = new Label(line);
                 l.setWrapText(true);
                 l.getStyleClass().add("chat-msg-line");

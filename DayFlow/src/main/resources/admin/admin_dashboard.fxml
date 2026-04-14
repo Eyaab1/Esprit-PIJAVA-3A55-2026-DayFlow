@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.admin.AdminDashboardController" styleClass="admin-root" stylesheets="@admin.css">
+    <content>
+        <VBox styleClass="admin-content" spacing="20">
+            <VBox spacing="6">
+                <Label styleClass="admin-page-title" text="Tableau de bord administrateur"/>
+                <Label styleClass="admin-page-sub" text="Vue d'ensemble de l'application DayFlow"/>
+            </VBox>
+            <HBox spacing="18" alignment="TOP_LEFT">
+                <VBox HBox.hgrow="ALWAYS" styleClass="admin-card" spacing="8" minWidth="280">
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Label styleClass="admin-card-title" text="Demandes récentes" HBox.hgrow="ALWAYS"/>
+                        <Hyperlink text="Voir tout" styleClass="admin-link" onAction="#onViewAllRequests"/>
+                    </HBox>
+                    <VBox fx:id="recentRequestsBox" spacing="0"/>
+                </VBox>
+                <VBox HBox.hgrow="ALWAYS" styleClass="admin-card" spacing="8" minWidth="280">
+                    <Label styleClass="admin-card-title" text="Sessions récentes"/>
+                    <VBox fx:id="recentSessionsBox" spacing="0"/>
+                </VBox>
+            </HBox>
+            <Region minHeight="12"/>
+        </VBox>
+    </content>
+</ScrollPane>
