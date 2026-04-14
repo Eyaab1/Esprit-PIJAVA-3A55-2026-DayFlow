@@ -170,7 +170,7 @@ public class EditSessionController implements Initializable {
 
     private void returnToSessions() {
         try {
-            NavigationManager.show("/views/mes_sessions.fxml", "Mes sessions");
+            NavigationManager.show("/user/coaching_session/mes_sessions.fxml", "Mes sessions");
         } catch (IOException e) {
             showError("Erreur de navigation", "Impossible de retourner à la liste");
             e.printStackTrace();

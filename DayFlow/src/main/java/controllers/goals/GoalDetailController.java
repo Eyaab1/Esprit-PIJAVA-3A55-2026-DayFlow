@@ -80,7 +80,7 @@ public class GoalDetailController {
 
     private void goBackToDashboard() {
         try {
-            NavigationManager.show("/user/goals/goals_dashboard.fxml", "DayFlow — Objectifs");
+            NavigationManager.show("/user/goals_routines/goals_dashboard.fxml", "DayFlow — Objectifs");
         } catch (IOException ex) {
             new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
         }
@@ -159,7 +159,7 @@ public class GoalDetailController {
     private void openRoutineDetail(int routineId) {
         RoutineNav.setPending(new RoutineNav.PendingRoutineDetail(routineId, goalId));
         try {
-            NavigationManager.show("/user/goals/routine_detail.fxml", "DayFlow — Routine");
+            NavigationManager.show("/user/goals_routines/routine_detail.fxml", "DayFlow — Routine");
         } catch (IOException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
         }

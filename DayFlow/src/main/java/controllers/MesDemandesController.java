@@ -332,7 +332,7 @@ public class MesDemandesController implements Initializable {
     @FXML
     private void handleNewRequest() {
         try {
-            NavigationManager.show("/views/coaching_request.fxml", "Nouvelle demande de coaching");
+            NavigationManager.show("/user/coaching_session/coaching_request.fxml", "Nouvelle demande de coaching");
         } catch (IOException e) {
             showError("Erreur de navigation", "Impossible de charger la page de demande");
             e.printStackTrace();
@@ -350,7 +350,7 @@ public class MesDemandesController implements Initializable {
 
         try {
             CoachingRequestController controller = NavigationManager.showAndGetController(
-                    "/views/coaching_request.fxml",
+                    "/user/coaching_session/coaching_request.fxml",
                     "Modifier la demande"
             );
             controller.loadRequestForUpdate(selectedRequest);
@@ -395,11 +395,11 @@ public class MesDemandesController implements Initializable {
     @FXML
     private void goBack(ActionEvent event) {
         try {
-            NavigationManager.show("/user/userdashboard/user_dashboard.fxml", "DayFlow — Accueil");
+            NavigationManager.show("/user/account/user_dashboard.fxml", "DayFlow — Accueil");
         } catch (IOException | IllegalStateException e) {
             // Fallback si la navigation shell n'est pas initialisée dans ce contexte.
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/userdashboard/user_dashboard.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/account/user_dashboard.fxml"));
                 Parent root = loader.load();
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                 stage.setScene(new Scene(root));
@@ -415,7 +415,7 @@ public class MesDemandesController implements Initializable {
     @FXML
     private void goToSessions(ActionEvent event) {
         try {
-            NavigationManager.show("/views/mes_sessions.fxml", "Mes sessions");
+            NavigationManager.show("/user/coaching_session/mes_sessions.fxml", "Mes sessions");
         } catch (IOException e) {
             showError("Erreur de navigation", "Impossible d'ouvrir la page des sessions");
             e.printStackTrace();

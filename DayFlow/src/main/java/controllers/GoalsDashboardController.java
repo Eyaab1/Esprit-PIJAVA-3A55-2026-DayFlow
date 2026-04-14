@@ -255,7 +255,7 @@ public class GoalsDashboardController {
 
     private void showGoalForm(Goal goal) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Goals_Routines/goal-form.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/goals_routines/goal-form.fxml"));
             VBox formRoot = loader.load();
             
             // Get form controls
@@ -414,7 +414,7 @@ public class GoalsDashboardController {
 
     private void onViewGoalDetails(Goal goal) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Goals_Routines/routine-details.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/goals_routines/routine-details.fxml"));
             javafx.scene.Parent root = loader.load();
             
             RoutineDetailsController controller = loader.getController();

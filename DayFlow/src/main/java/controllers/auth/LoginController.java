@@ -49,9 +49,9 @@ public class LoginController {
                     if (AppSession.isAdmin()) {
                         NavigationManager.show("/admin/admin_shell.fxml", "DayFlow — Administration");
                     } else if (AppSession.isCoach()) {
-                        NavigationManager.show("/user/coachdashboard/coach_dashboard.fxml", "DayFlow — Coach");
+                        NavigationManager.show("/user/account/coach_dashboard.fxml", "DayFlow — Coach");
                     } else {
-                        NavigationManager.show("/user/userdashboard/user_dashboard.fxml", "DayFlow — Accueil");
+                        NavigationManager.show("/user/account/user_dashboard.fxml", "DayFlow — Accueil");
                     }
                 } catch (IOException io) {
                     new Alert(Alert.AlertType.ERROR, io.getMessage()).showAndWait();

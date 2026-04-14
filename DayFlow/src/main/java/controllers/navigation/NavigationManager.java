@@ -70,9 +70,9 @@ public final class NavigationManager {
 
     /** Landing, login, inscription : pas de navbar globale (elles ont leur propre en-tête ou formulaire). */
     private static boolean isPublicMarketingOrAuthScreen(String path) {
-        return path.contains("/user/landingpage")
-                || path.contains("/user/login")
-                || path.contains("/user/signup")
+        return path.contains("/user/account/landing")
+                || path.contains("/user/account/login")
+                || path.contains("/user/account/signup")
                 || path.contains("/admin/");
     }
 }

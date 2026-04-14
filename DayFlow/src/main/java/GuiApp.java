@@ -13,7 +13,7 @@ public class GuiApp extends Application {
     @Override
     public void start(Stage stage) {
         try {
-            FXMLLoader shellLoader = new FXMLLoader(GuiApp.class.getResource("/user/shell/app_root.fxml"));
+            FXMLLoader shellLoader = new FXMLLoader(GuiApp.class.getResource("/user/account/app_root.fxml"));
             Parent shellRoot = shellLoader.load();
             ShellController shell = shellLoader.getController();
 
@@ -22,7 +22,7 @@ public class GuiApp extends Application {
             stage.setScene(scene);
 
             NavigationManager.init(stage, shell);
-            NavigationManager.show("/user/landingpage/landing.fxml", "DayFlow");
+            NavigationManager.show("/user/account/landing.fxml", "DayFlow");
 
             stage.show();
         } catch (IOException e) {

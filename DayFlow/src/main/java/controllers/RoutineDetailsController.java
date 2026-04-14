@@ -175,7 +175,7 @@ public class RoutineDetailsController {
     @FXML
     private void onBackToGoal() {
         try {
-            NavigationManager.show("/Goals_Routines/goals-dashboard.fxml", "DayFlow — Mes Objectifs");
+            NavigationManager.show("/user/goals_routines/goals-dashboard.fxml", "DayFlow — Mes Objectifs");
         } catch (IOException e) {
             showError("Erreur de navigation: " + e.getMessage());
         }
@@ -236,7 +236,7 @@ public class RoutineDetailsController {
 
     private void showRoutineForm(Routine routine) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Goals_Routines/routine-form.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/goals_routines/routine-form.fxml"));
             VBox formRoot = loader.load();
             
             // Get form controls
@@ -332,7 +332,7 @@ public class RoutineDetailsController {
 
     private void onViewRoutineDetails(Routine routine) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Goals_Routines/activity-details.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/goals_routines/activity-details.fxml"));
             javafx.scene.Parent root = loader.load();
             
             ActivityDetailsController controller = loader.getController();

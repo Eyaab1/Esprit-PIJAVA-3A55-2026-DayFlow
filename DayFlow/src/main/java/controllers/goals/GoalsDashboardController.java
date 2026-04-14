@@ -223,7 +223,7 @@ public class GoalsDashboardController {
     private void openGoalDetail(int goalId) {
         GoalNav.setSelectedGoalId(goalId);
         try {
-            NavigationManager.show("/user/goals/goal_detail.fxml", "DayFlow — Objectif");
+            NavigationManager.show("/user/goals_routines/goal_detail.fxml", "DayFlow — Objectif");
         } catch (IOException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
         }

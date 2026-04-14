@@ -449,10 +449,10 @@ public class CoachRequestsController implements Initializable {
 
     private void openAddSessionForm(CoachingRequest request) {
         try {
-            URL formUrl = getClass().getResource("/views/add_session.fxml");
+            URL formUrl = getClass().getResource("/user/coaching_session/add_session.fxml");
             if (formUrl == null) {
                 showError("Erreur de navigation",
-                        "Fichier FXML introuvable : /views/add_session.fxml. Recompilez le projet.");
+                        "Fichier FXML introuvable : /user/coaching_session/add_session.fxml. Recompilez le projet.");
                 return;
             }
             FXMLLoader loader = new FXMLLoader(formUrl);

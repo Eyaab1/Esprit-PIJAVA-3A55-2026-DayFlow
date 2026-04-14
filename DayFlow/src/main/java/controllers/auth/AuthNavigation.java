@@ -10,14 +10,14 @@ public final class AuthNavigation {
     }
 
     public static void showLogin() throws IOException {
-        NavigationManager.show("/user/login/login.fxml", "DayFlow — Connexion");
+        NavigationManager.show("/user/account/login.fxml", "DayFlow — Connexion");
     }
 
     public static void showSignup() throws IOException {
-        NavigationManager.show("/user/signup/signup.fxml", "DayFlow — Inscription");
+        NavigationManager.show("/user/account/signup.fxml", "DayFlow — Inscription");
     }
 
     public static void showLanding() throws IOException {
-        NavigationManager.show("/user/landingpage/landing.fxml", "DayFlow");
+        NavigationManager.show("/user/account/landing.fxml", "DayFlow");
     }
 }

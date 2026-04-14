@@ -138,7 +138,7 @@ public class MesSessionsController implements Initializable {
         }
         try {
             EditSessionController controller = NavigationManager.showAndGetController(
-                    "/views/edit_session.fxml",
+                    "/user/coaching_session/edit_session.fxml",
                     "Modifier la session"
             );
             controller.setSession(selectedSession);
@@ -152,7 +152,7 @@ public class MesSessionsController implements Initializable {
     @FXML
     private void goToMesDemandes(ActionEvent event) { // event conservé pour compatibilité FXML
         try {
-            NavigationManager.show("/views/mes_demandes.fxml", "Mes demandes");
+            NavigationManager.show("/user/coaching_session/mes_demandes.fxml", "Mes demandes");
         } catch (IOException e) {
             showError("Navigation impossible", "Impossible de revenir vers Mes demandes.");
         } catch (IllegalStateException e) {

@@ -151,7 +151,7 @@ public class UserDashboardController {
     @FXML
     private void onQuickFindCoach(MouseEvent event) {
         try {
-            NavigationManager.show("/user/coaching/find_coach.fxml", "DayFlow — Trouver un coach");
+            NavigationManager.show("/user/coaching_session/find_coach.fxml", "DayFlow — Trouver un coach");
         } catch (IOException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
         }
@@ -170,7 +170,7 @@ public class UserDashboardController {
     @FXML
     private void onMesReclamations() {
         try {
-            NavigationManager.show("/user/reclamations/mes_reclamations.fxml", "DayFlow — Mes réclamations");
+            NavigationManager.show("/user/reclamation/mes_reclamations.fxml", "DayFlow — Mes réclamations");
         } catch (IOException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
         }

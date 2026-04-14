@@ -169,7 +169,7 @@ public class FindCoachController {
     @FXML
     private void onBackDashboard() {
         try {
-            NavigationManager.show("/user/userdashboard/user_dashboard.fxml", "DayFlow — Accueil");
+            NavigationManager.show("/user/account/user_dashboard.fxml", "DayFlow — Accueil");
         } catch (IOException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
         }

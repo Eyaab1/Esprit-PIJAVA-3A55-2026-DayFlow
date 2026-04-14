@@ -55,20 +55,20 @@ public class NavbarController {
     @FXML
     private void onAccueil() {
         if (AppSession.isCoach()) {
-            navigate("/user/coachdashboard/coach_dashboard.fxml", "DayFlow — Coach");
+            navigate("/user/account/coach_dashboard.fxml", "DayFlow — Coach");
         } else {
-            navigate("/user/userdashboard/user_dashboard.fxml", "DayFlow — Accueil");
+            navigate("/user/account/user_dashboard.fxml", "DayFlow — Accueil");
         }
     }
 
     @FXML
     private void onObjectifs() {
-        navigate("/Goals_Routines/goals-dashboard.fxml", "DayFlow — Mes objectifs");
+        navigate("/user/goals_routines/goals-dashboard.fxml", "DayFlow — Mes objectifs");
     }
 
     @FXML
     private void onCommunity() {
-        navigate("/user/community/community.fxml", "DayFlow — Community");
+        navigate("/user/interaction/community.fxml", "DayFlow — Community");
     }
 
     @FXML
@@ -83,18 +83,18 @@ public class NavbarController {
 
     @FXML
     private void onPosts() {
-        navigate("/user/posts/posts_feed.fxml", "DayFlow — Posts");
+        navigate("/user/interaction/posts_feed.fxml", "DayFlow — Posts");
     }
 
     @FXML
     private void handleMesDemandes() {
-        navigate("/views/mes_demandes.fxml", "DayFlow — Mes demandes");
+        navigate("/user/coaching_session/mes_demandes.fxml", "DayFlow — Mes demandes");
     }
 
     @FXML
     private void onGererSessions() {
         if (AppSession.isCoach()) {
-            navigate("/views/mes_sessions.fxml", "DayFlow — Mes sessions");
+            navigate("/user/coaching_session/mes_sessions.fxml", "DayFlow — Mes sessions");
         } else {
             toastSoon("Gérer sessions");
         }

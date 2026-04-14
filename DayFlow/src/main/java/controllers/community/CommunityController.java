@@ -19,9 +19,9 @@ public class CommunityController {
     @FXML
     private void initialize() {
         addCard("📰  Fil de posts", "Voir et commenter les publications de la communauté.",
-                "/user/posts/posts_feed.fxml", "DayFlow — Posts");
+                "/user/interaction/posts_feed.fxml", "DayFlow — Posts");
         addCard("🎯  Objectifs & groupes", "Créer un goal, rejoindre un objectif et accéder aux chatrooms.",
-                "/user/goals/goals_dashboard.fxml", "DayFlow — Goals");
+                "/user/goals_routines/goals_dashboard.fxml", "DayFlow — Goals");
         addCard("💬  Discussions", "Ouvrir tes chats liés aux objectifs dont tu fais partie.",
                 "/user/chatroom/chatroom_hub.fxml", "DayFlow — Chat");
     }

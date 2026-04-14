@@ -19,10 +19,10 @@ public class FindCoachViewController {
     @FXML
     private void handleMesDemandes(ActionEvent event) {
         try {
-            NavigationManager.show("/views/mes_demandes.fxml", "DayFlow — Mes demandes");
+            NavigationManager.show("/user/coaching_session/mes_demandes.fxml", "DayFlow — Mes demandes");
         } catch (IOException | IllegalStateException e) {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/mes_demandes.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/coaching_session/mes_demandes.fxml"));
                 Parent root = loader.load();
 
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();

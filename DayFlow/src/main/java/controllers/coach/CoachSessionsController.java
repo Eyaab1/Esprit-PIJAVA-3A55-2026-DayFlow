@@ -219,7 +219,7 @@ public class CoachSessionsController implements Initializable {
         }
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/edit_session.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/coaching_session/edit_session.fxml"));
             Parent root = loader.load();
 
             EditSessionController controller = loader.getController();

@@ -105,7 +105,7 @@ public class RoutineDetailController {
 
     private void goToGoals() {
         try {
-            NavigationManager.show("/user/goals/goals_dashboard.fxml", "DayFlow — Objectifs");
+            NavigationManager.show("/user/goals_routines/goals_dashboard.fxml", "DayFlow — Objectifs");
         } catch (IOException ex) {
             new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
         }
@@ -114,7 +114,7 @@ public class RoutineDetailController {
     private void goBackToGoal() {
         GoalNav.setSelectedGoalId(parentGoalId);
         try {
-            NavigationManager.show("/user/goals/goal_detail.fxml", "DayFlow — Objectif");
+            NavigationManager.show("/user/goals_routines/goal_detail.fxml", "DayFlow — Objectif");
         } catch (IOException ex) {
             new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
         }
@@ -546,7 +546,7 @@ public class RoutineDetailController {
             dialog.initOwner(routineTitleLabel.getScene().getWindow());
         }
 
-        URL css = getClass().getResource("/user/goals/activity_dialog.css");
+        URL css = getClass().getResource("/user/goals_routines/activity_dialog.css");
         if (css != null) {
             dialog.getDialogPane().getStylesheets().add(css.toExternalForm());
         }

@@ -258,9 +258,9 @@ public class CoachingRequestController implements Initializable {
 
         coachCardsFlow.getChildren().clear();
 
-        URL cardUrl = CoachCardController.class.getResource("/views/components/CoachCard.fxml");
+        URL cardUrl = CoachCardController.class.getResource("/user/coaching_session/components/CoachCard.fxml");
         if (cardUrl == null) {
-            LOG.severe("[CoachingRequest] Ressource introuvable : /views/components/CoachCard.fxml");
+            LOG.severe("[CoachingRequest] Ressource introuvable : /user/coaching_session/components/CoachCard.fxml");
             return;
         }
 
@@ -512,10 +512,10 @@ public class CoachingRequestController implements Initializable {
 
     private void returnToMesDemandes() {
         try {
-            NavigationManager.show("/views/mes_demandes.fxml", "DayFlow — Mes demandes");
+            NavigationManager.show("/user/coaching_session/mes_demandes.fxml", "DayFlow — Mes demandes");
         } catch (IOException | IllegalStateException e) {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/mes_demandes.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/coaching_session/mes_demandes.fxml"));
                 Parent root = loader.load();
 
                 Stage stage = (Stage) submitButton.getScene().getWindow();
@@ -534,7 +534,7 @@ public class CoachingRequestController implements Initializable {
      */
     @FXML
     private void handleMesDemandes(ActionEvent event) {
-        navigateTo("/views/mes_demandes.fxml", "DayFlow — Mes demandes", event);
+        navigateTo("/user/coaching_session/mes_demandes.fxml", "DayFlow — Mes demandes", event);
     }
     
     /**
@@ -542,7 +542,7 @@ public class CoachingRequestController implements Initializable {
      */
     @FXML
     private void handleAccueil(ActionEvent event) {
-        navigateTo("/user/userdashboard/user_dashboard.fxml", "DayFlow — Accueil", event);
+        navigateTo("/user/account/user_dashboard.fxml", "DayFlow — Accueil", event);
     }
     
     /**
@@ -550,7 +550,7 @@ public class CoachingRequestController implements Initializable {
      */
     @FXML
     private void handleObjectifs(ActionEvent event) {
-        navigateTo("/views/goalparticipation.fxml", "DayFlow — Objectifs", event);
+        navigateTo("/user/goals_routines/goalparticipation.fxml", "DayFlow — Objectifs", event);
     }
     
     /**
@@ -558,7 +558,7 @@ public class CoachingRequestController implements Initializable {
      */
     @FXML
     private void handleCommunity(ActionEvent event) {
-        navigateTo("/user/posts/posts_feed.fxml", "DayFlow — Communauté", event);
+        navigateTo("/user/interaction/posts_feed.fxml", "DayFlow — Communauté", event);
     }
     
     /**
@@ -582,7 +582,7 @@ public class CoachingRequestController implements Initializable {
      */
     @FXML
     private void handlePosts(ActionEvent event) {
-        navigateTo("/user/posts/posts_feed.fxml", "DayFlow — Posts", event);
+        navigateTo("/user/interaction/posts_feed.fxml", "DayFlow — Posts", event);
     }
     
     /**

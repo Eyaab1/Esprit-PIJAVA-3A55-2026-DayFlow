@@ -163,7 +163,7 @@ public class ActivityDetailsController {
     @FXML
     private void onBackToRoutine() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Goals_Routines/routine-details.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/goals_routines/routine-details.fxml"));
             javafx.scene.Parent root = loader.load();
             
             RoutineDetailsController controller = loader.getController();
@@ -230,7 +230,7 @@ public class ActivityDetailsController {
 
     private void showActivityForm(Activity activity) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Goals_Routines/activity-form.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/goals_routines/activity-form.fxml"));
             VBox formRoot = loader.load();
             
             // Get form controls

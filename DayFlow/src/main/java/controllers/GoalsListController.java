@@ -37,7 +37,7 @@ public class GoalsListController {
     @FXML
     private void onBackToDashboard() {
         try {
-            NavigationManager.show("/Goals_Routines/goals-dashboard.fxml", "DayFlow — Mes Objectifs");
+            NavigationManager.show("/user/goals_routines/goals-dashboard.fxml", "DayFlow — Mes Objectifs");
         } catch (IOException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
         }

@@ -118,7 +118,7 @@ public class CoachDashboardController {
 
     private void redirectNonCoach() {
         try {
-            NavigationManager.show("/user/userdashboard/user_dashboard.fxml", "DayFlow — Accueil");
+            NavigationManager.show("/user/account/user_dashboard.fxml", "DayFlow — Accueil");
         } catch (IOException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
         }
@@ -127,7 +127,7 @@ public class CoachDashboardController {
     @FXML
     private void onBackToUserHome() {
         try {
-            NavigationManager.show("/user/userdashboard/user_dashboard.fxml", "DayFlow — Accueil");
+            NavigationManager.show("/user/account/user_dashboard.fxml", "DayFlow — Accueil");
         } catch (IOException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
         }
@@ -414,7 +414,7 @@ public class CoachDashboardController {
     @FXML
     private void onGoToSessions() {
         try {
-            NavigationManager.show("/views/mes_sessions.fxml", "DayFlow — Mes sessions");
+            NavigationManager.show("/user/coaching_session/mes_sessions.fxml", "DayFlow — Mes sessions");
         } catch (IOException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
         }
@@ -451,10 +451,10 @@ public class CoachDashboardController {
 
     private void openAddSessionForm(CoachingRequest request) {
         try {
-            URL formUrl = getClass().getResource("/views/add_session.fxml");
+            URL formUrl = getClass().getResource("/user/coaching_session/add_session.fxml");
             if (formUrl == null) {
                 new Alert(Alert.AlertType.ERROR,
-                        "Fichier FXML introuvable sur le classpath : /views/add_session.fxml\n"
+                        "Fichier FXML introuvable sur le classpath : /user/coaching_session/add_session.fxml\n"
                                 + "Recompilez le projet (mvn compile) ou faites Build > Rebuild.").showAndWait();
                 return;
             }
