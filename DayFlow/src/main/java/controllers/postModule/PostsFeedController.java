@@ -209,11 +209,15 @@ public class PostsFeedController {
             new Alert(Alert.AlertType.WARNING, "Le titre est obligatoire.").showAndWait();
             return;
         }
+        if (content.isEmpty()) {
+            new Alert(Alert.AlertType.WARNING, "Le contenu est obligatoire.").showAndWait();
+            return;
+        }
 
         int uid = AppSession.getCurrentUser().get().getId();
         Post post = new Post();
         post.setTitle(title);
-        post.setContent(content.isEmpty() ? null : content);
+        post.setContent(content);
         post.setCreatedById(uid);
         post.setImages(List.of());
         post.setViewCount(0);
@@ -769,6 +773,8 @@ public class PostsFeedController {
                 
                 // Update toggle button after adding reply
                 updateToggleButton.run();
+            } else {
+                new Alert(Alert.AlertType.WARNING, "La réponse ne peut pas être vide.").showAndWait();
             }
         });
 
@@ -795,6 +801,7 @@ public class PostsFeedController {
         }
         String text = field.getText() != null ? field.getText().trim() : "";
         if (text.isEmpty()) {
+            new Alert(Alert.AlertType.WARNING, "Le commentaire ne peut pas être vide.").showAndWait();
             return;
         }
         int uid = AppSession.getCurrentUser().get().getId();
