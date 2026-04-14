@@ -19,10 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Équivalent des opérations {@code ReclamationRepository} + parties métier des contrôleurs
- * {@code ReclamationController} et {@code AdminResponseController}.
- */
+
 public class ReclamationService implements CRUD<Reclamation, Integer> {
 
     public static final String AUTO_ACK_MESSAGE = """
@@ -141,9 +138,7 @@ public class ReclamationService implements CRUD<Reclamation, Integer> {
         return Optional.empty();
     }
 
-    /**
-     * Réclamation + réponses (écran {@code reclamation_show} Symfony).
-     */
+    
     public Optional<Reclamation> findByIdWithResponses(int id) throws SQLException {
         Optional<Reclamation> opt = findById(id);
         if (opt.isEmpty()) {
@@ -199,9 +194,7 @@ public class ReclamationService implements CRUD<Reclamation, Integer> {
         return 0;
     }
 
-    /**
-     * Liste admin avec filtres (écran {@code admin_reclamation_list} Symfony).
-     */
+    
     public List<Reclamation> findForAdmin(ReclamationStatus status, ReclamationType type,
                                           String search, int limit, int offset) throws SQLException {
         StringBuilder sql = new StringBuilder("""
@@ -296,9 +289,7 @@ public class ReclamationService implements CRUD<Reclamation, Integer> {
         return 0;
     }
 
-    /**
-     * Flux {@code reclamation_new} : enregistre la réclamation, accusé de réception automatique, notification.
-     */
+    
     public void createForUserWithAutoAck(Reclamation reclamation, ReclamationNotificationService notifications)
             throws SQLException {
         reclamation.setStatus(ReclamationStatus.PENDING);
@@ -312,9 +303,7 @@ public class ReclamationService implements CRUD<Reclamation, Integer> {
         }
     }
 
-    /**
-     * Flux admin {@code admin_reclamation_reply} : statut {@link ReclamationStatus#ANSWERED}, persistance réponse, notification.
-     */
+    
     public void addAdminReply(int reclamationId, String replyContent, ReclamationNotificationService notifications)
             throws SQLException {
         Optional<Reclamation> opt = findById(reclamationId);
@@ -352,10 +341,7 @@ public class ReclamationService implements CRUD<Reclamation, Integer> {
         return r;
     }
 
-    /**
-     * Données hétérogènes (Symfony, imports, anciennes valeurs) : on ne bloque plus le chargement
-     * si {@code type} ne correspond pas exactement à l'enum.
-     */
+    
     private static ReclamationType mapTypeLoose(String raw) {
         String v = raw != null ? raw.trim() : null;
         ReclamationType t = ReclamationType.fromValue(v);

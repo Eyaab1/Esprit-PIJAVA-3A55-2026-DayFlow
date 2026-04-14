@@ -15,12 +15,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Persistance des réponses liées aux réclamations (équivalent {@code ResponseRepository} Symfony).
- */
+
 public class ReclamationResponseService implements CRUD<Response, Integer> {
 
-    /** Table Doctrine par défaut pour l'entité {@code Response} : {@code response}. */
+    
     private static final String INSERT = """
             INSERT INTO response (content, created_at, reclamation_id)
             VALUES (?, ?, ?)
