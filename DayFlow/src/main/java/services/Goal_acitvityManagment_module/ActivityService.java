@@ -5,6 +5,8 @@ import services.CRUD;
 import utils.DbConnexion;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ActivityService implements CRUD<Activity, Integer> {
 
@@ -89,5 +91,59 @@ public class ActivityService implements CRUD<Activity, Integer> {
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, id);
         ps.executeUpdate();
+    }
+
+    public List<Activity> findByRoutineId(int routineId) throws SQLException {
+        String sql = """
+                SELECT id, title, start_time, duration, status, priority, has_reminder, 
+                       reminder_at, deadline, is_favorite, completed_at, actual_duration_minutes, 
+                       planned_duration_minutes, created_at, updated_at, routine_id
+                FROM activity WHERE routine_id = ?
+                ORDER BY start_time ASC
+                """;
+        List<Activity> activities = new ArrayList<>();
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, routineId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Activity activity = new Activity();
+                    activity.setId(rs.getInt("id"));
+                    activity.setTitle(rs.getString("title"));
+                    
+                    Timestamp startTime = rs.getTimestamp("start_time");
+                    if (startTime != null) activity.setStartTime(startTime.toLocalDateTime());
+                    
+                    Time duration = rs.getTime("duration");
+                    if (duration != null) activity.setDuration(duration.toLocalTime());
+                    
+                    activity.setStatus(rs.getString("status"));
+                    activity.setPriority(rs.getString("priority"));
+                    activity.setHasReminder(rs.getBoolean("has_reminder"));
+                    
+                    Timestamp reminderAt = rs.getTimestamp("reminder_at");
+                    if (reminderAt != null) activity.setReminderAt(reminderAt.toLocalDateTime());
+                    
+                    Date deadline = rs.getDate("deadline");
+                    if (deadline != null) activity.setDeadline(deadline.toLocalDate());
+                    
+                    activity.setFavorite(rs.getBoolean("is_favorite"));
+                    
+                    Timestamp completedAt = rs.getTimestamp("completed_at");
+                    if (completedAt != null) activity.setCompletedAt(completedAt.toLocalDateTime());
+                    
+                    Integer actualDuration = (Integer) rs.getObject("actual_duration_minutes");
+                    if (actualDuration != null) activity.setActualDurationMinutes(actualDuration);
+                    
+                    Integer plannedDuration = (Integer) rs.getObject("planned_duration_minutes");
+                    if (plannedDuration != null) activity.setPlannedDurationMinutes(plannedDuration);
+                    
+                    Timestamp updatedAt = rs.getTimestamp("updated_at");
+                    if (updatedAt != null) activity.setUpdatedAt(updatedAt.toLocalDateTime());
+                    
+                    activities.add(activity);
+                }
+            }
+        }
+        return activities;
     }
 }

@@ -159,6 +159,10 @@ public class Activity {
     }
     public void setUpdatedAt(LocalDateTime t)                       { this.updatedAt              = t; }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     // ─── Getters ──────────────────────────────────────────────
 
     public int            getId()                      { return id; }

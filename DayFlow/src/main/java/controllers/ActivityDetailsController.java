@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.scene.layout.Priority;
 import model.goals_activity_management.Activity;
 import model.goals_activity_management.Routine;
 import services.Goal_acitvityManagment_module.ActivityService;
@@ -68,8 +69,7 @@ public class ActivityDetailsController {
     }
 
     private List<Activity> fetchActivitiesForRoutine(int routineId) throws SQLException {
-        // TODO: Add method to ActivityService to fetch by routine_id
-        return new ArrayList<>();
+        return activityService.findByRoutineId(routineId);
     }
 
     private void displayActivities() {
@@ -248,6 +248,28 @@ public class ActivityDetailsController {
             priorityChoice.getItems().addAll("low", "medium", "high");
             statusChoice.getItems().addAll("pending", "in_progress", "completed", "skipped", "cancelled");
             
+            // Validation en temps réel
+            titleField.textProperty().addListener((obs, old, newVal) -> {
+                utils.FormValidator.validateTextField(titleField,
+                    utils.FormValidator.Validators.lengthBetween(3, 255),
+                    "Le titre doit contenir entre 3 et 255 caractères");
+                updateActivitySaveButtonState(saveButton, titleField, startTimeField, durationField);
+            });
+            
+            startTimeField.textProperty().addListener((obs, old, newVal) -> {
+                utils.FormValidator.validateTextField(startTimeField,
+                    utils.FormValidator.Validators.isTimeFormat(),
+                    "Format: HH:mm (ex: 09:30)");
+                updateActivitySaveButtonState(saveButton, titleField, startTimeField, durationField);
+            });
+            
+            durationField.textProperty().addListener((obs, old, newVal) -> {
+                utils.FormValidator.validateTextField(durationField,
+                    utils.FormValidator.Validators.isPositiveNumber(),
+                    "La durée doit être un nombre positif (en minutes)");
+                updateActivitySaveButtonState(saveButton, titleField, startTimeField, durationField);
+            });
+            
             // Populate if editing
             if (activity != null) {
                 titleField.setText(activity.getTitle());
@@ -265,6 +287,9 @@ public class ActivityDetailsController {
                 startTimeField.setText("09:00");
                 durationField.setText("30");
             }
+            
+            // Initial validation
+            updateActivitySaveButtonState(saveButton, titleField, startTimeField, durationField);
             
             // Create dialog
             Stage dialog = new Stage();
@@ -330,5 +355,24 @@ public class ActivityDetailsController {
     private void showInfo(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION, message);
         alert.showAndWait();
+    }
+
+    private void updateActivitySaveButtonState(Button saveButton, TextField titleField, 
+                                               TextField startTimeField, TextField durationField) {
+        boolean isValid = titleField.getText() != null && 
+                         titleField.getText().trim().length() >= 3 &&
+                         titleField.getText().length() <= 255 &&
+                         startTimeField.getText() != null &&
+                         startTimeField.getText().matches("^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$") &&
+                         durationField.getText() != null &&
+                         durationField.getText().matches("\\d+") &&
+                         Integer.parseInt(durationField.getText()) > 0;
+        
+        saveButton.setDisable(!isValid);
+        if (!isValid) {
+            saveButton.setStyle("-fx-opacity: 0.5;");
+        } else {
+            saveButton.setStyle("");
+        }
     }
 }

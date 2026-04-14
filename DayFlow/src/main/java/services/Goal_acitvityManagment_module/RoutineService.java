@@ -5,6 +5,8 @@ import services.CRUD;
 import utils.DbConnexion;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RoutineService implements CRUD<Routine, Integer> {
 
@@ -75,5 +77,40 @@ public class RoutineService implements CRUD<Routine, Integer> {
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, id);
         ps.executeUpdate();
+    }
+
+    public List<Routine> findByGoalId(int goalId) throws SQLException {
+        String sql = """
+                SELECT id, title, description, visibility, status, priority, deadline, 
+                       is_favorite, created_at, updated_at, goal_id
+                FROM routine WHERE goal_id = ?
+                ORDER BY created_at DESC
+                """;
+        List<Routine> routines = new ArrayList<>();
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, goalId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Routine routine = new Routine();
+                    routine.setId(rs.getInt("id"));
+                    routine.setTitle(rs.getString("title"));
+                    routine.setDescription(rs.getString("description"));
+                    routine.setVisibility(rs.getString("visibility"));
+                    routine.setStatus(rs.getString("status"));
+                    routine.setPriority(rs.getString("priority"));
+                    
+                    Date deadline = rs.getDate("deadline");
+                    if (deadline != null) routine.setDeadline(deadline.toLocalDate());
+                    
+                    routine.setFavorite(rs.getBoolean("is_favorite"));
+                    
+                    Timestamp updatedAt = rs.getTimestamp("updated_at");
+                    if (updatedAt != null) routine.setUpdatedAt(updatedAt.toLocalDateTime());
+                    
+                    routines.add(routine);
+                }
+            }
+        }
+        return routines;
     }
 }

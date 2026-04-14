@@ -9,6 +9,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.scene.layout.Priority;
 import model.goals_activity_management.Goal;
 import model.goals_activity_management.Routine;
 import services.Goal_acitvityManagment_module.GoalService;
@@ -69,8 +70,7 @@ public class RoutineDetailsController {
     }
 
     private List<Routine> fetchRoutinesForGoal(int goalId) throws SQLException {
-        // TODO: Add method to RoutineService to fetch by goal_id
-        return new ArrayList<>();
+        return routineService.findByGoalId(goalId);
     }
 
     private void displayRoutines() {
@@ -254,6 +254,20 @@ public class RoutineDetailsController {
             priorityChoice.getItems().addAll("low", "medium", "high");
             statusChoice.getItems().addAll("draft", "active", "paused", "completed", "skipped");
             
+            // Validation en temps réel
+            titleField.textProperty().addListener((obs, old, newVal) -> {
+                utils.FormValidator.validateTextField(titleField,
+                    utils.FormValidator.Validators.lengthBetween(3, 255),
+                    "Le titre doit contenir entre 3 et 255 caractères");
+                updateRoutineSaveButtonState(saveButton, titleField);
+            });
+            
+            descriptionField.textProperty().addListener((obs, old, newVal) -> {
+                utils.FormValidator.validateTextArea(descriptionField,
+                    utils.FormValidator.Validators.maxLength(1000),
+                    "La description ne peut pas dépasser 1000 caractères");
+            });
+            
             // Populate if editing
             if (routine != null) {
                 titleField.setText(routine.getTitle());
@@ -269,6 +283,9 @@ public class RoutineDetailsController {
                 priorityChoice.setValue("medium");
                 statusChoice.setValue("draft");
             }
+            
+            // Initial validation
+            updateRoutineSaveButtonState(saveButton, titleField);
             
             // Create dialog
             Stage dialog = new Stage();
@@ -336,5 +353,18 @@ public class RoutineDetailsController {
     private void showInfo(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION, message);
         alert.showAndWait();
+    }
+
+    private void updateRoutineSaveButtonState(Button saveButton, TextField titleField) {
+        boolean isValid = titleField.getText() != null && 
+                         titleField.getText().trim().length() >= 3 &&
+                         titleField.getText().length() <= 255;
+        
+        saveButton.setDisable(!isValid);
+        if (!isValid) {
+            saveButton.setStyle("-fx-opacity: 0.5;");
+        } else {
+            saveButton.setStyle("");
+        }
     }
 }

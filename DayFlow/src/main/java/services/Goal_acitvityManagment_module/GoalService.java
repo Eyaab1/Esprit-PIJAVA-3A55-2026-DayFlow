@@ -43,6 +43,9 @@ public class GoalService implements CRUD<Goal, Integer> {
 
     @Override
     public void insert(Goal goal) throws SQLException {
+        if (goal.getStartDate() != null && goal.getEndDate() != null && goal.getEndDate().isBefore(goal.getStartDate())) {
+            throw new IllegalArgumentException("La date de fin ne peut pas être avant la date de début");
+        }
         try (PreparedStatement ps = cnx.prepareStatement(INSERT_GOAL, Statement.RETURN_GENERATED_KEYS)) {
             int i = 1;
             ps.setString(i++, goal.getTitle());
@@ -87,6 +90,9 @@ public class GoalService implements CRUD<Goal, Integer> {
 
     @Override
     public void update(Goal goal) throws SQLException {
+        if (goal.getStartDate() != null && goal.getEndDate() != null && goal.getEndDate().isBefore(goal.getStartDate())) {
+            throw new IllegalArgumentException("La date de fin ne peut pas être avant la date de début");
+        }
         try (PreparedStatement ps = cnx.prepareStatement(UPDATE_GOAL)) {
             int i = 1;
             ps.setString(i++, goal.getTitle());

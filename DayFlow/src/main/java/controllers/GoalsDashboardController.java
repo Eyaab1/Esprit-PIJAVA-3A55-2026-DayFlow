@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.scene.layout.Priority;
 import model.goals_activity_management.Goal;
 import services.Goal_acitvityManagment_module.GoalService;
 import session.AppSession;
@@ -271,6 +272,41 @@ public class GoalsDashboardController {
             priorityChoice.getItems().addAll("low", "medium", "high");
             statusChoice.getItems().addAll("draft", "active", "paused", "completed", "failed");
             
+            // Validation en temps réel
+            titleField.textProperty().addListener((obs, old, newVal) -> {
+                utils.FormValidator.validateTextField(titleField, 
+                    utils.FormValidator.Validators.lengthBetween(3, 255),
+                    "Le titre doit contenir entre 3 et 255 caractères");
+                updateSaveButtonState(saveButton, titleField, startDatePicker, endDatePicker);
+            });
+            
+            descriptionField.textProperty().addListener((obs, old, newVal) -> {
+                utils.FormValidator.validateTextArea(descriptionField,
+                    utils.FormValidator.Validators.maxLength(1000),
+                    "La description ne peut pas dépasser 1000 caractères");
+            });
+            
+            startDatePicker.valueProperty().addListener((obs, old, newVal) -> {
+                utils.FormValidator.validateDatePicker(startDatePicker,
+                    utils.FormValidator.Validators.notNull(),
+                    "La date de début est obligatoire");
+                if (endDatePicker.getValue() != null) {
+                    utils.FormValidator.validateDatePicker(endDatePicker,
+                        date -> date != null && !date.isBefore(newVal),
+                        "La date de fin ne peut pas être avant la date de début");
+                }
+                updateSaveButtonState(saveButton, titleField, startDatePicker, endDatePicker);
+            });
+            
+            endDatePicker.valueProperty().addListener((obs, old, newVal) -> {
+                if (startDatePicker.getValue() != null) {
+                    utils.FormValidator.validateDatePicker(endDatePicker,
+                        date -> date != null && !date.isBefore(startDatePicker.getValue()),
+                        "La date de fin ne peut pas être avant la date de début");
+                }
+                updateSaveButtonState(saveButton, titleField, startDatePicker, endDatePicker);
+            });
+            
             // Populate if editing
             if (goal != null) {
                 titleField.setText(goal.getTitle());
@@ -287,6 +323,9 @@ public class GoalsDashboardController {
                 startDatePicker.setValue(LocalDate.now());
                 endDatePicker.setValue(LocalDate.now().plusDays(30));
             }
+            
+            // Initial validation
+            updateSaveButtonState(saveButton, titleField, startDatePicker, endDatePicker);
             
             // Create dialog
             Stage dialog = new Stage();
@@ -330,6 +369,24 @@ public class GoalsDashboardController {
             dialog.showAndWait();
         } catch (IOException e) {
             showError("Erreur lors de l'ouverture du formulaire: " + e.getMessage());
+        }
+    }
+
+    private void updateSaveButtonState(Button saveButton, TextField titleField, 
+                                       DatePicker startDatePicker, DatePicker endDatePicker) {
+        boolean isValid = titleField.getText() != null && 
+                         titleField.getText().trim().length() >= 3 &&
+                         titleField.getText().length() <= 255 &&
+                         startDatePicker.getValue() != null &&
+                         endDatePicker.getValue() != null &&
+                         (startDatePicker.getValue() == null || endDatePicker.getValue() == null ||
+                          !endDatePicker.getValue().isBefore(startDatePicker.getValue()));
+        
+        saveButton.setDisable(!isValid);
+        if (!isValid) {
+            saveButton.setStyle("-fx-opacity: 0.5;");
+        } else {
+            saveButton.setStyle("");
         }
     }
 
