@@ -12,14 +12,16 @@
 }
 
 .rd-back {
-    -fx-text-fill: #6366f1;
-    -fx-font-size: 13px;
+    -fx-text-fill: #4338ca;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
     -fx-border-color: transparent;
-    -fx-padding: 0;
+    -fx-padding: 4 0 8 0;
 }
 
 .rd-back:hover {
     -fx-underline: true;
+    -fx-text-fill: #3730a3;
 }
 
 .rd-header-card {
@@ -157,8 +159,8 @@
 
 /* —— Carte activité (exemple maquette) —— */
 .activity-card {
-    -fx-spacing: 12;
-    -fx-padding: 18;
+    -fx-spacing: 14;
+    -fx-padding: 20 20 18 20;
     -fx-background-color: white;
     -fx-background-radius: 15;
     -fx-border-color: #a855f7;
@@ -199,8 +201,8 @@
 }
 
 .activity-timer-box {
-    -fx-spacing: 10;
-    -fx-padding: 14;
+    -fx-spacing: 8;
+    -fx-padding: 12 14;
     -fx-background-color: #f3e8ff;
     -fx-background-radius: 10;
 }
@@ -219,9 +221,17 @@
 }
 
 .activity-timer-big {
-    -fx-font-size: 28px;
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
     -fx-text-fill: #7c3aed;
+}
+
+.activity-card-meta {
+    -fx-spacing: 6;
+}
+
+.activity-card-actions {
+    -fx-alignment: center-right;
 }
 
 .activity-timer-progress {
@@ -287,25 +297,40 @@
     -fx-padding: 4 0;
 }
 
-.activity-btn-modifier {
-    -fx-background-color: white;
-    -fx-text-fill: #3b82f6;
-    -fx-border-color: #3b82f6;
-    -fx-border-radius: 10;
-    -fx-border-width: 1.5;
-    -fx-padding: 10 16;
-    -fx-font-weight: 600;
-    -fx-cursor: hand;
+.activity-card-footer {
+    -fx-padding: 12 0 0 0;
+    -fx-border-color: #ede9fe;
+    -fx-border-width: 1 0 0 0;
+    -fx-alignment: center-left;
 }
 
-.activity-btn-del-icon {
-    -fx-min-width: 44;
-    -fx-min-height: 44;
-    -fx-background-color: white;
-    -fx-border-color: #ef4444;
+.activity-btn-modifier,
+.activity-btn-del {
+    -fx-background-radius: 10;
     -fx-border-radius: 10;
     -fx-border-width: 1.5;
-    -fx-text-fill: #ef4444;
-    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-font-size: 12px;
     -fx-cursor: hand;
+    -fx-padding: 0 10;
+}
+
+.activity-btn-modifier {
+    -fx-background-color: #eff6ff;
+    -fx-text-fill: #1d4ed8;
+    -fx-border-color: #3b82f6;
+}
+
+.activity-btn-modifier:hover {
+    -fx-background-color: #dbeafe;
+}
+
+.activity-btn-del {
+    -fx-background-color: #fff1f2;
+    -fx-border-color: #f87171;
+    -fx-text-fill: #dc2626;
+}
+
+.activity-btn-del:hover {
+    -fx-background-color: #ffe4e6;
 }

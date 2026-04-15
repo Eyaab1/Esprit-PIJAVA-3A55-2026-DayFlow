@@ -1,17 +1,6 @@
-/* Dialogue Nouvelle activité — en-tête violet */
+/* Dialogue activité — pas d'en-tête JavaFX dupliqué (headerText null) */
 .activity-dialog-pane {
-    -fx-min-width: 440;
-}
-
-.activity-dialog-pane > .header-panel {
-    -fx-background-color: #7c3aed;
-    -fx-padding: 14 18;
-}
-
-.activity-dialog-pane > .header-panel > .label {
-    -fx-text-fill: white;
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
+    -fx-min-width: 480;
 }
 
 .activity-dialog-pane > .button-bar > .container > .details-button {
@@ -22,9 +11,22 @@
     -fx-padding: 0;
 }
 
-.activity-form-root {
-    -fx-spacing: 14;
-    -fx-padding: 20;
+.activity-dialog-shell {
+    -fx-background-color: white;
+}
+
+.activity-dialog-heading {
+    -fx-background-color: #7c3aed;
+    -fx-text-fill: white;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-padding: 16 22;
+    -fx-background-radius: 10 10 0 0;
+}
+
+.activity-form-body {
+    -fx-spacing: 18;
+    -fx-padding: 18 22 8 22;
     -fx-background-color: white;
 }
 
@@ -49,11 +51,19 @@
     -fx-border-width: 1;
 }
 
+.activity-dialog-pane > .button-bar {
+    -fx-padding: 12 20 16 20;
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1 0 0 0;
+}
+
 .activity-btn-save {
     -fx-background-color: #7c3aed;
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-padding: 10 24;
+    -fx-padding: 10 28;
+    -fx-min-height: 40;
     -fx-background-radius: 10;
     -fx-cursor: hand;
 }
@@ -68,7 +78,8 @@
     -fx-border-color: #cbd5e1;
     -fx-border-radius: 10;
     -fx-border-width: 1;
-    -fx-padding: 10 20;
+    -fx-padding: 10 22;
+    -fx-min-height: 40;
     -fx-background-radius: 10;
     -fx-cursor: hand;
 }

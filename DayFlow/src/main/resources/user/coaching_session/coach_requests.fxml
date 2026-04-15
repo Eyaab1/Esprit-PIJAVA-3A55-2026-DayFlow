@@ -6,7 +6,7 @@
 <?import javafx.scene.text.Font?>
 
 <ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="controllers.coach.CoachRequestsController"
+            fx:controller="controllers.coaching_session.CoachRequestsController"
             fitToWidth="true" style="-fx-background-color: #f0f4f8; -fx-background: #f0f4f8;">
 
     <VBox spacing="0" style="-fx-background-color: #f0f4f8;">

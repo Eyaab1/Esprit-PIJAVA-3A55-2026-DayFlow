@@ -13,9 +13,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import services.admin_module.AdminGoalService;
-import services.admin_module.AdminGoalService.AdminGoalRow;
-import services.admin_module.AdminGoalService.SortOrder;
+import services.admin.AdminGoalService;
+import services.admin.AdminGoalService.AdminGoalRow;
+import services.admin.AdminGoalService.SortOrder;
 
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;

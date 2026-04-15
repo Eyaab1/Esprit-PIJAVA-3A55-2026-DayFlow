@@ -13,8 +13,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import services.admin_module.AdminStatsService;
-import services.admin_module.AdminStatsService.UserCardRow;
+import services.admin.AdminStatsService;
+import services.admin.AdminStatsService.UserCardRow;
 
 import java.sql.SQLException;
 import java.util.List;

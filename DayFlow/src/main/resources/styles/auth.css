@@ -20,6 +20,13 @@
     -fx-text-fill: #5d6b8a;
 }
 
+.auth-field-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #4a5878;
+    -fx-padding: 8 0 0 0;
+}
+
 .text-field,
 .password-field,
 .date-picker,

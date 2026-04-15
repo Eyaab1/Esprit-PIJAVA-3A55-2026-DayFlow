@@ -1,6 +1,6 @@
 package controllers.admin;
 
-import controllers.auth.AuthNavigation;
+import controllers.account.AuthNavigation;
 import controllers.components.NavbarController;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;

@@ -38,6 +38,13 @@
     -fx-alignment: center;
     -fx-background-radius: 18px;
     -fx-padding: 0;
+    -fx-underline: false;
+    -fx-border-width: 0;
+}
+
+.navbar-avatar:hover {
+    -fx-background-color: #5b4cdb;
+    -fx-text-fill: white;
 }
 
 .navbar-spacer {

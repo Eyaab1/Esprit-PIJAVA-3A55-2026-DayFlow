@@ -6,7 +6,7 @@
 <?import javafx.scene.text.Font?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="controllers.coach.AddSessionController"
+            fx:controller="controllers.coaching_session.AddSessionController"
             minWidth="380" minHeight="420"
             prefWidth="560" prefHeight="680"
             style="-fx-background-color: #f5f7fb;">

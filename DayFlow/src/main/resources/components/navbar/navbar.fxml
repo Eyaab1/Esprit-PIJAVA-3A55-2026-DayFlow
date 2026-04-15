@@ -34,7 +34,7 @@
 
     <Region styleClass="navbar-spacer" HBox.hgrow="ALWAYS"/>
 
-    <Label fx:id="avatarLabel" text="?" styleClass="navbar-avatar" alignment="CENTER"/>
+    <Hyperlink fx:id="avatarLink" text="?" styleClass="navbar-avatar" alignment="CENTER" onAction="#onProfile" />
     <Separator orientation="VERTICAL" prefHeight="24"/>
     <Hyperlink text="Déconnexion" onAction="#onLogout"/>
 </HBox>

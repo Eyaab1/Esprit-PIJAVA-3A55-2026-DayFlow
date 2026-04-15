@@ -6,7 +6,7 @@
 
 <VBox spacing="20" xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="controllers.MainController"
+      fx:controller="controllers.account.MainController"
       prefWidth="400" prefHeight="300" alignment="CENTER">
     <padding><Insets top="30" right="40" bottom="30" left="40"/></padding>
 

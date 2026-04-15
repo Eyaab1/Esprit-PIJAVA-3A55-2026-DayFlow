@@ -12,18 +12,15 @@ public class Message {
 
     private int chatroomId;
     private int authorId;
+    private int replyToId; // 0 = pas une réponse
 
     public Message() {
-        this.content = "";
         this.createdAt = LocalDateTime.now();
         this.isPinned = false;
         this.isEdited = false;
     }
 
     public Message(String content, int chatroomId, int authorId) {
-        if (content == null || content.trim().isEmpty()) {
-            throw new IllegalArgumentException("Content required");
-        }
         setContent(content);
         setChatroomId(chatroomId);
         setAuthorId(authorId);
@@ -32,10 +29,7 @@ public class Message {
         this.isEdited = false;
     }
 
-    /**
-     * Accepte un contenu vide pour l’hydratation depuis la BD (NULL ou chaîne vide).
-     * Les nouveaux messages sont validés côté service avant insertion.
-     */
+    /** NULL ou vide (BD) → chaîne vide. La validation des envois se fait dans MessageValidator / postMessage. */
     public void setContent(String content) {
         if (content == null || content.trim().isEmpty()) {
             this.content = "";
@@ -88,6 +82,9 @@ public class Message {
     public boolean isEdited() {
         return isEdited;
     }
+
+    public int getReplyToId()              { return replyToId; }
+    public void setReplyToId(int replyToId){ this.replyToId = replyToId; }
 
     public void setId(int id) {
         this.id = id;

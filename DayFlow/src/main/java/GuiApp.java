@@ -1,9 +1,12 @@
-import controllers.ShellController;
+import controllers.account.ShellController;
 import controllers.navigation.NavigationManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -23,6 +26,18 @@ public class GuiApp extends Application {
 
             NavigationManager.init(stage, shell);
             NavigationManager.show("/user/account/landing.fxml", "DayFlow");
+
+            scene.getAccelerators().put(
+                    new KeyCodeCombination(KeyCode.LEFT, KeyCombination.ALT_DOWN),
+                    () -> {
+                        try {
+                            if (NavigationManager.canGoBack()) {
+                                NavigationManager.goBack();
+                            }
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
 
             stage.show();
         } catch (IOException e) {

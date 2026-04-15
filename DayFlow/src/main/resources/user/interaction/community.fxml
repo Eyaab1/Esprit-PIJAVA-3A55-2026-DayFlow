@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="controllers.community.CommunityController"
+      fx:controller="controllers.interaction.CommunityController"
       alignment="TOP_CENTER" styleClass="community-root" stylesheets="@community.css">
    <children>
       <VBox alignment="TOP_CENTER" styleClass="community-inner">

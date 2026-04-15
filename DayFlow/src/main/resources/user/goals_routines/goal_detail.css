@@ -12,14 +12,16 @@
 }
 
 .gd-back {
-    -fx-text-fill: #6366f1;
-    -fx-font-size: 13px;
+    -fx-text-fill: #4338ca;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
     -fx-border-color: transparent;
-    -fx-padding: 0;
+    -fx-padding: 4 0 8 0;
 }
 
 .gd-back:hover {
     -fx-underline: true;
+    -fx-text-fill: #3730a3;
 }
 
 .gd-title {
@@ -209,4 +211,36 @@
 .gd-routine-meta {
     -fx-font-size: 12px;
     -fx-text-fill: #64748b;
+}
+
+.gd-goal-actions {
+    -fx-padding: 4 0 8 0;
+    -fx-spacing: 10;
+}
+
+.btn-gd-edit-goal {
+    -fx-background-color: #6366f1;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-padding: 8 16;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.btn-gd-delete-goal {
+    -fx-background-color: transparent;
+    -fx-text-fill: #b91c1c;
+    -fx-border-color: #fecaca;
+    -fx-border-radius: 10;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.btn-gd-delete-routine {
+    -fx-background-color: #fef2f2;
+    -fx-text-fill: #b91c1c;
+    -fx-font-size: 12px;
+    -fx-padding: 6 12;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
 }

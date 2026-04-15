@@ -12,8 +12,8 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import model.coaching_session.CoachingRequest;
-import services.coaching_session_module.CoachingRequestService;
-import services.coaching_session_module.CoachingRequestService.AdminCoachRequestRow;
+import services.coaching_session.CoachingRequestService;
+import services.coaching_session.CoachingRequestService.AdminCoachRequestRow;
 
 import java.sql.SQLException;
 import java.time.ZoneId;

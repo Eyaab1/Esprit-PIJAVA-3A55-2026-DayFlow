@@ -6,7 +6,7 @@
 <?import javafx.scene.text.Font?>
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="controllers.MesDemandesController"
+      fx:controller="controllers.coaching_session.MesDemandesController"
       spacing="25" style="-fx-background-color: #f5f7fb;">
     <padding>
         <Insets top="40" right="40" bottom="40" left="40"/>

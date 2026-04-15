@@ -8,9 +8,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import services.admin_module.AdminStatsService;
-import services.admin_module.AdminStatsService.RecentRequestRow;
-import services.admin_module.AdminStatsService.RecentSessionRow;
+import services.admin.AdminStatsService;
+import services.admin.AdminStatsService.RecentRequestRow;
+import services.admin.AdminStatsService.RecentSessionRow;
 
 import java.io.IOException;
 import java.sql.SQLException;

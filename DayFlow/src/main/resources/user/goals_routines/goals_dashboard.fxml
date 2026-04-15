@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="controllers.goals.GoalsDashboardController"
+      fx:controller="controllers.goals_routines.GoalsDashboardController"
       styleClass="goals-page-root" stylesheets="@goals_dashboard.css">
    <children>
       <VBox styleClass="goals-hero" VBox.vgrow="NEVER">

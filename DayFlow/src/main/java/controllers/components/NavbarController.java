@@ -1,11 +1,10 @@
 package controllers.components;
 
-import controllers.auth.AuthNavigation;
+import controllers.account.AuthNavigation;
 import controllers.navigation.NavigationManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
 import session.AppSession;
 
 import java.io.IOException;
@@ -17,7 +16,7 @@ public class NavbarController {
     @FXML
     private Hyperlink manageSessionsLink;
     @FXML
-    private Label avatarLabel;
+    private Hyperlink avatarLink;
 
     @FXML
     private void initialize() {
@@ -40,9 +39,18 @@ public class NavbarController {
     }
 
     private void applyAvatar() {
-        avatarLabel.setText(AppSession.getCurrentUser()
+        avatarLink.setText(AppSession.getCurrentUser()
                 .map(u -> initials(u.getFirstName(), u.getLastName()))
                 .orElse("?"));
+    }
+
+    @FXML
+    private void onProfile() {
+        if (AppSession.getCurrentUser().isEmpty()) {
+            toastSoon("Profil");
+            return;
+        }
+        navigate("/user/account/user_profile.fxml", "DayFlow — Profil");
     }
 
     private static String initials(String first, String last) {
@@ -63,7 +71,7 @@ public class NavbarController {
 
     @FXML
     private void onObjectifs() {
-        navigate("/user/goals_routines/goals-dashboard.fxml", "DayFlow — Mes objectifs");
+        navigate("/user/goals_routines/goals_dashboard.fxml", "DayFlow — Mes objectifs");
     }
 
     @FXML

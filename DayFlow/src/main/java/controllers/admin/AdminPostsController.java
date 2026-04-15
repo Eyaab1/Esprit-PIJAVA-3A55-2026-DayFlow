@@ -14,11 +14,11 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import model.interaction.Tag;
-import services.admin_module.AdminPostService;
-import services.admin_module.AdminPostService.AdminPostRow;
-import services.admin_module.AdminPostService.SortOrder;
-import services.admin_module.AdminPostService.TrendFilter;
-import services.tag.TagService;
+import services.admin.AdminPostService;
+import services.admin.AdminPostService.AdminPostRow;
+import services.admin.AdminPostService.SortOrder;
+import services.admin.AdminPostService.TrendFilter;
+import services.interaction.TagService;
 
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;

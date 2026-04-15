@@ -12,7 +12,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import model.reclamation.Reclamation;
 import model.reclamation.Response;
-import services.reclamation_services.ReclamationService;
+import services.reclamation.ReclamationService;
 import session.AppSession;
 
 import java.sql.SQLException;
