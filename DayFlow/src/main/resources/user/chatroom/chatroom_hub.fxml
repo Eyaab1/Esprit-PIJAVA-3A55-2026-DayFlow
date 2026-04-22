@@ -22,8 +22,8 @@
 
             <!-- Logo + titre -->
             <HBox alignment="CENTER_LEFT" spacing="10" styleClass="sidebar-header">
-                <StackPane maxHeight="36" maxWidth="36" minHeight="36" minWidth="36" style="-fx-background-color:#6c63ff; -fx-background-radius:10;">
-                    <Label style="-fx-text-fill:white; -fx-font-weight:bold; -fx-font-size:13px;" text="DF" />
+                <StackPane maxHeight="36" maxWidth="36" minHeight="36" minWidth="36" styleClass="brand-badge">
+                    <Label styleClass="brand-badge-text" text="DF" />
                 </StackPane>
                 <Label styleClass="sidebar-app-title" text="DayFlow Chat" />
             </HBox>
@@ -31,13 +31,12 @@
             <!-- Barre de recherche -->
             <HBox alignment="CENTER_LEFT" spacing="8" styleClass="sidebar-search-wrap">
                 <padding><Insets bottom="0" left="14" right="14" top="0" /></padding>
-                <Label style="-fx-font-size:13px; -fx-text-fill:#9ca3af;" text="🔍" />
+                <Label styleClass="icon-muted" text="🔍" />
                 <TextField fx:id="searchField" promptText="Search..." styleClass="sidebar-search" HBox.hgrow="ALWAYS" />
             </HBox>
 
             <!-- Feedback erreur recherche -->
-            <Label fx:id="searchErrorLabel" text="" managed="false" visible="false"
-                   style="-fx-text-fill:#ef4444; -fx-font-size:11px; -fx-padding:0 16 4 16;"/>
+            <Label fx:id="searchErrorLabel" text="" managed="false" visible="false" styleClass="field-error" />
 
             <!-- Label section -->
             <Label styleClass="chat-sidebar-title" text="RECENT CHATS" />
@@ -63,19 +62,16 @@
                     <Label fx:id="headerSubLabel" styleClass="chat-sub" text="" />
                 </VBox>
                 <!-- Avatar groupe (initiales) -->
-                <StackPane managed="false" maxHeight="40" maxWidth="40" minHeight="40" minWidth="40" style="-fx-background-color:#6c63ff; -fx-background-radius:50%;" visible="false">
+                <StackPane managed="false" maxHeight="40" maxWidth="40" minHeight="40" minWidth="40" styleClass="avatar header-avatar" visible="false">
                     <Label fx:id="headerAvatarLabel" styleClass="avatar-text" text="?" />
                 </StackPane>
                 <Region prefWidth="8" />
-                <Button onAction="#onToggleSearch" text="🔍"
-                        style="-fx-background-color:transparent; -fx-font-size:16px;
-                               -fx-cursor:hand; -fx-padding:4 8;"
-                        focusTraversable="false"/>
+                <Button onAction="#onToggleSearch" text="🔍" styleClass="icon-btn" focusTraversable="false"/>
                 <!-- Boutons admin (cachés par défaut) -->
                 <Button fx:id="pendingBtn" managed="false" onAction="#onPendingRequests" styleClass="btn-pending" text="⏳ Demandes" visible="false" />
-                <Button fx:id="lockBtn" managed="false" onAction="#onLock" styleClass="btn-admin,btn-lock" text="🔒" visible="false" />
-                <Button fx:id="archiveBtn" managed="false" onAction="#onArchive" styleClass="btn-admin,btn-archive" text="📦" visible="false" />
-                <Button fx:id="deleteBtn" managed="false" onAction="#onDeleteRoom" styleClass="btn-admin,btn-delete" text="🗑" visible="false" />
+                <Button fx:id="lockBtn" managed="false" onAction="#onLock" styleClass="btn-admin btn-lock" text="🔒" visible="false" />
+                <Button fx:id="archiveBtn" managed="false" onAction="#onArchive" styleClass="btn-admin btn-archive" text="📦" visible="false" />
+                <Button fx:id="deleteBtn" managed="false" onAction="#onDeleteRoom" styleClass="btn-admin btn-delete" text="🗑" visible="false" />
             </HBox>
 
             <!-- Corps : messages (centre) + saisie (bas) -->
@@ -83,39 +79,24 @@
                 <top>
                     <VBox>
                         <!-- Bannière message épinglé (style WhatsApp) -->
-                        <VBox fx:id="pinnedBanner" visible="false" managed="false"
-                              style="-fx-background-color:white; -fx-border-color:#e8ecf0;
-                                     -fx-border-width:0 0 1 0; -fx-cursor:hand;">
-                            <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding:8 16;">
-                                <Label text="📌" style="-fx-font-size:13px; -fx-text-fill:#6c63ff;"/>
+                        <VBox fx:id="pinnedBanner" visible="false" managed="false" styleClass="pinned-banner">
+                            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="pinned-banner-row">
+                                <Label text="📌" styleClass="pinned-icon"/>
                                 <VBox spacing="1" HBox.hgrow="ALWAYS">
-                                    <Label text="Message épinglé"
-                                           style="-fx-font-size:10px; -fx-font-weight:bold; -fx-text-fill:#6c63ff;"/>
-                                    <Label fx:id="pinnedBannerText" text=""
-                                           style="-fx-font-size:12px; -fx-text-fill:#374151;" maxWidth="400"/>
+                                    <Label text="Message épinglé" styleClass="pinned-title"/>
+                                    <Label fx:id="pinnedBannerText" text="" styleClass="pinned-text" maxWidth="400"/>
                                 </VBox>
-                                <Button text="✕" onAction="#onUnpinMessage" focusTraversable="false"
-                                        style="-fx-background-color:transparent; -fx-text-fill:#9ca3af;
-                                               -fx-font-size:13px; -fx-cursor:hand; -fx-padding:2 6;"/>
+                                <Button text="✕" onAction="#onUnpinMessage" focusTraversable="false" styleClass="icon-btn icon-btn-sm"/>
                             </HBox>
                         </VBox>
 
                         <!-- Barre de recherche dans les messages -->
-                        <HBox fx:id="searchMsgBar" alignment="CENTER_LEFT" spacing="8"
-                              visible="false" managed="false"
-                              style="-fx-background-color:#f0f1f8; -fx-padding:6 16;
-                                     -fx-border-color:#e8ecf0; -fx-border-width:0 0 1 0;">
-                            <Label text="🔍" style="-fx-font-size:13px; -fx-text-fill:#6c63ff;"/>
+                        <HBox fx:id="searchMsgBar" alignment="CENTER_LEFT" spacing="8" visible="false" managed="false" styleClass="search-msg-bar">
+                            <Label text="🔍" styleClass="search-msg-icon"/>
                             <TextField fx:id="msgSearchField" promptText="Rechercher dans les messages..."
-                                       HBox.hgrow="ALWAYS"
-                                       style="-fx-background-color:white; -fx-background-radius:8;
-                                              -fx-border-color:#e8ecf0; -fx-border-radius:8;
-                                              -fx-padding:6 12; -fx-font-size:13px;"/>
-                            <Label fx:id="searchResultLabel" text=""
-                                   style="-fx-font-size:11px; -fx-text-fill:#9ca3af;"/>
-                            <Button text="✕" onAction="#onCloseSearch" focusTraversable="false"
-                                    style="-fx-background-color:transparent; -fx-text-fill:#9ca3af;
-                                           -fx-font-size:14px; -fx-cursor:hand; -fx-padding:2 6;"/>
+                                       HBox.hgrow="ALWAYS" styleClass="search-msg-field"/>
+                            <Label fx:id="searchResultLabel" text="" styleClass="search-msg-result"/>
+                            <Button text="✕" onAction="#onCloseSearch" focusTraversable="false" styleClass="icon-btn icon-btn-sm"/>
                         </HBox>
                     </VBox>
                 </top>
@@ -129,12 +110,28 @@
                     </ScrollPane>
                 </center>
                 <bottom>
-                    <HBox alignment="CENTER_LEFT" spacing="12" styleClass="chat-input-row">
-                        <Label mouseTransparent="true" pickOnBounds="false" styleClass="input-icon" text="📎" />
-                        <TextField fx:id="messageField" editable="true" focusTraversable="true" promptText="Your message..." styleClass="chat-field" HBox.hgrow="ALWAYS" />
-                        <Label mouseTransparent="true" pickOnBounds="false" styleClass="input-icon" text="🎤" />
-                        <Button focusTraversable="false" onAction="#onSendMessage" styleClass="btn-send" text="➤" />
-                    </HBox>
+                    <VBox>
+                        <!-- Zone traduction (indicateur + résultat) -->
+                        <VBox fx:id="translationZone" visible="false" managed="false" styleClass="translation-zone">
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <Label fx:id="translationStatusLabel" text="🌐 Traduction en cours..." styleClass="translation-status"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button text="✕" onAction="#onCloseTranslation" focusTraversable="false" styleClass="icon-btn icon-btn-sm"/>
+                            </HBox>
+                            <Label fx:id="translationResultLabel" text="" wrapText="true" styleClass="translation-result"/>
+                            <Label fx:id="translationOriginalLabel" text="" wrapText="true" styleClass="translation-original"/>
+                        </VBox>
+
+                        <!-- Barre d'input -->
+                        <HBox alignment="CENTER_LEFT" spacing="8" styleClass="chat-input-row">
+                            <Button text="📎" onAction="#onAttachMenu" focusTraversable="false" styleClass="icon-btn input-icon"/>
+                            <TextField fx:id="messageField" editable="true" focusTraversable="true"
+                                       promptText="Your message..." styleClass="chat-field" HBox.hgrow="ALWAYS" />
+                            <Button text="😊" onAction="#onEmojiPicker" focusTraversable="false" styleClass="icon-btn input-icon"/>
+                            <Button fx:id="recordBtn" text="🎤" onAction="#onToggleRecord" focusTraversable="false" styleClass="icon-btn input-icon"/>
+                            <Button focusTraversable="false" onAction="#onSendMessage" styleClass="btn-send" text="➤" />
+                        </HBox>
+                    </VBox>
                 </bottom>
             </BorderPane>
 
@@ -158,7 +155,7 @@
                     <VBox spacing="0">
 
                         <!-- Section Files -->
-                        <Label style="-fx-font-size:12px; -fx-font-weight:bold;                                       -fx-text-fill:#9ca3af; -fx-padding:14 16 8 16;" text="Files" />
+                        <Label styleClass="section-muted-title" text="Files" />
 
                         <!-- Photos -->
                         <HBox alignment="CENTER_LEFT" spacing="12" styleClass="file-row">
@@ -189,9 +186,10 @@
                         </HBox>
 
                         <!-- Section Members -->
-                        <HBox alignment="CENTER_LEFT" style="-fx-padding:14 16 8 16;">
+                        <HBox alignment="CENTER_LEFT" styleClass="members-section-row">
                             <Label fx:id="memberCountLabel" styleClass="members-section-title" text="Members" />
                             <Region HBox.hgrow="ALWAYS" />
+                            <Button text="📊" onAction="#onShowActivity" focusTraversable="false" styleClass="icon-btn icon-primary"/>
                         </HBox>
 
                         <ListView fx:id="membersListView" prefHeight="320" styleClass="members-list" />

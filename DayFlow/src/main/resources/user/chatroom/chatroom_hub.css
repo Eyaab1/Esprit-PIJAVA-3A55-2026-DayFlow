@@ -7,6 +7,26 @@
 /* ══ ROOT ═════════════════════════════════════ */
 .chat-root { -fx-background-color: #f5f6fa; }
 
+.brand-badge {
+    -fx-background-color: linear-gradient(to bottom right, #6c63ff, #5a52e0);
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(108,99,255,0.24), 8, 0, 0, 2);
+}
+.brand-badge-text {
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-font-size: 13px;
+}
+.icon-muted {
+    -fx-font-size: 13px;
+    -fx-text-fill: #9ca3af;
+}
+.field-error {
+    -fx-text-fill: #ef4444;
+    -fx-font-size: 11px;
+    -fx-padding: 0 16 4 16;
+}
+
 /* ══ SIDEBAR ══════════════════════════════════ */
 .chat-sidebar {
     -fx-background-color: #ffffff;
@@ -96,6 +116,9 @@
 .avatar {
     -fx-background-radius: 50%;
 }
+.header-avatar {
+    -fx-background-color: linear-gradient(to bottom right, #6c63ff, #5a52e0);
+}
 .avatar-text {
     -fx-text-fill: white;
     -fx-font-weight: bold;
@@ -127,6 +150,29 @@
     -fx-border-width: 0 0 1 0;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 6, 0, 0, 2);
 }
+.icon-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #9ca3af;
+    -fx-font-size: 15px;
+    -fx-padding: 4 8;
+    -fx-cursor: hand;
+    -fx-background-radius: 8;
+}
+.icon-btn:hover {
+    -fx-background-color: #f3f4f6;
+    -fx-text-fill: #6b7280;
+}
+.icon-btn-sm {
+    -fx-font-size: 13px;
+    -fx-padding: 2 6;
+}
+.icon-primary {
+    -fx-text-fill: #6c63ff;
+}
+.icon-primary:hover {
+    -fx-text-fill: #5a52e0;
+    -fx-background-color: #eeecff;
+}
 .chat-title {
     -fx-font-size: 20px;
     -fx-font-weight: bold;
@@ -146,6 +192,52 @@
 .chat-messages > .viewport { -fx-background-color: #f5f6fa; }
 .chat-messages > .scroll-bar:vertical { -fx-pref-width: 5; -fx-background-color: transparent; }
 .chat-messages > .scroll-bar:vertical > .thumb { -fx-background-color: #d1d5db; -fx-background-radius: 3; }
+
+.pinned-banner {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e8ecf0;
+    -fx-border-width: 0 0 1 0;
+    -fx-cursor: hand;
+}
+.pinned-banner-row {
+    -fx-padding: 8 16;
+}
+.pinned-icon {
+    -fx-font-size: 13px;
+    -fx-text-fill: #6c63ff;
+}
+.pinned-title {
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #6c63ff;
+}
+.pinned-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: #374151;
+}
+
+.search-msg-bar {
+    -fx-background-color: #f0f1f8;
+    -fx-padding: 6 16;
+    -fx-border-color: #e8ecf0;
+    -fx-border-width: 0 0 1 0;
+}
+.search-msg-icon {
+    -fx-font-size: 13px;
+    -fx-text-fill: #6c63ff;
+}
+.search-msg-field {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: #e8ecf0;
+    -fx-border-radius: 8;
+    -fx-padding: 6 12;
+    -fx-font-size: 13px;
+}
+.search-msg-result {
+    -fx-font-size: 11px;
+    -fx-text-fill: #9ca3af;
+}
 
 /* ══ BUBBLES ══════════════════════════════════ */
 .bubble-received {
@@ -209,10 +301,9 @@
 }
 .input-icon {
     -fx-font-size: 17px;
-    -fx-cursor: hand;
-    -fx-opacity: 0.45;
+    -fx-opacity: 0.56;
 }
-.input-icon:hover { -fx-opacity: 0.85; }
+.input-icon:hover { -fx-opacity: 0.95; }
 
 .chat-field {
     -fx-background-color: #f0f1f8;
@@ -236,6 +327,28 @@
     -fx-effect: dropshadow(gaussian, rgba(108,99,255,0.4), 8, 0, 0, 3);
 }
 .btn-send:hover { -fx-background-color: #5a52e0; }
+
+.translation-zone {
+    -fx-background-color: #faf5ff;
+    -fx-border-color: #c4b5fd;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 10 16;
+}
+.translation-status {
+    -fx-font-size: 12px;
+    -fx-text-fill: #7c3aed;
+    -fx-font-style: italic;
+}
+.translation-result {
+    -fx-font-size: 14px;
+    -fx-text-fill: #1a1a2e;
+    -fx-padding: 4 0 0 0;
+}
+.translation-original {
+    -fx-font-size: 11px;
+    -fx-text-fill: #9ca3af;
+    -fx-font-style: italic;
+}
 
 /* ══ ADMIN BUTTONS ════════════════════════════ */
 .btn-pending { -fx-background-color: #f59e0b; -fx-text-fill: white; -fx-font-weight:600; -fx-padding:6 12; -fx-background-radius:8; -fx-cursor:hand; }
@@ -267,6 +380,13 @@
 .right-scroll { -fx-background-color: transparent; -fx-border-color: transparent; }
 .right-scroll > .viewport { -fx-background-color: transparent; }
 
+.section-muted-title {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #9ca3af;
+    -fx-padding: 14 16 8 16;
+}
+
 /* File rows */
 .file-row {
     -fx-padding: 10 16;
@@ -284,6 +404,9 @@
     -fx-font-size: 13px;
     -fx-font-weight: bold;
     -fx-text-fill: #1a1a2e;
+    -fx-padding: 14 16 8 16;
+}
+.members-section-row {
     -fx-padding: 14 16 8 16;
 }
 .members-list {
