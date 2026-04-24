@@ -31,11 +31,19 @@ import session.ChatroomNav;
 
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ChatroomHubController {
 
@@ -103,6 +111,13 @@ public class ChatroomHubController {
     private ObservableList<ChatroomListItem>   allRooms;
     private FilteredList<ChatroomListItem>     roomFilter;
     private final Map<Integer, String>         userNameCache = new HashMap<>();
+    private final Deque<String>                recentEmojis = new ArrayDeque<>(List.of(
+            "😀", "😂", "❤️", "👍", "🔥", "🎉", "😍", "🙏", "💯", "✨"
+    ));
+    private final Set<String>                  favoriteEmojis = new LinkedHashSet<>(List.of(
+            "❤️", "😂", "🔥", "👍"
+    ));
+    private static final int                   MAX_RECENT_EMOJIS = 16;
 
     // ══════════════════════════════════════════════════════════════════════
     // INIT
@@ -169,6 +184,21 @@ public class ChatroomHubController {
 
         messageField.setOnAction(e -> onSendMessage());
 
+        // Police emoji couleur dans le champ de saisie
+        messageField.setFont(javafx.scene.text.Font.font("Segoe UI Emoji", 13));
+
+        // Désactiver le polling pendant le scroll pour éviter les glitches
+        messagesScroll.vvalueProperty().addListener((obs, old, val) -> {
+            if (messagePollTimeline != null) {
+                messagePollTimeline.stop();
+                // Reprendre le polling 2s après la fin du scroll
+                new Timeline(new KeyFrame(Duration.seconds(2), e ->
+                    messagePollTimeline.play())).play();
+            }
+        });
+        // Police Segoe UI Emoji pour afficher les emojis en couleur dans le champ
+        messageField.setFont(javafx.scene.text.Font.font("Segoe UI Emoji", 13));
+
         // Compteur de caractères en temps réel
         messageField.textProperty().addListener((obs, old, val) -> {
             int len = val != null ? val.length() : 0;
@@ -185,7 +215,7 @@ public class ChatroomHubController {
             }
         });
 
-        messagePollTimeline = new Timeline(new KeyFrame(Duration.seconds(4), e -> {
+        messagePollTimeline = new Timeline(new KeyFrame(Duration.seconds(8), e -> {
             if (current != null) Platform.runLater(this::refreshMessages);
         }));
         messagePollTimeline.setCycleCount(Timeline.INDEFINITE);
@@ -540,8 +570,11 @@ public class ChatroomHubController {
                 }
             }
 
-            messageField.setDisable(false);
-            messageField.setPromptText("Your message...");
+            Optional<Chatroom> roomOpt = chatroomService.findById(item.chatroomId());
+            boolean activeRoom = roomOpt.map(c -> "active".equalsIgnoreCase(c.getState())).orElse(true);
+            updateAdminActionButtons(activeRoom);
+            messageField.setDisable(!activeRoom);
+            messageField.setPromptText(activeRoom ? "Your message..." : "Salon verrouillé / archivé.");
 
         } catch (Exception e) {
             headerSubLabel.setText("");
@@ -555,6 +588,18 @@ public class ChatroomHubController {
         lockBtn.setVisible(v);    lockBtn.setManaged(v);
         archiveBtn.setVisible(v); archiveBtn.setManaged(v);
         deleteBtn.setVisible(v);  deleteBtn.setManaged(v);
+        lockBtn.setDisable(!v || current == null);
+        archiveBtn.setDisable(!v || current == null);
+        deleteBtn.setDisable(!v || current == null);
+    }
+
+    private void updateAdminActionButtons(boolean activeRoom) {
+        // Etat actif => actions proposées = verrouiller + archiver
+        // Etat inactif => actions proposées = déverrouiller + désarchiver
+        lockBtn.setText(activeRoom ? "🔒" : "🔓");
+        lockBtn.setTooltip(new Tooltip(activeRoom ? "Verrouiller le salon" : "Déverrouiller le salon"));
+        archiveBtn.setText(activeRoom ? "📦" : "🗂");
+        archiveBtn.setTooltip(new Tooltip(activeRoom ? "Archiver le salon" : "Désarchiver le salon"));
     }
 
     // ══════════════════════════════════════════════════════════════════════
@@ -562,6 +607,12 @@ public class ChatroomHubController {
     // ══════════════════════════════════════════════════════════════════════
 
     private void refreshMessages() {
+        // ── Sauvegarder la position du scroll avant refresh ──────────
+        double scrollPos = messagesScroll.getVvalue();
+        boolean wasAtBottom = scrollPos >= 0.92;
+        // Ne pas interrompre si l'utilisateur scrolle activement (pas en bas)
+        boolean userScrolling = scrollPos < 0.85 && scrollPos > 0.05;
+
         messagesBox.getChildren().clear();
         if (current == null) {
             resetStats();
@@ -579,12 +630,21 @@ public class ChatroomHubController {
             for (Message m : msgs) {
                 messagesBox.getChildren().add(buildBubble(m, m.getAuthorId() == me));
             }
-            // Bannière message épinglé
             updatePinnedBanner(msgs);
         } catch (SQLException e) {
             messagesBox.getChildren().add(emptyState("Erreur : " + e.getMessage()));
         }
-        scrollToBottom();
+
+        // ── Restaurer position sans sauter ───────────────────────────
+        Platform.runLater(() -> {
+            if (wasAtBottom) {
+                messagesScroll.setVvalue(1.0);
+            } else if (userScrolling) {
+                // Restaurer exactement la position précédente
+                messagesScroll.setVvalue(scrollPos);
+            }
+            // Si scrollPos == 0 (début), ne rien faire
+        });
     }
 
     private HBox buildBubble(Message m, boolean isMine) {
@@ -742,10 +802,36 @@ public class ChatroomHubController {
         deleteRow.setOnMouseClicked(e -> { menuStage.close(); onDeleteMessage(m.getId()); });
         menuBox.getChildren().addAll(menuSep(), deleteRow);
 
-        javafx.scene.Scene ms = new javafx.scene.Scene(menuBox);
+        // ── ScrollPane pour éviter que le menu dépasse l'écran ────────
+        javafx.scene.control.ScrollPane scroll = new javafx.scene.control.ScrollPane(menuBox);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroll.setStyle("-fx-background-color:transparent; -fx-border-color:transparent;" +
+                        "-fx-background-radius:14;");
+
+        // Hauteur max = 80% de l'écran
+        double screenH = javafx.stage.Screen.getPrimary().getVisualBounds().getHeight();
+        scroll.setMaxHeight(screenH * 0.75);
+        scroll.setPrefWidth(260);
+
+        // Wrapper avec coins arrondis
+        StackPane wrapper = new StackPane(scroll);
+        wrapper.setStyle(
+            "-fx-background-color:#f2f2f7; -fx-background-radius:14;" +
+            "-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.22),16,0,0,6);");
+
+        javafx.scene.Scene ms = new javafx.scene.Scene(wrapper);
         ms.setFill(javafx.scene.paint.Color.TRANSPARENT);
         menuStage.setScene(ms);
-        menuStage.setX(x); menuStage.setY(y);
+
+        // Position ajustée pour ne pas sortir de l'écran
+        double screenW = javafx.stage.Screen.getPrimary().getVisualBounds().getWidth();
+        double px = Math.min(x, screenW - 270);
+        double py = Math.max(10, Math.min(y, screenH - scroll.getMaxHeight() - 20));
+        menuStage.setX(px); menuStage.setY(py);
+        menuStage.setResizable(false);
+
         menuStage.focusedProperty().addListener((obs, old, focused) -> {
             if (!focused) menuStage.close();
         });
@@ -1038,12 +1124,8 @@ public class ChatroomHubController {
             }
         }
 
-        // Texte par défaut
-        Label content = new Label(m.getContent() != null ? m.getContent() : "");
-        content.setWrapText(true);
-        content.setMaxWidth(400);
-        content.getStyleClass().add(isMine ? "bubble-sent-text" : "bubble-received-text");
-        return content;
+        // Texte par défaut — avec Segoe UI Emoji pour les emojis couleur
+        return buildEmojiRichText(m.getContent() != null ? m.getContent() : "", isMine);
     }
 
     private Label fallbackLabel(String text, boolean isMine) {
@@ -1079,25 +1161,27 @@ public class ChatroomHubController {
     // ══════════════════════════════════════════════════════════════════════
 
     private static final String[][] EMOJI_CATEGORIES = {
-        // Smileys & Emotions (60 emojis)
-        {"😀","😃","😄","😁","😆","😅","🤣","😂","🙂","🙃",
-         "😉","😊","😇","🥰","😍","🤩","😘","😗","😚","😙",
-         "🥲","😋","😛","😜","🤪","😝","🤑","🤗","🤭","🤫",
-         "🤔","🤐","🤨","😐","😑","😶","😏","😒","🙄","😬",
-         "🤥","😌","😔","😪","🤤","😴","😷","🤒","🤕","🤢",
-         "🤮","🤧","🥵","🥶","🥴","😵","🤯","🤠","🥳","🥸"},
-        // Gestes & Mains
+        // Smileys expressifs — tous les visages de l'image
+        {"😀","😁","😂","🤣","😃","😄","😅","😆","😇","😈",
+         "😉","😊","😋","😌","😍","😎","😏","😐","😑","😒",
+         "😓","😔","😕","😖","😗","😘","😙","😚","😛","😜",
+         "😝","😞","😟","😠","😡","😢","😣","😤","😥","😦",
+         "😧","😨","😩","😪","😫","😬","😭","😮","😯","😰",
+         "😱","😲","😳","😴","😵","😶","😷","🤐","🤑","🤒",
+         "🤓","🤔","🤕","🤗","🤠","🤡","🤢","🤤","🤥","🤧",
+         "🤨","🤩","🤪","🤫","🤬","🤭","🥰","🥱","🥲","🥳",
+         "🥴","🥵","🥶","🥸","🥺","🤯","😈","👿","💀","💩"},
+        // Gestes & Cœurs
         {"👍","👎","👌","✌️","🤞","🤟","🤘","🤙","👈","👉",
-         "👆","🖕","👇","☝️","👋","🤚","🖐️","✋","🖖","👏",
-         "🙌","🤲","🤝","🙏","✍️","💅","🤳","💪","🦾","🦿",
+         "👆","👇","☝️","👋","🤚","🖐️","✋","🖖","👏","🙌",
+         "🤲","🤝","🙏","✍️","💪","💅","🤳","🫶","🫂","🤜",
          "❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔",
-         "❣️","💕","💞","💓","💗","💖","💘","💝","💟","☮️"},
-        // Objets & Symboles
+         "❣️","💕","💞","💓","💗","💖","💘","💝","💟","♥️"},
+        // Objets & Fête
         {"🎉","🎊","🎁","🏆","🥇","⭐","🌟","✨","💫","🔥",
-         "💯","💢","💥","💦","💨","🕳️","💬","💭","💤","🔔",
-         "🎵","🎶","🎸","🎹","🎺","🎻","🥁","🎤","🎧","📱",
-         "💻","⌨️","🖥️","🖨️","📷","📸","📹","🎥","📽️","🎬",
-         "🌈","☀️","🌙","⭐","🌊","🌸","🌺","🌻","🌹","🍀"},
+         "💯","💢","💥","💦","💨","💬","💭","💤","🔔","🎵",
+         "🎶","🎸","🎹","🎺","🎻","🥁","🎤","🎧","📱","💻",
+         "📷","📸","📹","🎥","🎬","🌈","☀️","🌙","🌸","🌻"},
     };
 
     @FXML
@@ -1108,7 +1192,7 @@ public class ChatroomHubController {
 
         // ── Onglets catégories ────────────────────────────────────────
         String[] catIcons  = {"😀", "👍", "🎉"};
-        String[] catLabels = {"Smileys", "Gestes", "Objets"};
+        String[] catLabels = {"Sourires", "Gestes", "Objets"};
 
         javafx.scene.control.TabPane tabs = new javafx.scene.control.TabPane();
         tabs.setTabClosingPolicy(javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE);
@@ -1122,7 +1206,7 @@ public class ChatroomHubController {
             tile.setPadding(new Insets(10));
             tile.setStyle("-fx-background-color:#f8f9ff;");
 
-            for (String emoji : EMOJI_CATEGORIES[c]) {
+            for (String emoji : supportedEmojisInCategory(EMOJI_CATEGORIES[c])) {
                 tile.getChildren().add(emojiButton(emoji, picker));
             }
 
@@ -1164,23 +1248,41 @@ public class ChatroomHubController {
             }
             searchTile.getChildren().clear();
             for (String[] cat : EMOJI_CATEGORIES)
-                for (String emoji : cat)
-                    searchTile.getChildren().add(emojiButton(emoji, picker));
+                for (String emoji : supportedEmojisInCategory(cat))
+                    if (matchesEmojiQuery(emoji, q))
+                        searchTile.getChildren().add(emojiButton(emoji, picker));
             tabs.setVisible(false); tabs.setManaged(false);
             searchScroll.setVisible(true); searchScroll.setManaged(true);
         });
 
+        // ── Emojis favoris (ligne rapide) ─────────────────────────────
+        HBox favRow = new HBox(4);
+        favRow.setPadding(new Insets(6, 10, 2, 10));
+        Label favLbl = new Label("Favoris ⭐");
+        favLbl.setStyle("-fx-font-size:10px; -fx-text-fill:#9ca3af; -fx-padding:6 4 0 0;");
+        favRow.getChildren().add(favLbl);
+        if (favoriteEmojis.isEmpty()) {
+            Label emptyFav = new Label("Aucun");
+            emptyFav.setStyle("-fx-font-size:10px; -fx-text-fill:#c1c7d0; -fx-padding:8 0 0 0;");
+            favRow.getChildren().add(emptyFav);
+        } else {
+            for (String e : favoriteEmojis) {
+                if (EMOJI_PNG_MAP.containsKey(e)) favRow.getChildren().add(emojiButton(e, picker));
+            }
+        }
+
         // ── Emojis récents (ligne rapide) ─────────────────────────────
-        String[] recent = {"😀","😂","❤️","👍","🔥","🎉","😍","🥰","😭","✨"};
         HBox recentRow = new HBox(4);
         recentRow.setPadding(new Insets(6, 10, 2, 10));
-        Label recentLbl = new Label("Récents :");
+        Label recentLbl = new Label("Recents");
         recentLbl.setStyle("-fx-font-size:10px; -fx-text-fill:#9ca3af; -fx-padding:6 4 0 0;");
         recentRow.getChildren().add(recentLbl);
-        for (String e : recent) recentRow.getChildren().add(emojiButton(e, picker));
+        for (String e : recentEmojis) {
+            if (EMOJI_PNG_MAP.containsKey(e)) recentRow.getChildren().add(emojiButton(e, picker));
+        }
 
         // ── Container principal ───────────────────────────────────────
-        VBox container = new VBox(0, searchField, recentRow,
+        VBox container = new VBox(0, searchField, favRow, recentRow,
                 new javafx.scene.shape.Rectangle(400, 0.5,
                         javafx.scene.paint.Color.web("#e5e7eb")),
                 tabs, searchScroll);
@@ -1195,9 +1297,13 @@ public class ChatroomHubController {
         sc.setFill(javafx.scene.paint.Color.TRANSPARENT);
         picker.setScene(sc);
 
+        // Position fixe calculée une seule fois
         javafx.geometry.Bounds b = messageField.localToScreen(messageField.getBoundsInLocal());
-        picker.setX(b.getMinX() - 20);
-        picker.setY(b.getMinY() - 310);
+        double px = Math.max(10, b.getMinX() - 20);
+        double py = Math.max(10, b.getMinY() - 330);
+        picker.setX(px);
+        picker.setY(py);
+        picker.setResizable(false);
 
         picker.focusedProperty().addListener((obs, old, f) -> { if (!f) picker.close(); });
 
@@ -1208,6 +1314,23 @@ public class ChatroomHubController {
         javafx.animation.ScaleTransition st = new javafx.animation.ScaleTransition(Duration.millis(180), container);
         st.setToY(1); st.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
         new javafx.animation.ParallelTransition(ft, st).play();
+    }
+
+    private boolean matchesEmojiQuery(String emoji, String query) {
+        String q = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
+        if (q.isEmpty()) return true;
+        String keywords = switch (emoji) {
+            case "😀", "😃", "😄", "😁", "😆", "🙂" -> "smile joy happy heureux";
+            case "😂", "🤣" -> "rire lol laugh";
+            case "😍", "🥰", "😘", "❤️", "💕" -> "love coeur heart amour";
+            case "😢", "😭" -> "triste sad cry";
+            case "👍", "👏", "🙏", "💪" -> "ok bravo merci force";
+            case "🔥", "💯", "🎉", "🎊", "🏆" -> "top winner celebration fete";
+            case "📱", "💻", "📷", "🎧" -> "tech media photo";
+            case "🌈", "☀️", "🌙", "🍀", "🌸", "🌻" -> "nature color";
+            default -> "";
+        };
+        return emoji.contains(q) || keywords.contains(q);
     }
 
     // Mapping emoji → code PNG Twemoji
@@ -1240,37 +1363,75 @@ public class ChatroomHubController {
         for (String[] e : d) EMOJI_PNG_MAP.put(e[0], e[1]);
     }
 
-    /** Crée un bouton emoji avec image PNG Twemoji colorée */
+    private static final Pattern EMOJI_PATTERN = Pattern.compile(
+            EMOJI_PNG_MAP.keySet().stream()
+                    .sorted(Comparator.comparingInt(String::length).reversed())
+                    .map(Pattern::quote)
+                    .reduce((a, b) -> a + "|" + b)
+                    .orElse("$a")
+    );
+
+    // Cache des images emoji pour éviter de recharger à chaque refresh
+    private static final java.util.Map<String, javafx.scene.image.Image> EMOJI_IMAGE_CACHE
+            = new java.util.HashMap<>();
+
+    /** Crée un bouton emoji avec image PNG Twemoji (rendu couleur garanti) */
     private StackPane emojiButton(String emoji, Stage picker) {
         StackPane btn = new StackPane();
         btn.setMinSize(40, 40); btn.setMaxSize(40, 40);
-        btn.setStyle("-fx-cursor:hand; -fx-background-radius:8;");
+        btn.setStyle("-fx-cursor:hand; -fx-background-radius:10;");
 
         String code = EMOJI_PNG_MAP.get(emoji);
+        boolean loaded = false;
+
         if (code != null) {
-            java.net.URL url = getClass().getResource("/emoji/" + code + ".png");
-            if (url != null) {
-                javafx.scene.image.ImageView iv = new javafx.scene.image.ImageView(
-                    new javafx.scene.image.Image(url.toExternalForm(), 30, 30, true, true));
-                btn.getChildren().add(iv);
-            } else {
-                Label l = new Label(emoji); l.setStyle("-fx-font-size:22px;");
-                btn.getChildren().add(l);
-            }
-        } else {
-            Label l = new Label(emoji); l.setStyle("-fx-font-size:22px;");
-            btn.getChildren().add(l);
+            try {
+                // Utiliser le cache pour éviter de recharger
+                javafx.scene.image.Image img = EMOJI_IMAGE_CACHE.computeIfAbsent(code, k -> {
+                    try {
+                        java.io.InputStream is = getClass().getResourceAsStream("/emoji/" + k + ".png");
+                        if (is == null) return null;
+                        java.awt.image.BufferedImage bi = javax.imageio.ImageIO.read(is);
+                        is.close();
+                        return bi != null ? javafx.embed.swing.SwingFXUtils.toFXImage(bi, null) : null;
+                    } catch (Exception e) { return null; }
+                });
+                if (img != null) {
+                    javafx.scene.image.ImageView iv = new javafx.scene.image.ImageView(img);
+                    iv.setFitWidth(30); iv.setFitHeight(30);
+                    iv.setPreserveRatio(true); iv.setSmooth(true);
+                    btn.getChildren().add(iv);
+                    loaded = true;
+                }
+            } catch (Exception ignored) {}
+        }
+
+        if (!loaded) {
+            Label lbl = new Label(emoji);
+            lbl.setFont(javafx.scene.text.Font.font("Segoe UI Emoji", 22));
+            btn.getChildren().add(lbl);
         }
 
         btn.setOnMouseEntered(e -> {
-            btn.setStyle("-fx-cursor:hand; -fx-background-color:#ede9fe; -fx-background-radius:8;");
+            btn.setStyle("-fx-cursor:hand; -fx-background-color:#ede9fe; -fx-background-radius:10;");
             btn.setScaleX(1.2); btn.setScaleY(1.2);
         });
         btn.setOnMouseExited(e -> {
-            btn.setStyle("-fx-cursor:hand; -fx-background-radius:8;");
+            btn.setStyle("-fx-cursor:hand; -fx-background-radius:10;");
             btn.setScaleX(1.0); btn.setScaleY(1.0);
         });
         btn.setOnMouseClicked(e -> insertEmoji(emoji, picker));
+        btn.setOnContextMenuRequested(e -> {
+            ContextMenu menu = new ContextMenu();
+            boolean isFav = favoriteEmojis.contains(emoji);
+            MenuItem toggle = new MenuItem(isFav ? "Retirer des favoris" : "Ajouter aux favoris");
+            toggle.setOnAction(a -> {
+                if (isFav) favoriteEmojis.remove(emoji);
+                else favoriteEmojis.add(emoji);
+            });
+            menu.getItems().add(toggle);
+            menu.show(btn, e.getScreenX(), e.getScreenY());
+        });
         return btn;
     }
 
@@ -1280,8 +1441,82 @@ public class ChatroomHubController {
         String cur = messageField.getText() != null ? messageField.getText() : "";
         messageField.setText(cur.substring(0, pos) + emoji + cur.substring(pos));
         messageField.positionCaret(pos + emoji.length());
+        pushRecentEmoji(emoji);
         messageField.requestFocus();
         picker.close();
+    }
+
+    private void pushRecentEmoji(String emoji) {
+        recentEmojis.remove(emoji);
+        recentEmojis.addFirst(emoji);
+        while (recentEmojis.size() > MAX_RECENT_EMOJIS) {
+            recentEmojis.removeLast();
+        }
+    }
+
+    private List<String> supportedEmojisInCategory(String[] emojis) {
+        List<String> out = new ArrayList<>();
+        for (String e : emojis) {
+            if (EMOJI_PNG_MAP.containsKey(e)) out.add(e);
+        }
+        return out;
+    }
+
+    private javafx.scene.Node buildEmojiRichText(String text, boolean isMine) {
+        javafx.scene.text.TextFlow flow = new javafx.scene.text.TextFlow();
+        flow.setMaxWidth(400);
+        flow.setLineSpacing(1.5);
+        if (text == null || text.isEmpty()) return flow;
+
+        Matcher matcher = EMOJI_PATTERN.matcher(text);
+        int start = 0;
+        while (matcher.find()) {
+            if (matcher.start() > start) {
+                flow.getChildren().add(makeBubbleTextNode(text.substring(start, matcher.start()), isMine));
+            }
+            String emoji = matcher.group();
+            javafx.scene.Node n = emojiInlineNode(emoji);
+            flow.getChildren().add(n != null ? n : makeBubbleTextNode(emoji, isMine));
+            start = matcher.end();
+        }
+        if (start < text.length()) {
+            flow.getChildren().add(makeBubbleTextNode(text.substring(start), isMine));
+        }
+        return flow;
+    }
+
+    private javafx.scene.text.Text makeBubbleTextNode(String text, boolean isMine) {
+        javafx.scene.text.Text t = new javafx.scene.text.Text(text);
+        t.getStyleClass().add(isMine ? "bubble-sent-text" : "bubble-received-text");
+        t.setFont(javafx.scene.text.Font.font("Segoe UI", 13.5));
+        return t;
+    }
+
+    private javafx.scene.Node emojiInlineNode(String emoji) {
+        String code = EMOJI_PNG_MAP.get(emoji);
+        if (code == null) return null;
+        try {
+            javafx.scene.image.Image img = EMOJI_IMAGE_CACHE.computeIfAbsent(code, k -> {
+                try {
+                    java.io.InputStream is = getClass().getResourceAsStream("/emoji/" + k + ".png");
+                    if (is == null) return null;
+                    java.awt.image.BufferedImage bi = javax.imageio.ImageIO.read(is);
+                    is.close();
+                    return bi != null ? javafx.embed.swing.SwingFXUtils.toFXImage(bi, null) : null;
+                } catch (Exception e) {
+                    return null;
+                }
+            });
+            if (img == null) return null;
+            javafx.scene.image.ImageView iv = new javafx.scene.image.ImageView(img);
+            iv.setFitWidth(18);
+            iv.setFitHeight(18);
+            iv.setPreserveRatio(true);
+            iv.setTranslateY(3);
+            return iv;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     // ══════════════════════════════════════════════════════════════════════
@@ -1430,10 +1665,13 @@ public class ChatroomHubController {
         sc.setFill(javafx.scene.paint.Color.TRANSPARENT);
         popup.setScene(sc);
 
-        // Position au-dessus du bouton 📎
+        // Position fixe calculée une seule fois
         javafx.geometry.Bounds b = messageField.localToScreen(messageField.getBoundsInLocal());
-        popup.setX(b.getMinX() - 40);
-        popup.setY(b.getMinY() - 130);
+        double px = Math.max(10, b.getMinX() - 40);
+        double py = Math.max(10, b.getMinY() - 150);
+        popup.setX(px);
+        popup.setY(py);
+        popup.setResizable(false);
 
         popup.focusedProperty().addListener((obs, old, f) -> { if (!f) popup.close(); });
 
@@ -1568,14 +1806,14 @@ public class ChatroomHubController {
         // Emoji → [symbole, couleur fond, couleur texte]
         String[][] reactions = {
             {"❤",  "#fee2e2", "#ef4444"},   // rouge
-            {"�", "#fef9c3", "#ca8a04"},   // jaune
+            {"😂", "#fef9c3", "#ca8a04"},   // jaune
             {"😮", "#fef3c7", "#d97706"},   // orange clair
             {"😢", "#dbeafe", "#3b82f6"},   // bleu
             {"🔥", "#ffedd5", "#ea580c"},   // orange
             {"👍", "#ede9fe", "#6c63ff"},   // violet
         };
         // Emojis réels correspondants pour la BD
-        String[] emojiKeys = {"❤️", "�", "😮", "😢", "🔥", "👍"};
+        String[] emojiKeys = {"❤️", "😂", "😮", "😢", "🔥", "👍"};
 
         HBox emojisRow = new HBox(6);
         emojisRow.setAlignment(javafx.geometry.Pos.CENTER);
@@ -1630,6 +1868,10 @@ public class ChatroomHubController {
         plusBtn.getChildren().add(plusLbl);
         plusBtn.setOnMouseEntered(e -> plusBtn.setStyle("-fx-background-color:#ede9fe; -fx-background-radius:50%; -fx-cursor:hand;"));
         plusBtn.setOnMouseExited(e -> plusBtn.setStyle("-fx-background-color:#f0f1f8; -fx-background-radius:50%; -fx-cursor:hand;"));
+        plusBtn.setOnMouseClicked(e -> {
+            pickerStage.close();
+            onEmojiPicker();
+        });
         emojisRow.getChildren().add(plusBtn);
 
         VBox container = new VBox(6, hint, emojisRow);
@@ -1719,7 +1961,9 @@ public class ChatroomHubController {
     }
 
     private void scrollToBottom() {
-        Platform.runLater(() -> messagesScroll.setVvalue(1.0));
+        // Double runLater pour laisser le layout se calculer avant de scroller
+        Platform.runLater(() ->
+            Platform.runLater(() -> messagesScroll.setVvalue(1.0)));
     }
 
     // ══════════════════════════════════════════════════════════════════════
@@ -2023,6 +2267,7 @@ public class ChatroomHubController {
         if (userId <= 0) return;
         try {
             reactionService.addOrUpdate(messageId, userId, emoji);
+            pushRecentEmoji(emoji);
             refreshMessages();
         } catch (Exception e) {
             messagesBox.getChildren().add(emptyState("⚠️ " + e.getMessage()));
@@ -2079,14 +2324,52 @@ public class ChatroomHubController {
                     new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
                 }
             }
+            showNotification("Demandes traitées.");
             if (current != null) selectRoom(current);
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
         }
     }
 
-    @FXML private void onLock()    { setRoomState("inactive"); }
-    @FXML private void onArchive() { setRoomState("inactive"); }
+    @FXML
+    private void onLock() {
+        if (current == null) return;
+        try {
+            Optional<Chatroom> opt = chatroomService.findById(current.chatroomId());
+            if (opt.isEmpty()) return;
+            Chatroom c = opt.get();
+            boolean active = "active".equalsIgnoreCase(c.getState());
+            c.setState(active ? "inactive" : "active");
+            chatroomService.update(c);
+            showNotification(active ? "Salon verrouillé." : "Salon déverrouillé.");
+            selectRoom(current);
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+        }
+    }
+
+    @FXML
+    private void onArchive() {
+        if (current == null) return;
+        Optional<Chatroom> opt;
+        try {
+            opt = chatroomService.findById(current.chatroomId());
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+            return;
+        }
+        boolean active = opt.map(c -> "active".equalsIgnoreCase(c.getState())).orElse(true);
+        String action = active ? "Archiver" : "Désarchiver";
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                action + " ce salon ?");
+        if (confirm.showAndWait().filter(b -> b == ButtonType.OK).isEmpty()) return;
+        try {
+            setRoomState(active ? "inactive" : "active");
+            showNotification(active ? "Salon archivé." : "Salon désarchivé.");
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+        }
+    }
 
     private void setRoomState(String state) {
         if (current == null) return;
@@ -2095,7 +2378,7 @@ public class ChatroomHubController {
             if (opt.isEmpty()) return;
             Chatroom c = opt.get(); c.setState(state); chatroomService.update(c);
             selectRoom(current);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
         }
     }

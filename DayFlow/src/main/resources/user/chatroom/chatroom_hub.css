@@ -351,14 +351,34 @@
 }
 
 /* ══ ADMIN BUTTONS ════════════════════════════ */
-.btn-pending { -fx-background-color: #f59e0b; -fx-text-fill: white; -fx-font-weight:600; -fx-padding:6 12; -fx-background-radius:8; -fx-cursor:hand; }
-.btn-admin   { -fx-padding:6 10; -fx-background-radius:8; -fx-font-weight:600; -fx-cursor:hand; }
-.btn-lock    { -fx-background-color: #eab308; -fx-text-fill: #1e293b; }
-.btn-archive { -fx-background-color: #94a3b8; -fx-text-fill: white; }
-.btn-delete  { -fx-background-color: #ef4444; -fx-text-fill: white; }
-.btn-lock:hover    { -fx-background-color: #ca8a04; }
-.btn-archive:hover { -fx-background-color: #64748b; }
-.btn-delete:hover  { -fx-background-color: #dc2626; }
+.btn-pending {
+    -fx-background-color: #f59e0b;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-padding: 8 16;
+    -fx-background-radius: 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(245,158,11,0.35), 6, 0, 0, 2);
+}
+.btn-pending:hover { -fx-background-color: #d97706; }
+
+.btn-admin {
+    -fx-background-color: #f0f1f8;
+    -fx-font-size: 16px;
+    -fx-padding: 7 12;
+    -fx-background-radius: 12;
+    -fx-cursor: hand;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+}
+.btn-admin:hover { -fx-background-color: #e5e7eb; }
+
+.btn-lock    { -fx-text-fill: #374151; }
+.btn-archive { -fx-text-fill: #374151; }
+.btn-delete  { -fx-text-fill: #ef4444; }
+.btn-delete:hover { -fx-background-color: #fee2e2; }
 
 /* ══ RIGHT PANEL ══════════════════════════════ */
 .right-panel {
