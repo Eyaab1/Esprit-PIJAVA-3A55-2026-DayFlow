@@ -79,19 +79,44 @@ public class AIService {
         AIAnalysis analysis = analyzeUserMessage(userMessage);
 
         List<User> coaches = coachService.getAllCoaches();
+        System.out.println("========== COACHS DISPONIBLES ==========");
+System.out.println("Nombre de coachs = " + coaches.size());
+
+for (User coach : coaches) {
+    System.out.println(
+            "Coach: " + coach.getFirstName()
+            + " " + coach.getLastName()
+            + " | speciality: " + coach.getSpeciality()
+            + " | bio: " + coach.getBio()
+            + " | rating: " + coach.getRating()
+            + " | reviewCount: " + coach.getReviewCount()
+    );
+}
+
+System.out.println("========================================");
         if (coaches.isEmpty()) {
             throw new IllegalStateException("Aucun coach disponible pour le matching.");
         }
 
         List<CoachScore> scores = new ArrayList<>();
         for (User coach : coaches) {
-            int score = computeCompatibilityScore(analysis, coach);
+            int score = computeCompatibilityScore(userMessage, coach);
             String why = buildCoachReason(analysis.detectedNeed(), coach);
             scores.add(new CoachScore(coach, score, why));
         }
 
         scores.sort(Comparator.comparingInt(CoachScore::score).reversed());
-        CoachScore best = scores.getFirst();
+
+CoachScore best = scores.stream()
+        .filter(score -> score.score() > 0)
+        .findFirst()
+        .orElse(null);
+
+if (best == null) {
+    throw new IllegalStateException(
+            "Aucun coach compatible trouvé pour cette demande."
+    );
+}
 
         String justification = best.justification()
                 + " Besoin détecté: " + analysis.detectedNeed() + ".";
@@ -169,57 +194,35 @@ keywords.add(need);
 
         return new AIAnalysis(need.trim(), deduplicateLowercase(keywords));
     }
+private int computeCompatibilityScore(String userMessage, User coach) {
 
-    private int computeCompatibilityScore(AIAnalysis analysis, User coach) {
-        Set<String> needTokens = tokenize(analysis.detectedNeed());
-        analysis.keywords().forEach(k -> needTokens.addAll(tokenize(k)));
+    Set<String> messageTokens = tokenize(userMessage);
 
-        Set<String> specialityTokens = tokenize(String.join(" ",
-                safe(coach.getSpeciality()),
-                coach.getSpecialities() == null ? "" : String.join(" ", coach.getSpecialities())
-        ));
-        Set<String> bioTokens = tokenize(safe(coach.getBio()));
+    Set<String> coachTokens = tokenize(
+            safe(coach.getSpeciality()) + " " +
+            safe(coach.getBio())
+    );
 
-        long specialityMatches = needTokens.stream().filter(specialityTokens::contains).count();
-        long bioMatches = needTokens.stream().filter(bioTokens::contains).count();
-        if (specialityMatches == 0 && bioMatches == 0) {
-    return 0;
+    if (messageTokens.isEmpty() || coachTokens.isEmpty()) {
+        return 0;
+    }
+
+    long matches = messageTokens.stream()
+            .filter(coachTokens::contains)
+            .count();
+
+    int score = (int) ((matches * 100.0) / messageTokens.size());
+
+    if (score == 0) {
+        return 0;
+    }
+
+    return Math.min(score, 100);
 }
 
-        double coverage = needTokens.isEmpty() ? 0.0 : (specialityMatches * 1.0) / needTokens.size();
-        boolean perfectMatch = !needTokens.isEmpty()
-                && specialityMatches == needTokens.size()
-                && !specialityTokens.isEmpty();
-        if (perfectMatch) {
-            return 100;
-        }
+    
 
-        int overlapPoints = (int) Math.round(Math.min(1.0, coverage) * 70.0); // composant principal
-        int bioPoints = needTokens.isEmpty()
-                ? 0
-                : (int) Math.round(Math.min(1.0, bioMatches * 1.0 / needTokens.size()) * 10.0);
-
-        double rating = coach.getRating() != null ? coach.getRating() : 0.0;
-        int ratingPoints = (int) Math.round((Math.min(rating, 5.0) / 5.0) * 12.0);
-
-        int reviewCount = coach.getReviewCount() != null ? coach.getReviewCount() : 0;
-        int socialProofPoints = Math.min(8, reviewCount / 25);
-
-        int rawScore = overlapPoints + bioPoints + ratingPoints + socialProofPoints;
-        int bounded = Math.max(0, Math.min(99, rawScore));
-
-        // Ajustement de classe pour respecter les plages métier demandées.
-        if (coverage >= 0.75 && bounded < 80) {
-            return 80;
-        }
-        if (coverage >= 0.5 && bounded < 50) {
-            return 50;
-        }
-        if (coverage < 0.5 && bounded >= 50) {
-            return 49;
-        }
-        return bounded;
-    }
+   
 
     private String buildCoachReason(String detectedNeed, User coach) {
         String fullName = formatCoachName(coach);
