@@ -277,6 +277,34 @@
                             <Font name="System Bold" size="15"/>
                         </font>
                     </Button>
+
+                    <Label fx:id="aiAnalysisStatusLabel"
+                           text="Commencez à écrire votre message pour lancer l'analyse IA."
+                           wrapText="true"
+                           style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+
+                    <VBox fx:id="aiResultCard" spacing="10" visible="false" managed="false"
+                          style="-fx-background-color: #f8fafc; -fx-background-radius: 14; -fx-border-color: #c7d2fe; -fx-border-radius: 14; -fx-border-width: 1; -fx-padding: 14 16 14 16;">
+                        <Label text="Résultat de l'analyse IA"
+                               style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #4338ca;"/>
+
+                        <Label fx:id="detectedNeedValueLabel"
+                               text="Besoin détecté : -"
+                               wrapText="true"
+                               style="-fx-font-size: 13px; -fx-text-fill: #334155;"/>
+                        <Label fx:id="recommendedCoachValueLabel"
+                               text="Coach recommandé : -"
+                               wrapText="true"
+                               style="-fx-font-size: 13px; -fx-text-fill: #334155;"/>
+                        <Label fx:id="compatibilityScoreValueLabel"
+                               text="Score de compatibilité : -"
+                               wrapText="true"
+                               style="-fx-font-size: 13px; -fx-text-fill: #334155;"/>
+                        <Label fx:id="justificationValueLabel"
+                               text="Justification : -"
+                               wrapText="true"
+                               style="-fx-font-size: 13px; -fx-text-fill: #334155;"/>
+                    </VBox>
                 </VBox>
             </HBox>
         </VBox>

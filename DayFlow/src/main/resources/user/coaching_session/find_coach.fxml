@@ -156,6 +156,16 @@
                                  </children>
                               </HBox>
                               <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onSubmitRequest" styleClass="btn-primary-send" text="✈ Envoyer ma demande" />
+                              <Label fx:id="aiAnalysisStatusLabel" styleClass="hint" text="Commencez à écrire votre message pour lancer l'analyse IA." wrapText="true" />
+                              <VBox fx:id="aiResultCard" managed="false" spacing="6.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 10; -fx-border-color: #c7d2fe; -fx-border-radius: 10; -fx-padding: 10;" visible="false">
+                                 <children>
+                                    <Label style="-fx-font-weight: bold; -fx-text-fill: #4338ca;" text="Résultat de l'analyse IA" />
+                                    <Label fx:id="detectedNeedValueLabel" text="Besoin détecté : -" wrapText="true" />
+                                    <Label fx:id="recommendedCoachValueLabel" text="Coach recommandé : -" wrapText="true" />
+                                    <Label fx:id="compatibilityScoreValueLabel" text="Score de compatibilité : -" wrapText="true" />
+                                    <Label fx:id="justificationValueLabel" text="Justification : -" wrapText="true" />
+                                 </children>
+                              </VBox>
                            </children>
                         </VBox>
                      </children>

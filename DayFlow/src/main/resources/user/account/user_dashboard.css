@@ -1,7 +1,7 @@
-/* User dashboard — aligné sur la landing (violets, pastels, cartes arrondies) */
+/* User dashboard — Couleurs pastel douces et lisibles */
 .dashboard-root {
     -fx-font-family: "Segoe UI", "Inter", "Arial", sans-serif;
-    -fx-background-color: #f9fafb;
+    -fx-background-color: linear-gradient(to bottom, #f0f9ff 0%, #fef3f9 100%);
 }
 
 .dashboard-scroll {
@@ -11,155 +11,169 @@
 }
 
 .dashboard-scroll > .viewport {
-    -fx-background-color: #f9fafb;
+    -fx-background-color: transparent;
 }
 
 .dashboard-inner {
-    -fx-spacing: 28;
-    -fx-padding: 32 40 96 40;
+    -fx-spacing: 32;
+    -fx-padding: 36 44 100 44;
     -fx-max-width: 1100;
 }
 
-/* Bandeau d’accueil (dégradé proche hero landing) */
+/* Bandeau d'accueil avec dégradé pastel doux */
 .hero-dashboard {
-    -fx-padding: 36 40 40 40;
-    -fx-background-radius: 20;
-    -fx-background-color: linear-gradient(to right, #ede9fe 0%, #e0e7ff 45%, #fce7f3 100%);
-    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.12), 24, 0, 0, 4);
+    -fx-padding: 40 44 44 44;
+    -fx-background-radius: 24;
+    -fx-background-color: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 50%, #fce7f3 100%);
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.15), 20, 0, 0, 6);
 }
 
 .pill-welcome {
-    -fx-background-color: rgba(255, 255, 255, 0.92);
-    -fx-background-radius: 24;
-    -fx-padding: 8 18;
-    -fx-text-fill: #6d28d9;
-    -fx-font-size: 13px;
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-radius: 28;
+    -fx-padding: 10 20;
+    -fx-text-fill: #6366f1;
+    -fx-font-size: 14px;
     -fx-font-weight: 600;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.1), 8, 0, 0, 2);
 }
 
 .greeting-title {
-    -fx-font-size: 32px;
+    -fx-font-size: 36px;
     -fx-font-weight: bold;
-    -fx-text-fill: #111827;
+    -fx-text-fill: #1e293b;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.03), 4, 0, 0, 1);
 }
 
 .greeting-sub {
-    -fx-font-size: 15px;
-    -fx-text-fill: #6b7280;
+    -fx-font-size: 16px;
+    -fx-text-fill: #475569;
+    -fx-font-weight: 500;
 }
 
-/* Barre récap (style capture : sobre, icône → chiffre → libellé) */
+/* Barre récap avec couleurs pastel douces */
 .stats-summary-wrap {
     -fx-padding: 0;
 }
 
 .stats-summary-bar {
     -fx-spacing: 0;
-    -fx-padding: 22 8 26 8;
+    -fx-padding: 28 12 32 12;
     -fx-alignment: center;
-    -fx-background-radius: 16;
-    -fx-border-radius: 16;
-    -fx-border-width: 1;
-    -fx-border-color: #e5e7eb;
-    -fx-background-color: linear-gradient(to bottom, #ede9ff 0%, #fae8ff 5%, #ffffff 5%, #ffffff 100%);
-    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.05), 14, 0, 0, 1);
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-border-width: 2;
+    -fx-border-color: rgba(255, 255, 255, 0.8);
+    -fx-background-color: linear-gradient(to bottom, #ffffff 0%, #fef3f9 100%);
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.08), 16, 0, 0, 4);
 }
 
 .stat-item {
-    -fx-padding: 4 12 0 12;
+    -fx-padding: 8 16 4 16;
     -fx-alignment: center;
     -fx-min-width: 0;
 }
 
 .stat-icon-frame {
-    -fx-min-width: 32px;
-    -fx-min-height: 32px;
-    -fx-pref-width: 32px;
-    -fx-pref-height: 32px;
-    -fx-max-width: 32px;
-    -fx-max-height: 32px;
+    -fx-min-width: 48px;
+    -fx-min-height: 48px;
+    -fx-pref-width: 48px;
+    -fx-pref-height: 48px;
+    -fx-max-width: 48px;
+    -fx-max-height: 48px;
     -fx-alignment: center;
+    -fx-background-color: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%);
+    -fx-background-radius: 24;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.12), 8, 0, 0, 2);
 }
 
 .stat-icon-symbol {
-    -fx-font-size: 20px;
-    -fx-text-fill: #111827;
+    -fx-font-size: 24px;
+    -fx-text-fill: #1e293b;
     -fx-alignment: center;
     -fx-padding: 0;
 }
 
 .stat-value {
-    -fx-font-size: 26px;
+    -fx-font-size: 32px;
     -fx-font-weight: bold;
-    -fx-text-fill: #111827;
+    -fx-text-fill: #6366f1;
 }
 
 .stat-caption {
-    -fx-font-size: 13px;
+    -fx-font-size: 14px;
     -fx-text-fill: #64748b;
+    -fx-font-weight: 500;
 }
 
-/* Actions rapides */
+/* Actions rapides avec couleurs pastel */
 .section-title {
-    -fx-font-size: 18px;
+    -fx-font-size: 20px;
     -fx-font-weight: bold;
-    -fx-text-fill: #111827;
+    -fx-text-fill: #1e293b;
 }
 
 .quick-row {
-    -fx-spacing: 20;
+    -fx-spacing: 24;
     -fx-alignment: center-left;
 }
 
 .quick-card {
-    -fx-padding: 24 20 28 20;
+    -fx-padding: 28 24 32 24;
     -fx-min-width: 220;
     -fx-pref-width: 280;
     -fx-background-color: #ffffff;
-    -fx-background-radius: 16;
-    -fx-border-color: #e5e7eb;
-    -fx-border-radius: 16;
-    -fx-border-width: 1;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 10, 0, 0, 2);
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(226, 232, 240, 0.8);
+    -fx-border-radius: 20;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.08), 12, 0, 0, 4);
     -fx-cursor: hand;
 }
 
 .quick-card:hover {
     -fx-border-color: #c4b5fd;
-    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.15), 16, 0, 0, 4);
+    -fx-background-color: linear-gradient(to bottom, #ffffff 0%, #faf5ff 100%);
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.2), 20, 0, 0, 6);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
 }
 
 .quick-icon {
-    -fx-font-size: 28px;
-    -fx-padding: 0 0 8 0;
+    -fx-font-size: 32px;
+    -fx-padding: 0 0 12 0;
 }
 
 .quick-title {
-    -fx-font-size: 15px;
-    -fx-font-weight: 600;
-    -fx-text-fill: #111827;
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1e293b;
 }
 
 .quick-desc {
-    -fx-font-size: 13px;
-    -fx-text-fill: #6b7280;
+    -fx-font-size: 14px;
+    -fx-text-fill: #64748b;
     -fx-wrap-text: true;
+    -fx-line-spacing: 2;
 }
 
-/* FAB feedback */
+/* FAB feedback avec couleur pastel */
 .fab-feedback {
-    -fx-min-width: 56;
-    -fx-min-height: 56;
-    -fx-max-width: 56;
-    -fx-max-height: 56;
-    -fx-background-radius: 28;
-    -fx-background-color: #ef4444;
+    -fx-min-width: 64;
+    -fx-min-height: 64;
+    -fx-max-width: 64;
+    -fx-max-height: 64;
+    -fx-background-radius: 32;
+    -fx-background-color: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
     -fx-text-fill: white;
-    -fx-font-size: 22px;
+    -fx-font-size: 26px;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(239, 68, 68, 0.45), 12, 0, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(236, 72, 153, 0.4), 16, 0, 0, 6);
 }
 
 .fab-feedback:hover {
-    -fx-background-color: #dc2626;
+    -fx-background-color: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+    -fx-effect: dropshadow(gaussian, rgba(236, 72, 153, 0.5), 20, 0, 0, 8);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
 }
