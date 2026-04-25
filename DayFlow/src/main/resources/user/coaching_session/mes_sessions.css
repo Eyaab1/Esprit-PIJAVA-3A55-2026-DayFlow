@@ -1,0 +1,253 @@
+/* Mes Sessions Coach — Design pastel moderne et professionnel */
+
+/* ========== ROOT ========== */
+.root {
+    -fx-font-family: "Segoe UI", "Inter", "Arial", sans-serif;
+    -fx-background-color: linear-gradient(to bottom right, #f0f9ff 0%, #fef3f9 50%, #fef3c7 100%);
+}
+
+VBox {
+    -fx-background-color: transparent;
+}
+
+/* ========== HEADER ========== */
+.page-title {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+    -fx-letter-spacing: -0.5px;
+}
+
+.page-subtitle {
+    -fx-font-size: 16px;
+    -fx-text-fill: #475569;
+    -fx-font-weight: 500;
+}
+
+/* ========== BACK LINK ========== */
+.back-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: #0ea5e9;
+    -fx-font-size: 15px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+    -fx-underline: false;
+}
+
+.back-link:hover {
+    -fx-text-fill: #0284c7;
+    -fx-underline: true;
+}
+
+/* ========== STATISTICS CARDS ========== */
+.stat-card {
+    -fx-background-color: white;
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(226, 232, 240, 0.6);
+    -fx-border-radius: 20;
+    -fx-border-width: 2;
+    -fx-padding: 24 28;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.12), 20, 0, 0, 6);
+    -fx-cursor: hand;
+}
+
+.stat-card:hover {
+    -fx-border-color: #c4b5fd;
+    -fx-background-color: linear-gradient(to bottom, #ffffff 0%, #faf5ff 100%);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.2), 24, 0, 0, 8);
+}
+
+.stat-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 600;
+}
+
+.stat-value {
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: -0.5px;
+}
+
+.stat-value-blue {
+    -fx-text-fill: #3b82f6;
+}
+
+.stat-value-orange {
+    -fx-text-fill: #f59e0b;
+}
+
+.stat-value-green {
+    -fx-text-fill: #10b981;
+}
+
+/* ========== MAIN CARD ========== */
+.main-card {
+    -fx-background-color: white;
+    -fx-background-radius: 24;
+    -fx-border-color: rgba(226, 232, 240, 0.6);
+    -fx-border-radius: 24;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.12), 20, 0, 0, 6);
+}
+
+/* ========== SELECTION LABEL ========== */
+.selection-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 500;
+}
+
+/* ========== BUTTONS ========== */
+.btn-refresh {
+    -fx-background-color: linear-gradient(to right, #38bdf8 0%, #0ea5e9 100%);
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-background-radius: 12;
+    -fx-padding: 12 24;
+    -fx-cursor: hand;
+    -fx-letter-spacing: 0.3px;
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.3), 12, 0, 0, 4);
+}
+
+.btn-refresh:hover {
+    -fx-background-color: linear-gradient(to right, #0ea5e9 0%, #0284c7 100%);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+}
+
+.btn-modify {
+    -fx-background-color: linear-gradient(to right, #6366f1 0%, #8b5cf6 100%);
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+    -fx-background-radius: 12;
+    -fx-padding: 14 36;
+    -fx-cursor: hand;
+    -fx-letter-spacing: 0.3px;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.3), 12, 0, 0, 4);
+}
+
+.btn-modify:hover {
+    -fx-background-color: linear-gradient(to right, #8b5cf6 0%, #a78bfa 100%);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+}
+
+.btn-delete {
+    -fx-background-color: linear-gradient(to right, #ef4444 0%, #dc2626 100%);
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+    -fx-background-radius: 12;
+    -fx-padding: 14 36;
+    -fx-cursor: hand;
+    -fx-letter-spacing: 0.3px;
+    -fx-effect: dropshadow(gaussian, rgba(239, 68, 68, 0.3), 12, 0, 0, 4);
+}
+
+.btn-delete:hover {
+    -fx-background-color: linear-gradient(to right, #dc2626 0%, #b91c1c 100%);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+}
+
+.btn-complete {
+    -fx-background-color: linear-gradient(to right, #10b981 0%, #059669 100%);
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+    -fx-background-radius: 12;
+    -fx-padding: 14 36;
+    -fx-cursor: hand;
+    -fx-letter-spacing: 0.3px;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.3), 12, 0, 0, 4);
+}
+
+.btn-complete:hover {
+    -fx-background-color: linear-gradient(to right, #059669 0%, #047857 100%);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+}
+
+/* ========== TABLE VIEW ========== */
+TableView {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 12;
+}
+
+TableView .column-header-background {
+    -fx-background-color: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+    -fx-background-radius: 12 12 0 0;
+}
+
+TableView .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 0 0 2 0;
+    -fx-padding: 14 10;
+}
+
+TableView .column-header .label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #0f172a;
+    -fx-letter-spacing: 0.3px;
+}
+
+TableView .table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: #f1f5f9;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 14 10;
+}
+
+TableView .table-row-cell:hover {
+    -fx-background-color: #faf5ff;
+}
+
+TableView .table-row-cell:selected {
+    -fx-background-color: #e0e7ff;
+    -fx-border-color: #c4b5fd;
+}
+
+TableView .table-cell {
+    -fx-padding: 14 10;
+    -fx-font-size: 14px;
+    -fx-text-fill: #0f172a;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* ========== SCROLLBAR ========== */
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+}
+
+.scroll-bar:vertical .track {
+    -fx-background-color: rgba(226, 232, 240, 0.3);
+    -fx-background-radius: 4px;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: linear-gradient(to bottom, #c4b5fd 0%, #a78bfa 100%);
+    -fx-background-radius: 4px;
+}
+
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color: linear-gradient(to bottom, #a78bfa 0%, #8b5cf6 100%);
+}
+
+/* ========== ANCHOR PANE ========== */
+AnchorPane {
+    -fx-background-color: white;
+    -fx-background-radius: 24;
+    -fx-border-color: rgba(226, 232, 240, 0.6);
+    -fx-border-radius: 24;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.12), 20, 0, 0, 6);
+}

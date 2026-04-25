@@ -281,12 +281,12 @@ TextArea:focused {
 .form-field-label {
     -fx-font-size: 14px;
     -fx-font-weight: 600;
-    -fx-text-fill: #1e293b;
+    -fx-text-fill: #0f172a;
 }
 
 .form-hint {
     -fx-font-size: 12px;
-    -fx-text-fill: #64748b;
+    -fx-text-fill: #475569;
     -fx-font-style: italic;
 }
 
@@ -331,13 +331,13 @@ Separator {
 .section-title {
     -fx-font-size: 26px;
     -fx-font-weight: bold;
-    -fx-text-fill: #1e293b;
+    -fx-text-fill: #0f172a;
     -fx-letter-spacing: -0.5px;
 }
 
 .section-subtitle {
     -fx-font-size: 15px;
-    -fx-text-fill: #64748b;
+    -fx-text-fill: #475569;
     -fx-font-weight: 500;
 }
 

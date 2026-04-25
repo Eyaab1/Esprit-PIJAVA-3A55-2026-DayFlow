@@ -1,7 +1,7 @@
-/* Coach dashboard — en-tête sombre, cartes, filtres (proche maquette Symfony) */
+/* Coach dashboard — Design pastel moderne et professionnel */
 .coach-dash-root {
     -fx-font-family: "Segoe UI", "Inter", "Arial", sans-serif;
-    -fx-background-color: #f1f5f9;
+    -fx-background-color: linear-gradient(to bottom right, #f0f9ff 0%, #fef3f9 50%, #fef3c7 100%);
 }
 
 .coach-scroll {
@@ -10,288 +10,440 @@
 }
 
 .coach-scroll > .viewport {
-    -fx-background-color: #f1f5f9;
+    -fx-background-color: transparent;
+}
+
+.coach-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+}
+
+.coach-scroll .scroll-bar:vertical .track {
+    -fx-background-color: rgba(226, 232, 240, 0.3);
+    -fx-background-radius: 4px;
+}
+
+.coach-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: linear-gradient(to bottom, #c4b5fd 0%, #a78bfa 100%);
+    -fx-background-radius: 4px;
+}
+
+.coach-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: linear-gradient(to bottom, #a78bfa 0%, #8b5cf6 100%);
 }
 
 .coach-inner {
     -fx-spacing: 0;
-    -fx-padding: 20 0 80 0;
-    -fx-max-width: 1180;
+    -fx-padding: 28 0 100 0;
+    -fx-max-width: 1200;
 }
 
-/* Bandeau sombre */
+/* Bandeau hero avec dégradé pastel */
 .coach-hero {
-    -fx-padding: 30 36 36 36;
-    -fx-background-color: linear-gradient(to right, #1e3a5f 0%, #1e40af 55%, #312e81 100%);
-    -fx-background-radius: 14;
+    -fx-padding: 40 44 44 44;
+    -fx-background-color: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
+    -fx-background-radius: 24;
+    -fx-border-color: rgba(255, 255, 255, 0.3);
+    -fx-border-width: 2;
+    -fx-border-radius: 24;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.3), 24, 0, 0, 8);
 }
 
 .coach-breadcrumb-row {
-    -fx-spacing: 12;
+    -fx-spacing: 16;
     -fx-alignment: center-left;
-    -fx-padding: 0 36 14 36;
+    -fx-padding: 0 44 20 44;
 }
 
 .coach-back-link {
-    -fx-text-fill: #334155;
-    -fx-font-size: 14px;
+    -fx-text-fill: #0ea5e9;
+    -fx-font-size: 15px;
+    -fx-font-weight: 600;
     -fx-underline: false;
     -fx-border-color: transparent;
     -fx-background-color: transparent;
-    -fx-font-weight: 600;
 }
 
 .coach-back-link:hover {
-    -fx-text-fill: #1d4ed8;
+    -fx-text-fill: #0284c7;
+    -fx-underline: true;
 }
 
 .coach-badge-pill {
-    -fx-background-color: #dbeafe;
-    -fx-background-radius: 20;
-    -fx-padding: 4 14;
-    -fx-text-fill: #1e40af;
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
-    -fx-letter-spacing: 0.05em;
+    -fx-background-color: linear-gradient(to right, #e0f2fe 0%, #ddd6fe 100%);
+    -fx-background-radius: 24;
+    -fx-padding: 8 20;
+    -fx-text-fill: #4338ca;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-letter-spacing: 0.5px;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.15), 10, 0, 0, 3);
 }
 
 .coach-hero-title {
-    -fx-font-size: 28px;
+    -fx-font-size: 36px;
     -fx-font-weight: bold;
     -fx-text-fill: white;
+    -fx-letter-spacing: -0.5px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 8, 0, 0, 2);
 }
 
 .coach-hero-sub {
-    -fx-font-size: 14px;
-    -fx-text-fill: rgba(255, 255, 255, 0.82);
+    -fx-font-size: 16px;
+    -fx-text-fill: rgba(255, 255, 255, 0.95);
+    -fx-font-weight: 500;
+    -fx-letter-spacing: 0.2px;
 }
 
-/* Stats */
+/* Stats cards avec couleurs pastel */
 .coach-stats-row {
-    -fx-hgap: 16;
-    -fx-vgap: 16;
-    -fx-padding: -18 36 24 36;
+    -fx-hgap: 20;
+    -fx-vgap: 20;
+    -fx-padding: -20 44 32 44;
     -fx-alignment: center-left;
 }
 
 .coach-stat-card {
-    -fx-padding: 20 24;
-    -fx-min-width: 220;
-    -fx-pref-width: 320;
+    -fx-padding: 28 28;
+    -fx-min-width: 240;
+    -fx-pref-width: 340;
     -fx-background-color: white;
-    -fx-background-radius: 14;
-    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 16, 0, 0, 2);
-}
-
-.coach-stat-icon {
-    -fx-font-size: 22px;
-}
-
-.coach-stat-value {
-    -fx-font-size: 32px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #0f172a;
-}
-
-.coach-stat-label {
-    -fx-font-size: 13px;
-    -fx-text-fill: #64748b;
-}
-
-/* Filtres */
-.coach-filters-wrap {
-    -fx-padding: 0 36 24 36;
-}
-
-.coach-filters-card {
-    -fx-padding: 20 22;
-    -fx-spacing: 14;
-    -fx-background-color: white;
-    -fx-background-radius: 14;
-    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.06), 12, 0, 0, 1);
-}
-
-.coach-filters-title {
-    -fx-font-size: 15px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #0f172a;
-}
-
-.filter-field {
-    -fx-background-radius: 8;
-    -fx-border-radius: 8;
-    -fx-padding: 8 10;
-}
-
-.btn-apply {
-    -fx-background-color: #6366f1;
-    -fx-text-fill: white;
-    -fx-background-radius: 8;
-    -fx-padding: 10 18;
-    -fx-font-weight: 600;
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(226, 232, 240, 0.6);
+    -fx-border-radius: 20;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.12), 20, 0, 0, 6);
     -fx-cursor: hand;
 }
 
+.coach-stat-card:hover {
+    -fx-border-color: #c4b5fd;
+    -fx-background-color: linear-gradient(to bottom, #ffffff 0%, #faf5ff 100%);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.2), 24, 0, 0, 8);
+}
+
+.coach-stat-icon {
+    -fx-font-size: 32px;
+    -fx-padding: 0 0 8 0;
+}
+
+.coach-stat-value {
+    -fx-font-size: 40px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6366f1;
+    -fx-letter-spacing: -0.5px;
+}
+
+.coach-stat-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 600;
+    -fx-letter-spacing: 0.3px;
+}
+
+/* Filtres améliorés */
+.coach-filters-wrap {
+    -fx-padding: 0 44 32 44;
+}
+
+.coach-filters-card {
+    -fx-padding: 28 32;
+    -fx-spacing: 20;
+    -fx-background-color: white;
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(226, 232, 240, 0.6);
+    -fx-border-radius: 20;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.12), 20, 0, 0, 6);
+}
+
+.coach-filters-title {
+    -fx-font-size: 19px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+    -fx-letter-spacing: -0.3px;
+}
+
+.filter-field {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #cbd5e1;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-padding: 12 16;
+    -fx-font-size: 14px;
+}
+
+.filter-field:hover {
+    -fx-border-color: #a78bfa;
+}
+
+.filter-field:focused {
+    -fx-border-color: #8b5cf6;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(139, 92, 246, 0.15), 10, 0, 0, 3);
+}
+
+ComboBox {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 10 14;
+    -fx-font-size: 14px;
+}
+
+ComboBox:hover {
+    -fx-border-color: #a78bfa;
+}
+
+ComboBox:focused {
+    -fx-border-color: #8b5cf6;
+    -fx-border-width: 2;
+}
+
+DatePicker {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+DatePicker:hover {
+    -fx-border-color: #a78bfa;
+}
+
+.btn-apply {
+    -fx-background-color: linear-gradient(to right, #6366f1 0%, #8b5cf6 100%);
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-padding: 12 28;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+    -fx-letter-spacing: 0.3px;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.3), 12, 0, 0, 4);
+}
+
 .btn-apply:hover {
-    -fx-background-color: #4f46e5;
+    -fx-background-color: linear-gradient(to right, #8b5cf6 0%, #a78bfa 100%);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
 }
 
 .btn-reset {
     -fx-background-color: white;
     -fx-text-fill: #475569;
-    -fx-border-color: #e2e8f0;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-    -fx-padding: 10 18;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-border-width: 2;
+    -fx-padding: 12 28;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
     -fx-cursor: hand;
+}
+
+.btn-reset:hover {
+    -fx-border-color: #a78bfa;
+    -fx-text-fill: #6366f1;
+    -fx-background-color: #faf5ff;
 }
 
 /* Sections */
 .coach-section {
-    -fx-padding: 0 36 28 36;
-    -fx-spacing: 14;
+    -fx-padding: 0 44 32 44;
+    -fx-spacing: 18;
 }
 
 .coach-section-title {
-    -fx-font-size: 17px;
+    -fx-font-size: 20px;
     -fx-font-weight: bold;
     -fx-text-fill: #0f172a;
+    -fx-letter-spacing: -0.3px;
 }
 
 .coach-section-badge {
-    -fx-background-color: #ede9fe;
-    -fx-text-fill: #5b21b6;
-    -fx-background-radius: 12;
-    -fx-padding: 2 10;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
+    -fx-background-color: linear-gradient(to right, #ede9fe 0%, #fae8ff 100%);
+    -fx-text-fill: #6b21a8;
+    -fx-background-radius: 16;
+    -fx-padding: 6 16;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-letter-spacing: 0.3px;
 }
 
-/* Carte demande */
+/* Carte demande améliorée */
 .coach-request-card {
-    -fx-padding: 16 18;
-    -fx-spacing: 12;
+    -fx-padding: 24 24;
+    -fx-spacing: 16;
     -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-border-color: #e2e8f0;
-    -fx-border-radius: 12;
-    -fx-border-width: 1;
-    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.04), 8, 0, 0, 1);
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(226, 232, 240, 0.6);
+    -fx-border-radius: 20;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.1), 16, 0, 0, 4);
+    -fx-cursor: hand;
+}
+
+.coach-request-card:hover {
+    -fx-border-color: #c4b5fd;
+    -fx-background-color: linear-gradient(to bottom, #ffffff 0%, #faf5ff 100%);
+    -fx-scale-x: 1.01;
+    -fx-scale-y: 1.01;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.2), 20, 0, 0, 6);
 }
 
 .coach-avatar {
-    -fx-min-width: 44px;
-    -fx-min-height: 44px;
+    -fx-min-width: 56px;
+    -fx-min-height: 56px;
+    -fx-max-width: 56px;
+    -fx-max-height: 56px;
     -fx-alignment: center;
-    -fx-background-color: #6366f1;
-    -fx-background-radius: 22;
+    -fx-background-color: linear-gradient(135deg, #a5b4fc 0%, #f9a8d4 100%);
+    -fx-background-radius: 28px;
     -fx-text-fill: white;
-    -fx-font-size: 16px;
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(165, 180, 252, 0.3), 10, 0, 0, 3);
 }
 
 .coach-name {
-    -fx-font-size: 16px;
+    -fx-font-size: 17px;
     -fx-font-weight: bold;
     -fx-text-fill: #0f172a;
+    -fx-letter-spacing: -0.2px;
 }
 
 .coach-meta {
-    -fx-font-size: 12px;
-    -fx-text-fill: #64748b;
+    -fx-font-size: 13px;
+    -fx-text-fill: #475569;
+    -fx-font-weight: 500;
 }
 
+/* Badges de statut et priorité */
 .badge-status-pending {
-    -fx-background-color: #fef3c7;
+    -fx-background-color: linear-gradient(to right, #fef3c7 0%, #fde68a 100%);
     -fx-text-fill: #b45309;
-    -fx-background-radius: 6;
-    -fx-padding: 3 8;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    -fx-background-radius: 10;
+    -fx-padding: 6 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-letter-spacing: 0.3px;
 }
 
 .badge-priority-low {
     -fx-background-color: #f1f5f9;
     -fx-text-fill: #475569;
-    -fx-background-radius: 6;
-    -fx-padding: 3 8;
-    -fx-font-size: 11px;
+    -fx-background-radius: 10;
+    -fx-padding: 6 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
 }
 
 .badge-priority-mid {
-    -fx-background-color: #dbeafe;
+    -fx-background-color: linear-gradient(to right, #dbeafe 0%, #bfdbfe 100%);
     -fx-text-fill: #1d4ed8;
-    -fx-background-radius: 6;
-    -fx-padding: 3 8;
-    -fx-font-size: 11px;
+    -fx-background-radius: 10;
+    -fx-padding: 6 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
 }
 
 .badge-priority-high {
-    -fx-background-color: #fee2e2;
+    -fx-background-color: linear-gradient(to right, #fee2e2 0%, #fecaca 100%);
     -fx-text-fill: #b91c1c;
-    -fx-background-radius: 6;
-    -fx-padding: 3 8;
-    -fx-font-size: 11px;
+    -fx-background-radius: 10;
+    -fx-padding: 6 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
 }
 
 .badge-sla {
-    -fx-background-color: #fee2e2;
+    -fx-background-color: linear-gradient(to right, #fee2e2 0%, #fecaca 100%);
     -fx-text-fill: #991b1b;
-    -fx-background-radius: 6;
-    -fx-padding: 3 8;
-    -fx-font-size: 11px;
+    -fx-background-radius: 10;
+    -fx-padding: 6 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
 }
 
 .badge-days {
-    -fx-background-color: #ffedd5;
+    -fx-background-color: linear-gradient(to right, #ffedd5 0%, #fed7aa 100%);
     -fx-text-fill: #c2410c;
-    -fx-background-radius: 6;
-    -fx-padding: 3 8;
-    -fx-font-size: 11px;
+    -fx-background-radius: 10;
+    -fx-padding: 6 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
 }
 
 .coach-msg-box {
-    -fx-background-color: #f8fafc;
-    -fx-background-radius: 8;
-    -fx-padding: 12 14;
-    -fx-font-size: 13px;
+    -fx-background-color: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+    -fx-background-radius: 12;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-padding: 16 18;
+    -fx-font-size: 14px;
     -fx-text-fill: #334155;
     -fx-wrap-text: true;
+    -fx-line-spacing: 2px;
 }
 
+/* Boutons d'action */
 .btn-accept {
-    -fx-background-color: #dcfce7;
-    -fx-text-fill: #166534;
-    -fx-border-color: #86efac;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-    -fx-padding: 8 16;
-    -fx-font-weight: 600;
+    -fx-background-color: linear-gradient(to right, #d1fae5 0%, #a7f3d0 100%);
+    -fx-text-fill: #065f46;
+    -fx-border-color: transparent;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 12 24;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
     -fx-cursor: hand;
+    -fx-letter-spacing: 0.3px;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.2), 10, 0, 0, 3);
 }
 
 .btn-accept:hover {
-    -fx-background-color: #bbf7d0;
+    -fx-background-color: linear-gradient(to right, #a7f3d0 0%, #6ee7b7 100%);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.3), 14, 0, 0, 4);
 }
 
 .btn-decline {
-    -fx-background-color: #fee2e2;
+    -fx-background-color: linear-gradient(to right, #fee2e2 0%, #fecaca 100%);
     -fx-text-fill: #991b1b;
-    -fx-border-color: #fecaca;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-    -fx-padding: 8 16;
-    -fx-font-weight: 600;
+    -fx-border-color: transparent;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 12 24;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
     -fx-cursor: hand;
+    -fx-letter-spacing: 0.3px;
+    -fx-effect: dropshadow(gaussian, rgba(239, 68, 68, 0.2), 10, 0, 0, 3);
 }
 
 .btn-decline:hover {
-    -fx-background-color: #fecaca;
+    -fx-background-color: linear-gradient(to right, #fecaca 0%, #fca5a5 100%);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+    -fx-effect: dropshadow(gaussian, rgba(239, 68, 68, 0.3), 14, 0, 0, 4);
 }
 
 .coach-empty {
     -fx-text-fill: #94a3b8;
-    -fx-font-size: 14px;
-    -fx-padding: 16 0;
+    -fx-font-size: 15px;
+    -fx-padding: 20 0;
     -fx-font-style: italic;
+}
+
+/* Separator */
+Separator {
+    -fx-background-color: #e0e7ff;
+    -fx-padding: 0 44;
 }
