@@ -59,6 +59,7 @@ public class MesDemandesController implements Initializable {
 
     // Boutons
     @FXML private Button newRequestBtn;
+    @FXML private Button payButton;
     @FXML private Button updateBtn;
     @FXML private Button deleteBtn;
     @FXML private Button refreshBtn;
@@ -196,12 +197,14 @@ public class MesDemandesController implements Initializable {
                 (observable, oldValue, newValue) -> {
                     selectedRequest = newValue;
                     updateSelectionLabel();
+                    updatePayButtonState();
                 }
         );
     }
 
     private void setupButtons() {
         newRequestBtn.setOnAction(event -> handleNewRequest());
+        payButton.setOnAction(event -> handlePayment());
         updateBtn.setOnAction(event -> handleUpdate());
         deleteBtn.setOnAction(event -> handleDelete());
         refreshBtn.setOnAction(event -> {
@@ -209,6 +212,9 @@ public class MesDemandesController implements Initializable {
             updateStatistics();
         });
         filterBtn.setOnAction(event -> applyFilters());
+        
+        // Désactiver le bouton de paiement par défaut
+        payButton.setDisable(true);
     }
 
     private void loadRequests() {
@@ -329,6 +335,20 @@ public class MesDemandesController implements Initializable {
         }
     }
 
+    /**
+     * Met à jour l'état du bouton de paiement selon la demande sélectionnée.
+     */
+    private void updatePayButtonState() {
+        if (selectedRequest == null) {
+            payButton.setDisable(true);
+            return;
+        }
+
+        // Le bouton est actif uniquement si la demande est acceptée
+        boolean isAccepted = CoachingRequest.STATUS_ACCEPTED.equals(selectedRequest.getStatus());
+        payButton.setDisable(!isAccepted);
+    }
+
     @FXML
     private void handleNewRequest() {
         try {
@@ -338,6 +358,49 @@ public class MesDemandesController implements Initializable {
             e.printStackTrace();
         } catch (IllegalStateException e) {
             showError("Erreur de navigation", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handlePayment() {
+        if (selectedRequest == null) {
+            showWarning("Veuillez sélectionner une demande à payer");
+            return;
+        }
+
+        // Vérifier que la demande est acceptée
+        if (!CoachingRequest.STATUS_ACCEPTED.equals(selectedRequest.getStatus())) {
+            showWarning("Seules les demandes acceptées peuvent être payées");
+            return;
+        }
+
+        try {
+            // Charger la page de paiement
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/payment/payment.fxml"));
+            Parent root = loader.load();
+            
+            // Récupérer le contrôleur et charger les données
+            controllers.payment.PaymentController controller = loader.getController();
+            controller.loadPaymentForRequest(selectedRequest);
+            
+            // Créer une nouvelle fenêtre
+            Stage stage = new Stage();
+            stage.setTitle("Paiement de la séance");
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.setResizable(false);
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            
+            // Rafraîchir la liste après fermeture
+            stage.setOnHidden(event -> {
+                loadRequests();
+                updateStatistics();
+            });
+            
+            stage.showAndWait();
+            
+        } catch (IOException e) {
+            showError("Erreur de navigation", "Impossible de charger la page de paiement");
+            e.printStackTrace();
         }
     }
 
