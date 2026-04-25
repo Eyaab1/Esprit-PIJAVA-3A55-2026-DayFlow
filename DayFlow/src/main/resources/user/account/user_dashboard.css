@@ -1,7 +1,7 @@
 /* User dashboard — Couleurs pastel douces et lisibles */
 .dashboard-root {
     -fx-font-family: "Segoe UI", "Inter", "Arial", sans-serif;
-    -fx-background-color: linear-gradient(to bottom, #f0f9ff 0%, #fef3f9 100%);
+    -fx-background-color: linear-gradient(to bottom right, #f0f9ff 0%, #fef3f9 50%, #fef3c7 100%);
 }
 
 .dashboard-scroll {
@@ -14,41 +14,66 @@
     -fx-background-color: transparent;
 }
 
+.dashboard-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+}
+
+.dashboard-scroll .scroll-bar:vertical .track {
+    -fx-background-color: rgba(226, 232, 240, 0.3);
+    -fx-background-radius: 4px;
+}
+
+.dashboard-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: linear-gradient(to bottom, #c4b5fd 0%, #a78bfa 100%);
+    -fx-background-radius: 4px;
+}
+
+.dashboard-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: linear-gradient(to bottom, #a78bfa 0%, #8b5cf6 100%);
+}
+
 .dashboard-inner {
-    -fx-spacing: 32;
-    -fx-padding: 36 44 100 44;
-    -fx-max-width: 1100;
+    -fx-spacing: 36;
+    -fx-padding: 40 48 120 48;
+    -fx-max-width: 1200;
 }
 
 /* Bandeau d'accueil avec dégradé pastel doux */
 .hero-dashboard {
-    -fx-padding: 40 44 44 44;
-    -fx-background-radius: 24;
+    -fx-padding: 48 48 52 48;
+    -fx-background-radius: 28;
     -fx-background-color: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 50%, #fce7f3 100%);
-    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.15), 20, 0, 0, 6);
+    -fx-border-color: rgba(255, 255, 255, 0.6);
+    -fx-border-width: 2;
+    -fx-border-radius: 28;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.18), 24, 0, 0, 8);
 }
 
 .pill-welcome {
-    -fx-background-color: rgba(255, 255, 255, 0.95);
-    -fx-background-radius: 28;
-    -fx-padding: 10 20;
+    -fx-background-color: rgba(255, 255, 255, 0.98);
+    -fx-background-radius: 30;
+    -fx-padding: 12 24;
     -fx-text-fill: #6366f1;
     -fx-font-size: 14px;
-    -fx-font-weight: 600;
-    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.1), 8, 0, 0, 2);
+    -fx-font-weight: 700;
+    -fx-letter-spacing: 0.3px;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.15), 10, 0, 0, 3);
 }
 
 .greeting-title {
-    -fx-font-size: 36px;
+    -fx-font-size: 42px;
     -fx-font-weight: bold;
     -fx-text-fill: #1e293b;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.03), 4, 0, 0, 1);
+    -fx-letter-spacing: -0.5px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 6, 0, 0, 2);
 }
 
 .greeting-sub {
-    -fx-font-size: 16px;
+    -fx-font-size: 17px;
     -fx-text-fill: #475569;
     -fx-font-weight: 500;
+    -fx-letter-spacing: 0.2px;
 }
 
 /* Barre récap avec couleurs pastel douces */
@@ -57,60 +82,71 @@
 }
 
 .stats-summary-bar {
-    -fx-spacing: 0;
-    -fx-padding: 28 12 32 12;
+    -fx-spacing: 16;
+    -fx-padding: 32 16 36 16;
     -fx-alignment: center;
-    -fx-background-radius: 20;
-    -fx-border-radius: 20;
+    -fx-background-radius: 24;
+    -fx-border-radius: 24;
     -fx-border-width: 2;
-    -fx-border-color: rgba(255, 255, 255, 0.8);
-    -fx-background-color: linear-gradient(to bottom, #ffffff 0%, #fef3f9 100%);
-    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.08), 16, 0, 0, 4);
+    -fx-border-color: rgba(255, 255, 255, 0.9);
+    -fx-background-color: linear-gradient(to bottom, #ffffff 0%, #fefcff 100%);
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.12), 20, 0, 0, 6);
 }
 
 .stat-item {
-    -fx-padding: 8 16 4 16;
+    -fx-padding: 16 20 12 20;
     -fx-alignment: center;
     -fx-min-width: 0;
+    -fx-background-radius: 16;
+    -fx-cursor: hand;
+}
+
+.stat-item:hover {
+    -fx-background-color: linear-gradient(to bottom, #faf5ff 0%, #f5f3ff 100%);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
 }
 
 .stat-icon-frame {
-    -fx-min-width: 48px;
-    -fx-min-height: 48px;
-    -fx-pref-width: 48px;
-    -fx-pref-height: 48px;
-    -fx-max-width: 48px;
-    -fx-max-height: 48px;
+    -fx-min-width: 56px;
+    -fx-min-height: 56px;
+    -fx-pref-width: 56px;
+    -fx-pref-height: 56px;
+    -fx-max-width: 56px;
+    -fx-max-height: 56px;
     -fx-alignment: center;
     -fx-background-color: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%);
-    -fx-background-radius: 24;
-    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.12), 8, 0, 0, 2);
+    -fx-background-radius: 28;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.15), 10, 0, 0, 3);
 }
 
 .stat-icon-symbol {
-    -fx-font-size: 24px;
+    -fx-font-size: 28px;
     -fx-text-fill: #1e293b;
     -fx-alignment: center;
     -fx-padding: 0;
 }
 
 .stat-value {
-    -fx-font-size: 32px;
+    -fx-font-size: 36px;
     -fx-font-weight: bold;
     -fx-text-fill: #6366f1;
+    -fx-letter-spacing: -0.5px;
 }
 
 .stat-caption {
     -fx-font-size: 14px;
     -fx-text-fill: #64748b;
-    -fx-font-weight: 500;
+    -fx-font-weight: 600;
+    -fx-letter-spacing: 0.3px;
 }
 
 /* Actions rapides avec couleurs pastel */
 .section-title {
-    -fx-font-size: 20px;
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
     -fx-text-fill: #1e293b;
+    -fx-letter-spacing: -0.3px;
 }
 
 .quick-row {
@@ -119,61 +155,68 @@
 }
 
 .quick-card {
-    -fx-padding: 28 24 32 24;
-    -fx-min-width: 220;
-    -fx-pref-width: 280;
+    -fx-padding: 32 28 36 28;
+    -fx-min-width: 240;
+    -fx-pref-width: 300;
     -fx-background-color: #ffffff;
-    -fx-background-radius: 20;
-    -fx-border-color: rgba(226, 232, 240, 0.8);
-    -fx-border-radius: 20;
+    -fx-background-radius: 24;
+    -fx-border-color: rgba(226, 232, 240, 0.6);
+    -fx-border-radius: 24;
     -fx-border-width: 2;
-    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.08), 12, 0, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.1), 16, 0, 0, 6);
     -fx-cursor: hand;
 }
 
 .quick-card:hover {
     -fx-border-color: #c4b5fd;
     -fx-background-color: linear-gradient(to bottom, #ffffff 0%, #faf5ff 100%);
-    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.2), 20, 0, 0, 6);
-    -fx-scale-x: 1.02;
-    -fx-scale-y: 1.02;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.25), 24, 0, 0, 10);
+    -fx-scale-x: 1.04;
+    -fx-scale-y: 1.04;
 }
 
 .quick-icon {
-    -fx-font-size: 32px;
-    -fx-padding: 0 0 12 0;
+    -fx-font-size: 40px;
+    -fx-padding: 0 0 16 0;
 }
 
 .quick-title {
-    -fx-font-size: 16px;
+    -fx-font-size: 17px;
     -fx-font-weight: 700;
     -fx-text-fill: #1e293b;
+    -fx-letter-spacing: -0.2px;
 }
 
 .quick-desc {
     -fx-font-size: 14px;
     -fx-text-fill: #64748b;
     -fx-wrap-text: true;
-    -fx-line-spacing: 2;
+    -fx-line-spacing: 3;
+    -fx-font-weight: 500;
 }
 
 /* FAB feedback avec couleur pastel */
 .fab-feedback {
-    -fx-min-width: 64;
-    -fx-min-height: 64;
-    -fx-max-width: 64;
-    -fx-max-height: 64;
-    -fx-background-radius: 32;
+    -fx-min-width: 68;
+    -fx-min-height: 68;
+    -fx-max-width: 68;
+    -fx-max-height: 68;
+    -fx-background-radius: 34;
     -fx-background-color: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
     -fx-text-fill: white;
-    -fx-font-size: 26px;
+    -fx-font-size: 28px;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(236, 72, 153, 0.4), 16, 0, 0, 6);
+    -fx-effect: dropshadow(gaussian, rgba(236, 72, 153, 0.45), 20, 0, 0, 8);
 }
 
 .fab-feedback:hover {
     -fx-background-color: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
-    -fx-effect: dropshadow(gaussian, rgba(236, 72, 153, 0.5), 20, 0, 0, 8);
-    -fx-scale-x: 1.05;
-    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(236, 72, 153, 0.6), 28, 0, 0, 12);
+    -fx-scale-x: 1.08;
+    -fx-scale-y: 1.08;
+}
+
+.fab-feedback:pressed {
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
 }
