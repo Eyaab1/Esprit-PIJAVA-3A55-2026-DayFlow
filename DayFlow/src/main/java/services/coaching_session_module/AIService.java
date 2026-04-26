@@ -2,6 +2,7 @@ package services.coaching_session_module;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.cdimascio.dotenv.Dotenv;
 import model.user.User;
 import services.UserServices.CoachService;
 
@@ -61,10 +62,17 @@ public class AIService {
     /**
      * Clé lue exclusivement depuis l'environnement du processus (aucune clé en dur).
      */
-  private static String readHuggingFaceApiKey() {
-    String key = "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";
-    return normalizeApiKey(key);
-}
+    private static String readHuggingFaceApiKey() {
+        Dotenv dotenv = Dotenv.configure()
+                .ignoreIfMissing()
+                .ignoreIfMalformed()
+                .load();
+        String key = dotenv.get("HUGGINGFACE_API_KEY");
+        if (key == null || key.isBlank()) {
+            key = System.getenv("HUGGINGFACE_API_KEY");
+        }
+        return normalizeApiKey(key);
+    }
 
     private static String normalizeApiKey(String key) {
         if (key == null) {
@@ -76,7 +84,15 @@ public class AIService {
 
     public RecommendationResult recommendCoach(String userMessage) throws SQLException, IOException, InterruptedException {
         validateMessage(userMessage);
-        AIAnalysis analysis = analyzeUserMessage(userMessage);
+        AIAnalysis analysis;
+        try {
+            analysis = analyzeUserMessage(userMessage);
+        } catch (Exception e) {
+            // Fallback local : la recommandation reste disponible même si l'API IA est indisponible.
+            String fallbackNeed = inferNeedFromMessage(userMessage);
+            analysis = new AIAnalysis(fallbackNeed, new ArrayList<>(tokenize(userMessage)));
+            System.out.println("AI fallback active: " + e.getMessage());
+        }
 
         List<User> coaches = coachService.getAllCoaches();
         System.out.println("========== COACHS DISPONIBLES ==========");
@@ -194,6 +210,42 @@ keywords.add(need);
 
         return new AIAnalysis(need.trim(), deduplicateLowercase(keywords));
     }
+
+    private String inferNeedFromMessage(String userMessage) {
+        Set<String> tokens = tokenize(userMessage);
+        if (containsAny(tokens, "stress", "pression", "surcharge", "fatigue")) {
+            return "Gestion du stress";
+        }
+        if (containsAny(tokens, "confiance", "estime", "timide", "oser")) {
+            return "Confiance en soi";
+        }
+        if (containsAny(tokens, "organisation", "planifier", "discipline", "procrastination")) {
+            return "Organisation";
+        }
+        if (containsAny(tokens, "motivation", "demotive", "objectif", "ambition")) {
+            return "Motivation";
+        }
+        if (containsAny(tokens, "emotion", "emotions", "colere", "tristesse")) {
+            return "Gestion des émotions";
+        }
+        if (containsAny(tokens, "burnout", "epuisement", "surmenage")) {
+            return "Burnout";
+        }
+        if (containsAny(tokens, "anxiete", "angoisse", "panique", "peur")) {
+            return "Anxiété";
+        }
+        return "Développement personnel";
+    }
+
+    private boolean containsAny(Set<String> tokens, String... candidates) {
+        for (String candidate : candidates) {
+            if (tokens.contains(normalize(candidate))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 private int computeCompatibilityScore(String userMessage, User coach) {
 
     Set<String> messageTokens = tokenize(userMessage);
