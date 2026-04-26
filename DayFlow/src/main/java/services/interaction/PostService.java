@@ -7,6 +7,7 @@ import enums.PostStatus;
 import model.interaction.Post;
 import org.postgresql.util.PGobject;
 import services.CRUD;
+import services.post.moderation.ModerationService;
 import utils.DbConnexion;
 
 import java.sql.*;
@@ -16,6 +17,7 @@ import java.util.List;
 public class PostService implements CRUD<Post, Integer> {
 
     private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ModerationService MODERATION = new ModerationService();
 
     private static final String INSERT_POST = """
             INSERT INTO post (
@@ -68,6 +70,7 @@ public class PostService implements CRUD<Post, Integer> {
         if (post.getCreatedById() == null) {
             throw new SQLException("createdById is required");
         }
+        MODERATION.validatePostContent(post.getCreatedById(), "post", post.getTitle(), post.getContent());
         Connection c = DbConnexion.getConnection();
         try (PreparedStatement ps = c.prepareStatement(INSERT_POST, Statement.RETURN_GENERATED_KEYS)) {
             int i = 1;
@@ -108,6 +111,7 @@ public class PostService implements CRUD<Post, Integer> {
         if (post.getTitle() == null || post.getTitle().isBlank()) {
             throw new SQLException("Post title is required");
         }
+        MODERATION.validatePostContent(post.getCreatedById(), "post_edit", post.getTitle(), post.getContent());
         Connection c = DbConnexion.getConnection();
         try (PreparedStatement ps = c.prepareStatement(UPDATE_POST)) {
             int i = 1;

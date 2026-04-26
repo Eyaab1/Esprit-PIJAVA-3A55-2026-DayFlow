@@ -233,6 +233,63 @@
     -fx-wrap-text: true;
 }
 
+.comment-author {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #111827;
+}
+
+.comment-options-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 16px;
+    -fx-padding: 0;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.comment-options-btn:hover {
+    -fx-background-color: #eef2ff;
+}
+
+.comment-options-btn > .arrow-button {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+    -fx-opacity: 0;
+    -fx-max-width: 0;
+}
+
+.comment-options-btn > .label {
+    -fx-padding: 0;
+}
+
+.comment-edit-field {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 10;
+    -fx-padding: 8 10;
+    -fx-font-size: 13px;
+}
+
+.comment-edit-actions {
+    -fx-spacing: 8;
+    -fx-alignment: center-left;
+}
+
+.comment-secondary-btn {
+    -fx-background-color: #e5e7eb;
+    -fx-text-fill: #111827;
+    -fx-background-radius: 10;
+    -fx-padding: 6 12;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.comment-secondary-btn:hover {
+    -fx-background-color: #d1d5db;
+}
+
 .comment-actions {
     -fx-spacing: 10;
     -fx-padding: 4 0 0 0;

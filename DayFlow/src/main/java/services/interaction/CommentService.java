@@ -2,6 +2,7 @@ package services.interaction;
 
 import model.interaction.Comment;
 import services.CRUD;
+import services.post.moderation.ModerationService;
 import utils.DbConnexion;
 
 import java.sql.*;
@@ -10,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommentService implements CRUD<Comment, Integer> {
+
+    private static final ModerationService MODERATION = new ModerationService();
 
     private static final String INSERT_COMMENT = """
             INSERT INTO comment (content, created_at, post_id, commenter_id, parent_comment_id)
@@ -55,6 +58,7 @@ public class CommentService implements CRUD<Comment, Integer> {
         if (comment.getPostId() == null || comment.getCommenterId() == null) {
             throw new SQLException("postId and commenterId are required");
         }
+        MODERATION.validateCommentContent(comment.getCommenterId(), "comment", comment.getContent());
         Connection c = DbConnexion.getConnection();
         try (PreparedStatement ps = c.prepareStatement(INSERT_COMMENT, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, comment.getContent());
@@ -87,6 +91,7 @@ public class CommentService implements CRUD<Comment, Integer> {
         if (comment.getPostId() == null || comment.getCommenterId() == null) {
             throw new SQLException("postId and commenterId are required");
         }
+        MODERATION.validateCommentContent(comment.getCommenterId(), "comment_edit", comment.getContent());
         Connection c = DbConnexion.getConnection();
         try (PreparedStatement ps = c.prepareStatement(UPDATE_COMMENT)) {
             ps.setString(1, comment.getContent());

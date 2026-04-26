@@ -9,27 +9,38 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
+<!-- Root container: full-height column for the whole posts feed screen. -->
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="controllers.interaction.PostsFeedController"
       styleClass="posts-feed-root" stylesheets="@posts_feed.css">
+   <!-- Root’s direct children (single inner column that fills height). -->
    <children>
+      <!-- Inner column: holds toolbar + scroll area; VBox.vgrow=ALWAYS makes it take all vertical space. -->
       <VBox styleClass="posts-feed-inner" VBox.vgrow="ALWAYS">
          <children>
+            <!-- Toolbar row: sort / filter / tag dropdowns, spacer, then “Create post”. -->
             <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="posts-toolbar">
                <children>
                   <ComboBox fx:id="sortCombo" prefWidth="200.0" styleClass="posts-combo" />
                   <ComboBox fx:id="filterCombo" prefWidth="200.0" styleClass="posts-combo" />
                   <ComboBox fx:id="tagCombo" prefWidth="200.0" styleClass="posts-combo" />
+                  <!-- Spacer: absorbs extra width so the button stays right-aligned. -->
                   <Region HBox.hgrow="ALWAYS" />
+                  <!-- Opens the “new post” dialog (handler onCreatePost in the controller). -->
                   <Button fx:id="createPostBtn" mnemonicParsing="false" onAction="#onCreatePost" styleClass="btn-create-post" text="＋  Créer un post" />
                </children>
+               <!-- Padding inside the toolbar HBox (bottom gap under the controls). -->
                <padding>
                   <Insets bottom="8.0" left="0.0" right="0.0" top="0.0" />
                </padding>
             </HBox>
+            <!-- Scrollable viewport for the feed; fitToWidth=true stretches content to the pane width. -->
             <ScrollPane fx:id="scrollPane" fitToWidth="true" styleClass="posts-scroll" VBox.vgrow="ALWAYS">
+               <!-- Single child of ScrollPane: the scrollable body. -->
                <content>
+                  <!-- Vertical list built in code (buildPostCard): each post is added as a child here. -->
                   <VBox fx:id="postsContainer" spacing="20.0" styleClass="posts-list-wrap">
+                     <!-- Outer padding around the list of cards (bottom space for end-of-scroll comfort). -->
                      <padding>
                         <Insets bottom="48.0" left="0.0" right="8.0" top="8.0" />
                      </padding>
