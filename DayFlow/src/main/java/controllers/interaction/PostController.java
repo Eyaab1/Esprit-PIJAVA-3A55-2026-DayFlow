@@ -6,6 +6,7 @@ import model.interaction.Tag;
 import services.interaction.CommentService;
 import services.interaction.PostService;
 import services.interaction.TagService;
+import services.post.moderation.ModerationRejectedException;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -32,6 +33,8 @@ public class PostController {
         try {
             postService.createPost(post);
             return "Post created successfully with ID: " + post.getId();
+        } catch (ModerationRejectedException e) {
+            return e.getMessage();
         } catch (SQLException e) {
             return "Error creating post: " + e.getMessage();
         }
@@ -59,6 +62,8 @@ public class PostController {
         try {
             postService.updatePost(post);
             return "Post updated successfully";
+        } catch (ModerationRejectedException e) {
+            return e.getMessage();
         } catch (SQLException e) {
             return "Error updating post: " + e.getMessage();
         }

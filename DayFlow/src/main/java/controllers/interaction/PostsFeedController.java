@@ -20,11 +20,13 @@ import model.interaction.Post;
 import model.interaction.Tag;
 import model.user.User;
 import services.account.UserService;
+import services.interaction.AutoTaggingService;
 import services.interaction.CommentService;
 import services.interaction.PostLikeService;
 import services.interaction.PostService;
 import services.interaction.SavedPostService;
 import services.interaction.TagService;
+import services.post.moderation.ModerationRejectedException;
 import session.AppSession;
 import utils.HtmlPlainText;
 
@@ -62,6 +64,7 @@ public class PostsFeedController {
 
     private final PostService postService = new PostService();
     private final TagService tagService = new TagService();
+    private final AutoTaggingService autoTaggingService = new AutoTaggingService();
     private final CommentService commentService = new CommentService();
     private final PostLikeService postLikeService = new PostLikeService();
     private final SavedPostService savedPostService = new SavedPostService();
@@ -102,10 +105,8 @@ public class PostsFeedController {
         Platform.runLater(() -> {
             if (scrollPane != null) {
                 scrollPane.vvalueProperty().addListener((obs, oldVal, newVal) -> {
-                    System.out.println("Scroll: " + newVal);
                     if (newVal.doubleValue() >= 0.95 && !isLoading
                             && currentPage * pageSize < allFilteredPosts.size()) {
-                        System.out.println("Loading more posts...");
                         loadMorePosts();
                     }
                 });
@@ -155,8 +156,6 @@ public class PostsFeedController {
         contentArea.setPromptText("Contenu");
         contentArea.setPrefRowCount(6);
         contentArea.setWrapText(true);
-        TextField tagsField = new TextField();
-        tagsField.setPromptText("Tags (optionnel, séparés par des virgules)");
         ComboBox<String> statusCombo = new ComboBox<>();
         statusCombo.setItems(FXCollections.observableArrayList(
                 "Brouillon",
@@ -190,8 +189,10 @@ public class PostsFeedController {
         grid.add(titleField, 1, 0);
         grid.add(new Label("Contenu :"), 0, 1);
         grid.add(contentArea, 1, 1);
+        Label autoTagHint = new Label("Tags générés automatiquement (IA)");
+        autoTagHint.getStyleClass().add("post-meta");
         grid.add(new Label("Tags :"), 0, 2);
-        grid.add(tagsField, 1, 2);
+        grid.add(autoTagHint, 1, 2);
         grid.add(new Label("Statut :"), 0, 3);
         grid.add(statusCombo, 1, 3);
         grid.add(new Label("Date :"), 0, 4);
@@ -252,37 +253,15 @@ public class PostsFeedController {
         try {
             postService.insert(post);
             int pid = post.getId();
-            String tagsCsv = tagsField.getText();
-            if (tagsCsv != null && !tagsCsv.isBlank()) {
-                for (String part : tagsCsv.split(",")) {
-                    String name = part.trim();
-                    if (name.isEmpty()) {
-                        continue;
-                    }
-                    Tag t = findTagByName(name);
-                    if (t == null) {
-                        t = new Tag();
-                        t.setName(name);
-                        tagService.addTag(t);
-                    }
-                    tagService.attachTagToPost(pid, t.getId());
-                }
-            }
+            autoTaggingService.generateAndAttachTags(pid, title, content);
             reloadTagFilterChoices();
             refreshFeed();
             new Alert(Alert.AlertType.INFORMATION, "Post publié.").showAndWait();
+        } catch (ModerationRejectedException e) {
+            new Alert(Alert.AlertType.WARNING, e.getMessage()).showAndWait();
         } catch (SQLException e) {
             showError("Création du post", e);
         }
-    }
-
-    private Tag findTagByName(String name) throws SQLException {
-        for (Tag t : tagService.getAllTags()) {
-            if (t.getName() != null && t.getName().equalsIgnoreCase(name)) {
-                return t;
-            }
-        }
-        return null;
     }
 
     private void refreshFeed() {
@@ -809,6 +788,8 @@ public class PostsFeedController {
             commentService.addComment(c);
             field.clear();
             refreshFeed();
+        } catch (ModerationRejectedException e) {
+            new Alert(Alert.AlertType.WARNING, e.getMessage()).showAndWait();
         } catch (SQLException e) {
             showError("Commentaire", e);
         }
@@ -948,6 +929,8 @@ public class PostsFeedController {
             postService.update(post);
             refreshFeed();
             new Alert(Alert.AlertType.INFORMATION, "Post mis à jour.").showAndWait();
+        } catch (ModerationRejectedException e) {
+            new Alert(Alert.AlertType.WARNING, e.getMessage()).showAndWait();
         } catch (SQLException e) {
             showError("Mise à jour du post", e);
         }

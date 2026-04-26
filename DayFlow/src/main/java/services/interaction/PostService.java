@@ -56,6 +56,20 @@ public class PostService implements CRUD<Post, Integer> {
             WHERE status = ? AND scheduled_at IS NOT NULL AND scheduled_at <= ?
             """;
 
+    private static final String SELECT_SLUG_EXISTS = """
+            SELECT 1
+            FROM post
+            WHERE slug = ?
+            LIMIT 1
+            """;
+
+    private static final String SELECT_SLUG_EXISTS_EXCLUDING_ID = """
+            SELECT 1
+            FROM post
+            WHERE slug = ? AND id <> ?
+            LIMIT 1
+            """;
+
     @Override
     public void create(Post post) throws SQLException {
         insert(post);
@@ -72,6 +86,7 @@ public class PostService implements CRUD<Post, Integer> {
         }
         MODERATION.validatePostContent(post.getCreatedById(), "post", post.getTitle(), post.getContent());
         Connection c = DbConnexion.getConnection();
+        post.setSlug(generateUniqueSlug(c, post.getSlug(), post.getTitle(), null));
         try (PreparedStatement ps = c.prepareStatement(INSERT_POST, Statement.RETURN_GENERATED_KEYS)) {
             int i = 1;
             ps.setString(i++, post.getTitle());
@@ -86,9 +101,6 @@ public class PostService implements CRUD<Post, Integer> {
             ps.setObject(i++, toJsonList(post.getImages()));
             ps.setTimestamp(i++, post.getScheduledAt() != null ? Timestamp.valueOf(post.getScheduledAt()) : null);
             ps.setTimestamp(i++, post.getUpdatedAt() != null ? Timestamp.valueOf(post.getUpdatedAt()) : null);
-            if (post.getSlug() == null) {
-                post.setSlug(post.getTitle().toLowerCase().replace(" ", "-"));
-            }
             ps.setString(i++, post.getSlug());
             ps.setTimestamp(i++, post.getDeletedAt() != null ? Timestamp.valueOf(post.getDeletedAt()) : null);
             ps.setInt(i++, post.getViewCount() != null ? post.getViewCount() : 0);
@@ -113,6 +125,7 @@ public class PostService implements CRUD<Post, Integer> {
         }
         MODERATION.validatePostContent(post.getCreatedById(), "post_edit", post.getTitle(), post.getContent());
         Connection c = DbConnexion.getConnection();
+        post.setSlug(generateUniqueSlug(c, post.getSlug(), post.getTitle(), post.getId()));
         try (PreparedStatement ps = c.prepareStatement(UPDATE_POST)) {
             int i = 1;
             ps.setString(i++, post.getTitle());
@@ -332,5 +345,43 @@ public class PostService implements CRUD<Post, Integer> {
         } catch (JsonProcessingException e) {
             return new ArrayList<>();
         }
+    }
+
+    private String generateUniqueSlug(Connection c, String requestedSlug, String title, Integer currentPostId) throws SQLException {
+        String base = slugify((requestedSlug != null && !requestedSlug.isBlank()) ? requestedSlug : title);
+        String candidate = base;
+        int suffix = 2;
+        while (slugExists(c, candidate, currentPostId)) {
+            candidate = base + "-" + suffix;
+            suffix++;
+        }
+        return candidate;
+    }
+
+    private boolean slugExists(Connection c, String slug, Integer currentPostId) throws SQLException {
+        if (currentPostId == null) {
+            try (PreparedStatement ps = c.prepareStatement(SELECT_SLUG_EXISTS)) {
+                ps.setString(1, slug);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next();
+                }
+            }
+        }
+        try (PreparedStatement ps = c.prepareStatement(SELECT_SLUG_EXISTS_EXCLUDING_ID)) {
+            ps.setString(1, slug);
+            ps.setInt(2, currentPostId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    private String slugify(String input) {
+        String value = input == null ? "" : input.toLowerCase().trim();
+        value = value.replaceAll("[^a-z0-9\\s-]", "");
+        value = value.replaceAll("\\s+", "-");
+        value = value.replaceAll("-{2,}", "-");
+        value = value.replaceAll("^-|-$", "");
+        return value.isBlank() ? "post" : value;
     }
 }
