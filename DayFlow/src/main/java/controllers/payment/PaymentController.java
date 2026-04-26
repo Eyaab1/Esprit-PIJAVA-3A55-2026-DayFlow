@@ -14,6 +14,9 @@ import services.coaching_session_module.CoachingRequestService;
 import services.payment.PaymentService;
 import session.AppSession;
 
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.SQLException;
@@ -216,11 +219,11 @@ public class PaymentController implements Initializable {
             // Initier le paiement Stripe
             String checkoutUrl = paymentService.initiateStripeCheckout(payment);
 
-            // TODO: Ouvrir l'URL Stripe dans le navigateur
-            // Pour l'instant, on simule un paiement réussi après 2 secondes
-            simulatePaymentSuccess();
+            openCheckoutInBrowser(checkoutUrl);
+            showMessage("Finalisez le paiement dans Stripe, puis revenez ici. Vérification en cours...", "info");
+            pollPaymentStatusUntilPaid();
 
-        } catch (SQLException e) {
+        } catch (SQLException | IllegalStateException e) {
             progressIndicator.setVisible(false);
             payButton.setDisable(false);
             showError("Erreur de paiement", "Impossible d'initier le paiement: " + e.getMessage());
@@ -229,48 +232,83 @@ public class PaymentController implements Initializable {
     }
 
     /**
-     * Simule un paiement réussi (à remplacer par l'intégration Stripe réelle).
+     * Ouvre Stripe Checkout dans le navigateur système.
      */
-    private void simulatePaymentSuccess() {
-        // Simulation d'un délai de traitement
+    private void openCheckoutInBrowser(String checkoutUrl) {
+        if (checkoutUrl == null || checkoutUrl.isBlank()) {
+            throw new IllegalStateException("URL Stripe Checkout invalide.");
+        }
+        try {
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(URI.create(checkoutUrl));
+            } else {
+                throw new IllegalStateException("Ouverture automatique du navigateur non supportee.");
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Impossible d'ouvrir Stripe Checkout dans le navigateur.", e);
+        }
+    }
+
+    /**
+     * Vérifie périodiquement le statut de la session Checkout jusqu'au paiement.
+     */
+    private void pollPaymentStatusUntilPaid() {
         new Thread(() -> {
             try {
-                Thread.sleep(2000);
-                
-                // Marquer le paiement comme réussi
-                javafx.application.Platform.runLater(() -> {
-                    try {
-                        String simulatedPaymentIntentId = "pi_test_" + System.currentTimeMillis();
-                        String simulatedReceiptUrl = "https://stripe.com/receipt/test";
-                        
-                        paymentService.markPaymentAsSucceeded(
-                            payment.getId(), 
-                            simulatedPaymentIntentId, 
-                            simulatedReceiptUrl
-                        );
-
-                        // Recharger le paiement
-                        Optional<Payment> updated = paymentService.findById(payment.getId());
-                        if (updated.isPresent()) {
-                            payment = updated.get();
-                            displayPaymentInfo();
-                            updateButtonStates();
-                        }
-
-                        progressIndicator.setVisible(false);
-                        showSuccess("Paiement réussi !", "Votre séance de coaching est maintenant confirmée.");
-
-                    } catch (SQLException e) {
-                        progressIndicator.setVisible(false);
-                        payButton.setDisable(false);
-                        showError("Erreur", "Impossible de confirmer le paiement: " + e.getMessage());
+                int maxAttempts = 120; // ~10 minutes (120 * 5s)
+                int attempts = 0;
+                while (attempts < maxAttempts) {
+                    attempts++;
+                    Thread.sleep(5000);
+                    Optional<PaymentService.StripeCheckoutStatus> checkoutStatus =
+                            paymentService.fetchCheckoutStatus(payment.getStripeCheckoutSessionId());
+                    if (checkoutStatus.isPresent()) {
+                        PaymentService.StripeCheckoutStatus status = checkoutStatus.get();
+                        String paymentIntentId = status.paymentIntentId() != null
+                                ? status.paymentIntentId()
+                                : "pi_unknown_" + System.currentTimeMillis();
+                        paymentService.markPaymentAsSucceeded(payment.getId(), paymentIntentId, status.receiptUrl());
+                        javafx.application.Platform.runLater(() -> refreshUiAfterSuccessfulPayment());
+                        return;
                     }
+                }
+                javafx.application.Platform.runLater(() -> {
+                    progressIndicator.setVisible(false);
+                    payButton.setDisable(false);
+                    showMessage("Paiement non confirme pour le moment. Vous pouvez reessayer ou fermer cette fenetre.", "info");
                 });
-
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+                javafx.application.Platform.runLater(() -> {
+                    progressIndicator.setVisible(false);
+                    payButton.setDisable(false);
+                    showError("Interruption", "La verification du paiement a ete interrompue.");
+                });
+            } catch (SQLException e) {
+                javafx.application.Platform.runLater(() -> {
+                    progressIndicator.setVisible(false);
+                    payButton.setDisable(false);
+                    showError("Erreur", "Impossible de confirmer le paiement: " + e.getMessage());
+                });
             }
         }).start();
+    }
+
+    private void refreshUiAfterSuccessfulPayment() {
+        try {
+            Optional<Payment> updated = paymentService.findById(payment.getId());
+            if (updated.isPresent()) {
+                payment = updated.get();
+                displayPaymentInfo();
+                updateButtonStates();
+            }
+            progressIndicator.setVisible(false);
+            showSuccess("Paiement réussi !", "Votre séance de coaching est maintenant confirmée.");
+        } catch (SQLException e) {
+            progressIndicator.setVisible(false);
+            payButton.setDisable(false);
+            showError("Erreur", "Paiement reçu mais impossible de recharger les données: " + e.getMessage());
+        }
     }
 
     /**

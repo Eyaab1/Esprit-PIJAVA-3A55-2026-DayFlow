@@ -2,11 +2,12 @@ package config;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 /**
  * Configuration pour l'intégration Stripe.
- * Charge les clés API depuis les variables d'environnement ou un fichier .env
+ * Charge les clés API depuis les variables d'environnement, config.properties ou .env.
  */
 public class StripeConfig {
 
@@ -30,19 +31,16 @@ public class StripeConfig {
     }
 
     /**
-     * Charge la configuration depuis les variables d'environnement ou le fichier .env
+     * Charge la configuration depuis les variables d'environnement, config.properties ou .env.
      */
     private static void loadConfiguration() {
         if (initialized) {
             return;
         }
 
-        try {
-            // Essayer de charger depuis le fichier .env
-            loadFromEnvFile();
-        } catch (IOException e) {
-            System.out.println("Fichier .env non trouvé, utilisation des variables d'environnement système");
-        }
+        loadOptionalPropertiesFile("config.properties");
+        loadOptionalClasspathProperties("config.properties");
+        loadOptionalPropertiesFile(".env");
 
         // Charger les valeurs (priorité aux variables d'environnement système)
         secretKey = getProperty("STRIPE_SECRET_KEY", "");
@@ -66,12 +64,21 @@ public class StripeConfig {
         }
     }
 
-    /**
-     * Charge les propriétés depuis le fichier .env
-     */
-    private static void loadFromEnvFile() throws IOException {
-        try (FileInputStream fis = new FileInputStream(".env")) {
+    private static void loadOptionalPropertiesFile(String filePath) {
+        try (FileInputStream fis = new FileInputStream(filePath)) {
             properties.load(fis);
+        } catch (IOException ignored) {
+            // Fichier optionnel: ignoré s'il n'existe pas.
+        }
+    }
+
+    private static void loadOptionalClasspathProperties(String resourcePath) {
+        try (InputStream in = StripeConfig.class.getClassLoader().getResourceAsStream(resourcePath)) {
+            if (in != null) {
+                properties.load(in);
+            }
+        } catch (IOException ignored) {
+            // Ressource optionnelle: ignorée si invalide.
         }
     }
 
@@ -85,7 +92,7 @@ public class StripeConfig {
             return envValue;
         }
 
-        // 2. Vérifier le fichier .env
+        // 2. Vérifier les propriétés chargées (config.properties puis .env)
         String propValue = properties.getProperty(key);
         if (propValue != null && !propValue.isEmpty()) {
             return propValue;
@@ -153,8 +160,7 @@ public class StripeConfig {
         }
 
         try {
-            // TODO: Décommenter quand la dépendance Stripe sera ajoutée
-            // com.stripe.Stripe.apiKey = secretKey;
+            com.stripe.Stripe.apiKey = secretKey;
             System.out.println("✓ Stripe initialisé avec succès");
         } catch (Exception e) {
             System.err.println("❌ Erreur lors de l'initialisation de Stripe: " + e.getMessage());

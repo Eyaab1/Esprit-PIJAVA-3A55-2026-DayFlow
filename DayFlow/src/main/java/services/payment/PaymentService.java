@@ -1,5 +1,10 @@
 package services.payment;
 
+import com.stripe.exception.StripeException;
+import com.stripe.model.checkout.Session;
+import com.stripe.param.checkout.SessionCreateParams;
+import com.stripe.param.checkout.SessionRetrieveParams;
+import config.StripeConfig;
 import enums.PaymentStatus;
 import model.coaching_session.CoachingRequest;
 import model.payment.Payment;
@@ -12,6 +17,7 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -25,7 +31,45 @@ public class PaymentService implements CRUD<Payment, Integer> {
 
     public PaymentService() {
         this.cnx = DbConnexion.getInstance().getCnx();
+        ensurePaymentTableExists();
         this.coachingRequestService = new CoachingRequestService();
+        StripeConfig.initializeStripe();
+    }
+
+    /**
+     * Garantit la présence de la table payment (PostgreSQL) au runtime.
+     * Cela évite l'erreur "relation payment n'existe pas" si la migration n'a pas encore été exécutée.
+     */
+    private void ensurePaymentTableExists() {
+        String ddl = """
+                CREATE TABLE IF NOT EXISTS payment (
+                    id SERIAL PRIMARY KEY,
+                    coaching_request_id INTEGER NOT NULL,
+                    user_id INTEGER NOT NULL,
+                    coach_id INTEGER NOT NULL,
+                    amount DECIMAL(10,2) NOT NULL CHECK (amount >= 0),
+                    currency VARCHAR(3) NOT NULL DEFAULT 'EUR',
+                    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+                    stripe_payment_intent_id VARCHAR(255),
+                    stripe_checkout_session_id VARCHAR(255),
+                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    paid_at TIMESTAMP NULL,
+                    failure_reason TEXT NULL,
+                    receipt_url TEXT NULL,
+                    CONSTRAINT fk_payment_coaching_request
+                        FOREIGN KEY (coaching_request_id) REFERENCES coaching_request(id) ON DELETE CASCADE,
+                    CONSTRAINT fk_payment_user
+                        FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE,
+                    CONSTRAINT fk_payment_coach
+                        FOREIGN KEY (coach_id) REFERENCES "user"(id) ON DELETE CASCADE
+                )
+                """;
+        try (Statement st = cnx.createStatement()) {
+            st.execute(ddl);
+        } catch (SQLException e) {
+            throw new IllegalStateException("Impossible d'initialiser la table payment: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -220,25 +264,84 @@ public class PaymentService implements CRUD<Payment, Integer> {
     }
 
     /**
-     * Initie un paiement Stripe (à implémenter avec la clé Stripe).
-     * Pour l'instant, retourne juste une URL de simulation.
-     *
-     * @param payment le paiement à traiter
-     * @return l'URL de checkout Stripe (simulée pour l'instant)
-     * @throws SQLException si erreur base de données
+     * Crée une vraie Stripe Checkout Session et retourne son URL.
      */
     public String initiateStripeCheckout(Payment payment) throws SQLException {
-        // TODO: Implémenter l'intégration Stripe réelle
-        // Pour l'instant, on simule la création d'une session Stripe
-        
-        String simulatedSessionId = "cs_test_" + System.currentTimeMillis();
-        payment.setStripeCheckoutSessionId(simulatedSessionId);
-        payment.setStatus(PaymentStatus.PROCESSING);
-        update(payment);
+        if (payment == null || payment.getId() == null) {
+            throw new IllegalArgumentException("Paiement invalide");
+        }
+        if (!StripeConfig.isConfigured()) {
+            throw new IllegalStateException("Stripe n'est pas configuré. Ajoutez STRIPE_SECRET_KEY dans config.properties.");
+        }
 
-        // URL de simulation - à remplacer par la vraie URL Stripe
-        return "https://checkout.stripe.com/pay/" + simulatedSessionId;
+        try {
+            String currency = payment.getCurrency() == null ? "eur" : payment.getCurrency().toLowerCase(Locale.ROOT);
+            long unitAmount = payment.getAmount()
+                    .multiply(BigDecimal.valueOf(100))
+                    .setScale(0, java.math.RoundingMode.HALF_UP)
+                    .longValueExact();
+
+            SessionCreateParams params = SessionCreateParams.builder()
+                    .setMode(SessionCreateParams.Mode.PAYMENT)
+                    .setSuccessUrl(StripeConfig.getSuccessUrl() + "?session_id={CHECKOUT_SESSION_ID}")
+                    .setCancelUrl(StripeConfig.getCancelUrl())
+                    .putMetadata("payment_id", String.valueOf(payment.getId()))
+                    .putMetadata("coaching_request_id", String.valueOf(payment.getCoachingRequestId()))
+                    .addLineItem(
+                            SessionCreateParams.LineItem.builder()
+                                    .setQuantity(1L)
+                                    .setPriceData(
+                                            SessionCreateParams.LineItem.PriceData.builder()
+                                                    .setCurrency(currency)
+                                                    .setUnitAmount(unitAmount)
+                                                    .setProductData(
+                                                            SessionCreateParams.LineItem.PriceData.ProductData.builder()
+                                                                    .setName("Seance de coaching DayFlow")
+                                                                    .setDescription("Paiement de la seance de coaching #" + payment.getCoachingRequestId())
+                                                                    .build()
+                                                    )
+                                                    .build()
+                                    )
+                                    .build()
+                    )
+                    .build();
+
+            Session session = Session.create(params);
+            payment.setStripeCheckoutSessionId(session.getId());
+            payment.setStatus(PaymentStatus.PROCESSING);
+            update(payment);
+            return session.getUrl();
+        } catch (StripeException e) {
+            throw new IllegalStateException("Erreur Stripe Checkout: " + e.getMessage(), e);
+        }
     }
+
+    public Optional<StripeCheckoutStatus> fetchCheckoutStatus(String checkoutSessionId) {
+        if (checkoutSessionId == null || checkoutSessionId.isBlank() || !StripeConfig.isConfigured()) {
+            return Optional.empty();
+        }
+        try {
+            Session session = Session.retrieve(
+                    checkoutSessionId,
+                    SessionRetrieveParams.builder().addExpand("payment_intent").build(),
+                    null
+            );
+            String paymentStatus = session.getPaymentStatus();
+            if (!"paid".equalsIgnoreCase(paymentStatus)) {
+                return Optional.empty();
+            }
+            String paymentIntentId = session.getPaymentIntent();
+            String receiptUrl = null;
+            if (session.getCustomerDetails() != null && session.getCustomerDetails().getEmail() != null) {
+                receiptUrl = "Recu Stripe - client: " + session.getCustomerDetails().getEmail();
+            }
+            return Optional.of(new StripeCheckoutStatus(paymentIntentId, receiptUrl));
+        } catch (StripeException e) {
+            return Optional.empty();
+        }
+    }
+
+    public record StripeCheckoutStatus(String paymentIntentId, String receiptUrl) {}
 
     /**
      * Marque un paiement comme réussi et met à jour la demande de coaching.

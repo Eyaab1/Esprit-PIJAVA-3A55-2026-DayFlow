@@ -398,6 +398,9 @@ public class CoachingRequestController implements Initializable {
         try {
             List<User> coaches = coachService.getAllCoaches();
             System.out.println("[CoachingRequest] Nombre de coachs chargés (BD) : " + coaches.size());
+            if (aiAnalysisStatusLabel != null) {
+                aiAnalysisStatusLabel.setText("Coachs disponibles chargés: " + coaches.size());
+            }
 
             coachComboBox.setItems(FXCollections.observableArrayList(coaches));
             loadCoachCards(coaches);

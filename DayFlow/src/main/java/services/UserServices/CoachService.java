@@ -27,7 +27,11 @@ public class CoachService implements CRUD<User, Integer> {
                    rating, review_count, price_per_session, bio, photo_url,
                    profile_picture_name, profile_picture_size
             FROM "user"
-            WHERE roles::text LIKE '%ROLE_COACH%'
+            WHERE (
+                    roles::text ILIKE '%ROLE_COACH%'
+                    OR roles::text ILIKE '%COACH%'
+                    OR COALESCE(TRIM(speciality), '') <> ''
+                  )
             ORDER BY rating DESC NULLS LAST, review_count DESC
             """;
 
@@ -37,7 +41,12 @@ public class CoachService implements CRUD<User, Integer> {
                    rating, review_count, price_per_session, bio, photo_url,
                    profile_picture_name, profile_picture_size
             FROM "user"
-            WHERE id = ? AND roles::text LIKE '%ROLE_COACH%'
+            WHERE id = ?
+              AND (
+                    roles::text ILIKE '%ROLE_COACH%'
+                    OR roles::text ILIKE '%COACH%'
+                    OR COALESCE(TRIM(speciality), '') <> ''
+                  )
             """;
 
     public CoachService() {
@@ -141,7 +150,11 @@ public class CoachService implements CRUD<User, Integer> {
                        rating, review_count, price_per_session, bio, photo_url,
                        profile_picture_name, profile_picture_size
                 FROM "user"
-                WHERE roles::text LIKE '%ROLE_COACH%'
+                WHERE (
+                        roles::text ILIKE '%ROLE_COACH%'
+                        OR roles::text ILIKE '%COACH%'
+                        OR COALESCE(TRIM(speciality), '') <> ''
+                      )
                   AND (speciality ILIKE ? OR specialities::text ILIKE ?)
                 ORDER BY rating DESC NULLS LAST
                 """;
@@ -171,7 +184,11 @@ public class CoachService implements CRUD<User, Integer> {
                        rating, review_count, price_per_session, bio, photo_url,
                        profile_picture_name, profile_picture_size
                 FROM "user"
-                WHERE roles::text LIKE '%ROLE_COACH%'
+                WHERE (
+                        roles::text ILIKE '%ROLE_COACH%'
+                        OR roles::text ILIKE '%COACH%'
+                        OR COALESCE(TRIM(speciality), '') <> ''
+                      )
                   AND availability IS NOT NULL
                   AND availability != ''
                 ORDER BY rating DESC NULLS LAST
@@ -192,7 +209,14 @@ public class CoachService implements CRUD<User, Integer> {
      * @return Nombre de coachs dans la base de données
      */
     public int countCoaches() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM \"user\" WHERE roles::text LIKE '%ROLE_COACH%'";
+        String sql = """
+                SELECT COUNT(*) FROM "user"
+                WHERE (
+                        roles::text ILIKE '%ROLE_COACH%'
+                        OR roles::text ILIKE '%COACH%'
+                        OR COALESCE(TRIM(speciality), '') <> ''
+                      )
+                """;
         try (PreparedStatement ps = cnx.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
