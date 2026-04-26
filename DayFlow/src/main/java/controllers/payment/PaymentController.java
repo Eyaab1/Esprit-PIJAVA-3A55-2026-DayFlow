@@ -9,8 +9,8 @@ import javafx.stage.Stage;
 import model.coaching_session.CoachingRequest;
 import model.payment.Payment;
 import model.user.User;
-import services.UserServices.UserService;
-import services.coaching_session_module.CoachingRequestService;
+import services.account.UserService;
+import services.coaching_session.CoachingRequestService;
 import services.payment.PaymentService;
 import session.AppSession;
 

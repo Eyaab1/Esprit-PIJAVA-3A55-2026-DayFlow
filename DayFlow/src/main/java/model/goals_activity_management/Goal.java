@@ -133,6 +133,11 @@ public class Goal {
         this.title = title;
     }
 
+    /** Setter sans validation — pour les cas où title est stocké en mémoire uniquement (pas en BD). */
+    public void setTitleDirect(String title) {
+        this.title = title;
+    }
+
     public void setDescription(String description) {
         validateDescription(description);
         this.description = description;

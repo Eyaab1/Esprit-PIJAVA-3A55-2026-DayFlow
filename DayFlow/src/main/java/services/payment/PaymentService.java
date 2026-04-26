@@ -8,9 +8,8 @@ import config.StripeConfig;
 import enums.PaymentStatus;
 import model.coaching_session.CoachingRequest;
 import model.payment.Payment;
-import model.user.User;
 import services.CRUD;
-import services.coaching_session_module.CoachingRequestService;
+import services.coaching_session.CoachingRequestService;
 import utils.DbConnexion;
 
 import java.math.BigDecimal;

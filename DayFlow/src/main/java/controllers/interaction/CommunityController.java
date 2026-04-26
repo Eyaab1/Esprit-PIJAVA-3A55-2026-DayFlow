@@ -45,7 +45,10 @@ public class CommunityController {
         try {
             NavigationManager.show(path, title);
         } catch (IOException ex) {
-            new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            new Alert(Alert.AlertType.ERROR,
+                cause.getClass().getSimpleName() + ": " + cause.getMessage()).showAndWait();
+            cause.printStackTrace();
         }
     }
 }
