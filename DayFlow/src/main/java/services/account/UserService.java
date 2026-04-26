@@ -33,6 +33,7 @@ public class UserService implements CRUD<User, Integer> {
     /** Téléphone saisi : chiffres et séparateurs usuels (+, espaces, tirets, parenthèses). */
     private static final Pattern PHONE_VISUAL = Pattern.compile("^[+0-9()\\s.\\-]{8,22}$");
     private static final ObjectMapper JSON = new ObjectMapper();
+    private final PwnedPasswordService pwnedPasswordService = new PwnedPasswordService();
 
     private static final String SELECT_BY_EMAIL = """
             SELECT id, first_name, last_name, email, password, roles,
@@ -100,6 +101,7 @@ public class UserService implements CRUD<User, Integer> {
     private User signUp(String firstName, String lastName, String email, String rawPassword, UserRole role,
                         String phoneNumber, String ageText, boolean requireProfile) throws SQLException {
         validateSignUpBasic(firstName, lastName, email, rawPassword);
+        validatePasswordNotCompromised(rawPassword);
         Integer ageValue = null;
         String phoneValue = null;
         if (requireProfile) {
@@ -134,6 +136,15 @@ public class UserService implements CRUD<User, Integer> {
         }
         user.setPassword(null);
         return user;
+    }
+
+    private void validatePasswordNotCompromised(String rawPassword) {
+        PwnedPasswordService.PwnedCheckResult pwned = pwnedPasswordService.checkPassword(rawPassword);
+        if (pwned.compromised()) {
+            throw new IllegalArgumentException(
+                    "Ce mot de passe apparaît dans des fuites de données (" + pwned.breachCount()
+                            + " fois). Choisissez un mot de passe différent.");
+        }
     }
 
     public Optional<User> login(String email, String rawPassword) throws SQLException {

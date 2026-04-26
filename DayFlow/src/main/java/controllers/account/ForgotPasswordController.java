@@ -1,8 +1,8 @@
 package controllers.account;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import services.account.PasswordResetService;
 
@@ -19,6 +19,8 @@ public class ForgotPasswordController {
     private Button sendButton;
     @FXML
     private Button backButton;
+    @FXML
+    private Label formMessageLabel;
 
     @FXML
     private void initialize() {
@@ -27,12 +29,12 @@ public class ForgotPasswordController {
     }
 
     private void onSend() {
+        clearMessage();
         try {
             passwordResetService.requestReset(emailField.getText());
-            new Alert(Alert.AlertType.INFORMATION,
-                    "If the email exists, a reset message has been sent.").showAndWait();
+            showSuccess("If the email exists, a 6-digit reset code has been sent.");
         } catch (SQLException ex) {
-            new Alert(Alert.AlertType.ERROR, "Database error: " + ex.getMessage()).showAndWait();
+            showError("Database error: " + ex.getMessage());
         }
     }
 
@@ -40,7 +42,33 @@ public class ForgotPasswordController {
         try {
             AuthNavigation.showLogin();
         } catch (IOException ex) {
-            new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
+            showError(ex.getMessage());
         }
+    }
+
+    private void showError(String message) {
+        formMessageLabel.getStyleClass().remove("auth-success-msg");
+        if (!formMessageLabel.getStyleClass().contains("auth-error-msg")) {
+            formMessageLabel.getStyleClass().add("auth-error-msg");
+        }
+        formMessageLabel.setText(message);
+        formMessageLabel.setVisible(true);
+        formMessageLabel.setManaged(true);
+    }
+
+    private void showSuccess(String message) {
+        formMessageLabel.getStyleClass().remove("auth-error-msg");
+        if (!formMessageLabel.getStyleClass().contains("auth-success-msg")) {
+            formMessageLabel.getStyleClass().add("auth-success-msg");
+        }
+        formMessageLabel.setText(message);
+        formMessageLabel.setVisible(true);
+        formMessageLabel.setManaged(true);
+    }
+
+    private void clearMessage() {
+        formMessageLabel.setText("");
+        formMessageLabel.setVisible(false);
+        formMessageLabel.setManaged(false);
     }
 }

@@ -1,8 +1,8 @@
 package controllers.account;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import services.account.PasswordResetService;
@@ -24,6 +24,8 @@ public class ResetPasswordController {
     private Button resetButton;
     @FXML
     private Button backButton;
+    @FXML
+    private Label formMessageLabel;
 
     @FXML
     private void initialize() {
@@ -32,30 +34,81 @@ public class ResetPasswordController {
     }
 
     private void onReset() {
+        clearMessage();
         if (!newPasswordField.getText().equals(confirmPasswordField.getText())) {
-            new Alert(Alert.AlertType.ERROR, "Passwords do not match.").showAndWait();
+            showError("Passwords do not match.");
             return;
         }
         try {
             boolean ok = passwordResetService.resetPassword(tokenField.getText(), newPasswordField.getText());
             if (ok) {
-                new Alert(Alert.AlertType.INFORMATION, "Password updated. Please login.").showAndWait();
+                showSuccess("Password updated. Please login.");
                 AuthNavigation.showLogin();
             } else {
-                new Alert(Alert.AlertType.ERROR, "Invalid or expired token.").showAndWait();
+                showError("Invalid or expired reset code.");
             }
         } catch (SQLException ex) {
-            new Alert(Alert.AlertType.ERROR, "Database error: " + ex.getMessage()).showAndWait();
+            showError("Database error: " + ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            showError(ex.getMessage());
         } catch (IOException ex) {
-            new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
+            showError(ex.getMessage());
         }
+    }
+
+    public void setPrefilledToken(String tokenOrLink) {
+        tokenField.setText(normalizeToken(tokenOrLink));
+    }
+
+    private String normalizeToken(String tokenOrLink) {
+        if (tokenOrLink == null) {
+            return "";
+        }
+        String trimmed = tokenOrLink.trim();
+        if (trimmed.isEmpty()) {
+            return "";
+        }
+        int tokenParamIndex = trimmed.indexOf("token=");
+        if (tokenParamIndex >= 0) {
+            String tokenPart = trimmed.substring(tokenParamIndex + "token=".length());
+            int ampIndex = tokenPart.indexOf('&');
+            String value = (ampIndex >= 0 ? tokenPart.substring(0, ampIndex) : tokenPart).trim();
+            return value.replaceAll("\\D", "");
+        }
+        return trimmed.replaceAll("\\D", "");
     }
 
     private void onBack() {
         try {
             AuthNavigation.showLogin();
         } catch (IOException ex) {
-            new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
+            showError(ex.getMessage());
         }
+    }
+
+    private void showError(String message) {
+        formMessageLabel.getStyleClass().remove("auth-success-msg");
+        if (!formMessageLabel.getStyleClass().contains("auth-error-msg")) {
+            formMessageLabel.getStyleClass().add("auth-error-msg");
+        }
+        formMessageLabel.setText(message);
+        formMessageLabel.setVisible(true);
+        formMessageLabel.setManaged(true);
+    }
+
+    private void showSuccess(String message) {
+        formMessageLabel.getStyleClass().remove("auth-error-msg");
+        if (!formMessageLabel.getStyleClass().contains("auth-success-msg")) {
+            formMessageLabel.getStyleClass().add("auth-success-msg");
+        }
+        formMessageLabel.setText(message);
+        formMessageLabel.setVisible(true);
+        formMessageLabel.setManaged(true);
+    }
+
+    private void clearMessage() {
+        formMessageLabel.setText("");
+        formMessageLabel.setVisible(false);
+        formMessageLabel.setManaged(false);
     }
 }

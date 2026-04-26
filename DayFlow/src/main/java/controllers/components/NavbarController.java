@@ -5,6 +5,7 @@ import controllers.navigation.NavigationManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Hyperlink;
+import services.account.AccountSecurityService;
 import session.AppSession;
 
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.io.IOException;
 public class NavbarController {
 
     private static NavbarController instance;
+    private final AccountSecurityService accountSecurityService = new AccountSecurityService();
 
     @FXML
     private Hyperlink manageSessionsLink;
@@ -120,6 +122,14 @@ public class NavbarController {
 
     @FXML
     private void onLogout() {
+        AppSession.getCurrentUser().ifPresent(u -> {
+            try {
+                if (u.getId() != null) {
+                    accountSecurityService.revokeCurrentSession(u.getId(), AppSession.getSessionToken().orElse(null));
+                }
+            } catch (Exception ignored) {
+            }
+        });
         AppSession.clear();
         try {
             AuthNavigation.showLanding();

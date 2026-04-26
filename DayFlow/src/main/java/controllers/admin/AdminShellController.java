@@ -10,6 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import services.account.AccountSecurityService;
 import session.AppSession;
 
 import java.io.IOException;
@@ -21,6 +22,7 @@ import java.util.Objects;
  * Coque administration : barre latérale, en-tête, zone centrale (dashboard, utilisateurs, …).
  */
 public class AdminShellController {
+    private final AccountSecurityService accountSecurityService = new AccountSecurityService();
 
     @FXML
     private StackPane adminContentPane;
@@ -105,6 +107,14 @@ public class AdminShellController {
     @FXML
     private void onLogout() {
         try {
+            AppSession.getCurrentUser().ifPresent(u -> {
+                try {
+                    if (u.getId() != null) {
+                        accountSecurityService.revokeCurrentSession(u.getId(), AppSession.getSessionToken().orElse(null));
+                    }
+                } catch (Exception ignored) {
+                }
+            });
             AppSession.clear();
             NavbarController.refreshFromSession();
             AuthNavigation.showLogin();

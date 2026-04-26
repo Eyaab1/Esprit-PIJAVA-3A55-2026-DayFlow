@@ -20,6 +20,7 @@
             <Label styleClass="auth-subtitle" text="Sign in to continue to DayFlow" />
             <TextField fx:id="emailField" promptText="Email address" prefHeight="38.0" prefWidth="360.0" />
             <PasswordField fx:id="passwordField" promptText="Password" prefHeight="38.0" prefWidth="360.0" />
+            <Label fx:id="formMessageLabel" text="" visible="false" managed="false" wrapText="true" maxWidth="360.0" styleClass="auth-error-msg" />
             <Button fx:id="loginButton" mnemonicParsing="false" prefHeight="40.0" prefWidth="360.0" styleClass="primary-button" text="Login" />
             <Button fx:id="googleLoginButton" mnemonicParsing="false" prefHeight="38.0" prefWidth="360.0" styleClass="secondary-button" text="Continue with Google" />
             <Hyperlink fx:id="forgotPasswordLink" text="Forgot password?" />

@@ -24,6 +24,8 @@ import model.profile.ProfileAnalysisResult;
 import model.profile.AiArchetypeProfile;
 import model.profile.OnboardingAnswers;
 import model.user.User;
+import services.account.AccountSecurityService;
+import services.account.IpGeolocationService;
 import services.account.UserService;
 import services.chatroom.ChatroomService;
 import services.chatroom.ChatroomService.ChatroomListItem;
@@ -58,6 +60,8 @@ public class UserProfileController {
     private final ProfileAnalyzerService profileAnalyzerService = new ProfileAnalyzerService();
     private final AiProfileGeneratorService aiProfileGeneratorService = new AiProfileGeneratorService();
     private final UserAiProfileStorageService userAiProfileStorageService = new UserAiProfileStorageService();
+    private final AccountSecurityService accountSecurityService = new AccountSecurityService();
+    private final IpGeolocationService ipGeolocationService = new IpGeolocationService();
 
     private final ToggleGroup tabGroup = new ToggleGroup();
     private int userId;
@@ -110,6 +114,8 @@ public class UserProfileController {
     @FXML
     private ToggleButton tabChatrooms;
     @FXML
+    private ToggleButton tabLoginSecurity;
+    @FXML
     private Hyperlink openFeedLink;
     @FXML
     private VBox contentBox;
@@ -121,6 +127,16 @@ public class UserProfileController {
     private Label archetypeNameLabel;
     @FXML
     private Label archetypeDescriptionLabel;
+    @FXML
+    private Label securityStatusLabel;
+    @FXML
+    private VBox activeSessionsBox;
+    @FXML
+    private VBox loginHistoryBox;
+    @FXML
+    private Button logoutAllDevicesButton;
+    @FXML
+    private VBox loginSecuritySection;
 
     @FXML
     private void initialize() {
@@ -131,7 +147,7 @@ public class UserProfileController {
         }
         userId = session.get().getId();
 
-        for (ToggleButton b : List.of(tabPosts, tabSaved, tabScheduled, tabDrafts, tabChatrooms)) {
+        for (ToggleButton b : List.of(tabPosts, tabSaved, tabScheduled, tabDrafts, tabChatrooms, tabLoginSecurity)) {
             b.setToggleGroup(tabGroup);
         }
         tabGroup.selectedToggleProperty().addListener((obs, prev, sel) -> {
@@ -146,9 +162,12 @@ public class UserProfileController {
         runAnalysisButton.setOnAction(e -> onRunProfileAnalysis());
         editPersonalInfoButton.setOnAction(e -> onEditPersonalInfo());
         savePersonalInfoButton.setOnAction(e -> onSavePersonalInfo());
+        logoutAllDevicesButton.setOnAction(e -> onLogoutAllDevices());
 
         loadUserHeader();
         refreshStatsAndTabs();
+        loadSecurityCards();
+        setLoginSecuritySectionVisible(false);
         loadSavedAiProfile();
         tabPosts.setSelected(true);
     }
@@ -250,6 +269,12 @@ public class UserProfileController {
 
     private void loadUserHeader() {
         try {
+            AppSession.getSessionToken().ifPresent(token -> {
+                try {
+                    accountSecurityService.touchSession(userId, token);
+                } catch (SQLException ignored) {
+                }
+            });
             Optional<User> u = userService.findById(userId);
             if (u.isEmpty()) {
                 heroNameLabel.setText("Utilisateur introuvable");
@@ -374,12 +399,99 @@ public class UserProfileController {
         }
     }
 
+    private void loadSecurityCards() {
+        activeSessionsBox.getChildren().clear();
+        loginHistoryBox.getChildren().clear();
+        try {
+            String currentSession = AppSession.getSessionToken().orElse("");
+            List<AccountSecurityService.ActiveSessionView> sessions = accountSecurityService.findActiveSessions(userId, currentSession);
+            List<AccountSecurityService.LoginHistoryView> logins = accountSecurityService.findRecentLogins(userId);
+
+            long suspiciousCount = logins.stream().filter(AccountSecurityService.LoginHistoryView::suspicious).count();
+            if (suspiciousCount > 0) {
+                securityStatusLabel.setText("Security alert: " + suspiciousCount + " suspicious login(s) found.");
+            } else {
+                securityStatusLabel.setText("Your account looks safe. No suspicious login detected.");
+            }
+
+            if (sessions.isEmpty()) {
+                activeSessionsBox.getChildren().add(new Label("No active session found."));
+            } else {
+                for (AccountSecurityService.ActiveSessionView s : sessions) {
+                    activeSessionsBox.getChildren().add(buildSessionCard(s));
+                }
+            }
+
+            if (logins.isEmpty()) {
+                loginHistoryBox.getChildren().add(new Label("No login history yet."));
+            } else {
+                for (AccountSecurityService.LoginHistoryView h : logins) {
+                    loginHistoryBox.getChildren().add(buildLoginEventCard(h));
+                }
+            }
+        } catch (SQLException e) {
+            securityStatusLabel.setText("Cannot load security insights: " + e.getMessage());
+        }
+    }
+
+    private VBox buildSessionCard(AccountSecurityService.ActiveSessionView sessionView) {
+        VBox card = new VBox(4);
+        card.getStyleClass().add("profile-security-item");
+        Label device = new Label((sessionView.currentSession() ? "This device • " : "") + sessionView.deviceLabel());
+        device.getStyleClass().add("profile-security-item-title");
+        Label details = new Label("Connected: " + sessionView.connectedAt() + "  •  Last seen: " + sessionView.lastSeenAt());
+        details.getStyleClass().add("profile-security-item-subtitle");
+        card.getChildren().addAll(device, details);
+        return card;
+    }
+
+    private VBox buildLoginEventCard(AccountSecurityService.LoginHistoryView historyView) {
+        VBox card = new VBox(4);
+        card.getStyleClass().add("profile-security-item");
+        String status = historyView.success() ? "Login success" : "Login failed";
+        if (historyView.suspicious()) {
+            status += " • Suspicious";
+        }
+        Label title = new Label(status + " • " + historyView.attemptedAt());
+        title.getStyleClass().add("profile-security-item-title");
+        String reason = historyView.suspiciousReason() == null ? "" : (" • " + historyView.suspiciousReason());
+        IpGeolocationService.GeoInfo geo = ipGeolocationService.resolve(historyView.ipAddress());
+        String ipPart = (geo.ipAddress() == null || geo.ipAddress().isBlank()) ? "" : (" • IP: " + geo.ipAddress());
+        String locationPart = (geo.locationLabel() == null || geo.locationLabel().isBlank()) ? "" : (" • " + geo.locationLabel());
+        Label subtitle = new Label(historyView.deviceLabel() + ipPart + locationPart + reason);
+        subtitle.getStyleClass().add("profile-security-item-subtitle");
+        card.getChildren().addAll(title, subtitle);
+        return card;
+    }
+
+    private void onLogoutAllDevices() {
+        Alert confirm = new Alert(
+                Alert.AlertType.CONFIRMATION,
+                "This will end all sessions on all devices. Continue?",
+                ButtonType.YES,
+                ButtonType.NO
+        );
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.YES) {
+            return;
+        }
+        try {
+            int revoked = accountSecurityService.logoutAllDevices(userId);
+            AppSession.clear();
+            new Alert(Alert.AlertType.INFORMATION, "Done. " + revoked + " session(s) revoked. Please login again.").showAndWait();
+            AuthNavigation.showLogin();
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "Cannot revoke sessions: " + e.getMessage()).showAndWait();
+        }
+    }
+
     private void refreshTabContent() {
         contentBox.getChildren().clear();
         ToggleButton sel = (ToggleButton) tabGroup.getSelectedToggle();
         if (sel == null) {
             return;
         }
+        setLoginSecuritySectionVisible(sel == tabLoginSecurity);
         try {
             if (sel == tabPosts) {
                 fillPostCards(postService.findProfilePostsByAuthorAndStatus(userId, PostStatus.PUBLISHED));
@@ -391,10 +503,17 @@ public class UserProfileController {
                 fillPostCards(postService.findProfilePostsByAuthorAndStatus(userId, PostStatus.DRAFT));
             } else if (sel == tabChatrooms) {
                 fillChatroomCards(chatroomService.findAccessibleForUser(userId));
+            } else if (sel == tabLoginSecurity) {
+                loadSecurityCards();
             }
         } catch (SQLException e) {
             contentBox.getChildren().add(new Label("Erreur : " + e.getMessage()));
         }
+    }
+
+    private void setLoginSecuritySectionVisible(boolean visible) {
+        loginSecuritySection.setVisible(visible);
+        loginSecuritySection.setManaged(visible);
     }
 
     private void fillPostCards(List<PostWithStats> rows) {

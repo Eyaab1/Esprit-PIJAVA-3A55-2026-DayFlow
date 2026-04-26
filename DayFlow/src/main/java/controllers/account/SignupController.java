@@ -2,9 +2,9 @@ package controllers.account;
 
 import enums.UserRole;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
@@ -39,6 +39,8 @@ public class SignupController {
     private Button signupButton;
     @FXML
     private Button goToLoginButton;
+    @FXML
+    private Label formMessageLabel;
 
     @FXML
     private void initialize() {
@@ -69,8 +71,9 @@ public class SignupController {
     }
 
     private void onSignup() {
+        clearMessage();
         if (!passwordField.getText().equals(confirmPasswordField.getText())) {
-            new Alert(Alert.AlertType.ERROR, "Les mots de passe ne correspondent pas.").showAndWait();
+            showError("Les mots de passe ne correspondent pas.");
             return;
         }
         UserRole role = roleChoiceBox.getValue();
@@ -87,13 +90,12 @@ public class SignupController {
                     phoneField.getText(),
                     ageField.getText()
             );
-            new Alert(Alert.AlertType.INFORMATION,
-                    "Compte créé, id = " + created.getId() + ". Vous pouvez vous connecter.").showAndWait();
+            showSuccess("Compte créé, id = " + created.getId() + ". Vous pouvez vous connecter.");
             navigateToLogin();
         } catch (IllegalArgumentException ex) {
-            new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
+            showError(ex.getMessage());
         } catch (SQLException ex) {
-            new Alert(Alert.AlertType.ERROR, "Erreur base de données : " + ex.getMessage()).showAndWait();
+            showError("Erreur base de données : " + ex.getMessage());
         }
     }
 
@@ -101,7 +103,33 @@ public class SignupController {
         try {
             AuthNavigation.showLogin();
         } catch (IOException ex) {
-            new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
+            showError(ex.getMessage());
         }
+    }
+
+    private void showError(String message) {
+        formMessageLabel.getStyleClass().remove("auth-success-msg");
+        if (!formMessageLabel.getStyleClass().contains("auth-error-msg")) {
+            formMessageLabel.getStyleClass().add("auth-error-msg");
+        }
+        formMessageLabel.setText(message);
+        formMessageLabel.setVisible(true);
+        formMessageLabel.setManaged(true);
+    }
+
+    private void showSuccess(String message) {
+        formMessageLabel.getStyleClass().remove("auth-error-msg");
+        if (!formMessageLabel.getStyleClass().contains("auth-success-msg")) {
+            formMessageLabel.getStyleClass().add("auth-success-msg");
+        }
+        formMessageLabel.setText(message);
+        formMessageLabel.setVisible(true);
+        formMessageLabel.setManaged(true);
+    }
+
+    private void clearMessage() {
+        formMessageLabel.setText("");
+        formMessageLabel.setVisible(false);
+        formMessageLabel.setManaged(false);
     }
 }

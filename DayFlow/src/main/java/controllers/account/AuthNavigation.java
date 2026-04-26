@@ -25,6 +25,14 @@ public final class AuthNavigation {
         NavigationManager.show("/user/account/reset_password.fxml", "DayFlow — Reset password");
     }
 
+    public static void showResetPassword(String tokenOrLink) throws IOException {
+        ResetPasswordController controller = NavigationManager.showAndGetController(
+                "/user/account/reset_password.fxml",
+                "DayFlow — Reset password"
+        );
+        controller.setPrefilledToken(tokenOrLink);
+    }
+
     public static void showLanding() throws IOException {
         NavigationManager.resetTo("/user/account/landing.fxml", "DayFlow");
     }

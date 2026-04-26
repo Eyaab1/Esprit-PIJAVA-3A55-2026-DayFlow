@@ -1,15 +1,18 @@
 package controllers.account;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import model.user.User;
 import controllers.components.NavbarController;
 import controllers.navigation.NavigationManager;
+import services.account.AccountSecurityService;
 import services.account.AuthService;
+import services.account.IpGeolocationService;
+import services.account.SecurityAlertMailService;
 import session.AppSession;
 
 import java.io.IOException;
@@ -19,6 +22,9 @@ import java.util.Optional;
 public class LoginController {
 
     private final AuthService authService = new AuthService();
+    private final AccountSecurityService accountSecurityService = new AccountSecurityService();
+    private final IpGeolocationService ipGeolocationService = new IpGeolocationService();
+    private final SecurityAlertMailService securityAlertMailService = new SecurityAlertMailService();
 
     @FXML
     private TextField emailField;
@@ -34,6 +40,8 @@ public class LoginController {
     private Button googleLoginButton;
     @FXML
     private Hyperlink resetWithTokenLink;
+    @FXML
+    private Label formMessageLabel;
 
     @FXML
     private void initialize() {
@@ -45,11 +53,23 @@ public class LoginController {
     }
 
     private void onLogin() {
+        clearMessage();
         try {
-            Optional<User> user = authService.login(emailField.getText(), passwordField.getText());
+            AuthService.LoginResult loginResult = authService.loginDetailed(emailField.getText(), passwordField.getText());
+            Optional<User> user = loginResult.user();
             if (user.isPresent()) {
                 User u = user.get();
-                AppSession.setCurrentUser(u);
+                if (loginResult.securityMeta() != null) {
+                    AppSession.setCurrentUser(u, loginResult.securityMeta().sessionToken(), loginResult.securityMeta().deviceLabel());
+                    if (loginResult.securityMeta().suspicious()) {
+                        String reason = loginResult.securityMeta().suspiciousReason() == null
+                                ? "New or risky login detected."
+                                : loginResult.securityMeta().suspiciousReason();
+                        showError("Suspicious login detected: " + reason + ". Please review active sessions in your profile.");
+                    }
+                } else {
+                    AppSession.setCurrentUser(u);
+                }
                 NavbarController.refreshFromSession();
                 try {
                     if (AppSession.isAdmin()) {
@@ -60,15 +80,15 @@ public class LoginController {
                         NavigationManager.show("/user/account/user_dashboard.fxml", "DayFlow — Accueil");
                     }
                 } catch (IOException io) {
-                    new Alert(Alert.AlertType.ERROR, io.getMessage()).showAndWait();
+                    showError(io.getMessage());
                 }
             } else {
-                new Alert(Alert.AlertType.ERROR, "Email ou mot de passe incorrect.").showAndWait();
+                showError("Email ou mot de passe incorrect.");
             }
         } catch (SQLException ex) {
-            new Alert(Alert.AlertType.ERROR, "Erreur base de données : " + ex.getMessage()).showAndWait();
+            showError("Erreur base de données : " + ex.getMessage());
         } catch (IllegalStateException ex) {
-            new Alert(Alert.AlertType.WARNING, ex.getMessage()).showAndWait();
+            showError(ex.getMessage());
         }
     }
 
@@ -76,7 +96,7 @@ public class LoginController {
         try {
             AuthNavigation.showSignup();
         } catch (IOException ex) {
-            new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
+            showError(ex.getMessage());
         }
     }
 
@@ -84,7 +104,7 @@ public class LoginController {
         try {
             AuthNavigation.showForgotPassword();
         } catch (IOException ex) {
-            new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
+            showError(ex.getMessage());
         }
     }
 
@@ -92,14 +112,32 @@ public class LoginController {
         try {
             AuthNavigation.showResetPassword();
         } catch (IOException ex) {
-            new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
+            showError(ex.getMessage());
         }
     }
 
     private void onGoogleLogin() {
         try {
+            clearMessage();
             User u = authService.loginWithGoogle();
-            AppSession.setCurrentUser(u);
+            if (u.getId() != null) {
+                AccountSecurityService.LoginSuccessMeta meta = accountSecurityService.registerSuccessfulLogin(u.getId(), u.getEmail());
+                AppSession.setCurrentUser(u, meta.sessionToken(), meta.deviceLabel());
+                if (meta.suspicious()) {
+                    IpGeolocationService.GeoInfo geo = ipGeolocationService.resolve(meta.ipAddress());
+                    securityAlertMailService.sendSuspiciousLoginAlert(
+                            u.getEmail(),
+                            ((u.getFirstName() == null ? "" : u.getFirstName().trim()) + " "
+                                    + (u.getLastName() == null ? "" : u.getLastName().trim())).trim(),
+                            meta.suspiciousReason(),
+                            meta.deviceLabel(),
+                            geo.ipAddress(),
+                            geo.locationLabel()
+                    );
+                }
+            } else {
+                AppSession.setCurrentUser(u);
+            }
             NavbarController.refreshFromSession();
             if (AppSession.isAdmin()) {
                 NavigationManager.show("/admin/admin_shell.fxml", "DayFlow — Administration");
@@ -109,7 +147,23 @@ public class LoginController {
                 NavigationManager.show("/user/account/user_dashboard.fxml", "DayFlow — Accueil");
             }
         } catch (Exception ex) {
-            new Alert(Alert.AlertType.ERROR, "Google login failed: " + ex.getMessage()).showAndWait();
+            showError("Google login failed: " + ex.getMessage());
         }
+    }
+
+    private void showError(String message) {
+        formMessageLabel.getStyleClass().remove("auth-success-msg");
+        if (!formMessageLabel.getStyleClass().contains("auth-error-msg")) {
+            formMessageLabel.getStyleClass().add("auth-error-msg");
+        }
+        formMessageLabel.setText(message);
+        formMessageLabel.setVisible(true);
+        formMessageLabel.setManaged(true);
+    }
+
+    private void clearMessage() {
+        formMessageLabel.setText("");
+        formMessageLabel.setVisible(false);
+        formMessageLabel.setManaged(false);
     }
 }

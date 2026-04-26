@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.Base64;
+import java.util.Locale;
 import java.util.Optional;
 
 public class PasswordResetService {
@@ -20,17 +20,26 @@ public class PasswordResetService {
     private final UserService userService;
     private final PasswordResetTokenRepository tokenRepository;
     private final ResetMailSenderService resetMailSenderService;
+    private final PwnedPasswordService pwnedPasswordService;
 
     public PasswordResetService() {
-        this(new UserService(), new PasswordResetTokenRepository(), new ResetMailSenderService());
+        this(new UserService(), new PasswordResetTokenRepository(), new ResetMailSenderService(), new PwnedPasswordService());
     }
 
     public PasswordResetService(UserService userService,
                                 PasswordResetTokenRepository tokenRepository,
                                 ResetMailSenderService resetMailSenderService) {
+        this(userService, tokenRepository, resetMailSenderService, new PwnedPasswordService());
+    }
+
+    public PasswordResetService(UserService userService,
+                                PasswordResetTokenRepository tokenRepository,
+                                ResetMailSenderService resetMailSenderService,
+                                PwnedPasswordService pwnedPasswordService) {
         this.userService = userService;
         this.tokenRepository = tokenRepository;
         this.resetMailSenderService = resetMailSenderService;
+        this.pwnedPasswordService = pwnedPasswordService;
     }
 
     public void requestReset(String email) throws SQLException {
@@ -55,10 +64,16 @@ public class PasswordResetService {
     }
 
     public boolean resetPassword(String rawToken, String newPassword) throws SQLException {
-        if (rawToken == null || rawToken.isBlank() || newPassword == null || newPassword.length() < 8) {
+        String normalizedCode = normalizeResetCode(rawToken);
+        if (normalizedCode == null || newPassword == null || newPassword.length() < 8) {
             return false;
         }
-        String tokenHash = sha256(rawToken.trim());
+        PwnedPasswordService.PwnedCheckResult pwned = pwnedPasswordService.checkPassword(newPassword);
+        if (pwned.compromised()) {
+            throw new IllegalArgumentException(
+                    "This password appears in known data breaches (" + pwned.breachCount() + "). Please choose another one.");
+        }
+        String tokenHash = sha256(normalizedCode);
         Optional<PasswordResetTokenRepository.ResetTokenRow> tokenRow = tokenRepository.findValidByHash(tokenHash);
         if (tokenRow.isEmpty()) {
             return false;
@@ -71,13 +86,24 @@ public class PasswordResetService {
         user.setPassword(PasswordHasher.hash(newPassword));
         userService.update(user);
         tokenRepository.markUsed(row.id());
+        resetMailSenderService.sendPasswordChangedConfirmationEmail(user.getEmail());
         return true;
     }
 
     private static String generateToken() {
-        byte[] bytes = new byte[32];
-        RANDOM.nextBytes(bytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+        int code = RANDOM.nextInt(1_000_000);
+        return String.format(Locale.ROOT, "%06d", code);
+    }
+
+    private static String normalizeResetCode(String rawValue) {
+        if (rawValue == null) {
+            return null;
+        }
+        String onlyDigits = rawValue.replaceAll("\\D", "");
+        if (onlyDigits.length() != 6) {
+            return null;
+        }
+        return onlyDigits;
     }
 
     private static String sha256(String value) {

@@ -11,6 +11,8 @@ import java.util.Optional;
 public final class AppSession {
 
     private static User currentUser;
+    private static String sessionToken;
+    private static String sessionDeviceLabel;
 
     private AppSession() {
     }
@@ -19,16 +21,32 @@ public final class AppSession {
         currentUser = user;
     }
 
+    public static void setCurrentUser(User user, String currentSessionToken, String currentSessionDeviceLabel) {
+        currentUser = user;
+        sessionToken = currentSessionToken;
+        sessionDeviceLabel = currentSessionDeviceLabel;
+    }
+
     public static Optional<User> getCurrentUser() {
         return Optional.ofNullable(currentUser);
     }
 
     public static void clear() {
         currentUser = null;
+        sessionToken = null;
+        sessionDeviceLabel = null;
     }
 
     public static boolean isLoggedIn() {
         return currentUser != null;
+    }
+
+    public static Optional<String> getSessionToken() {
+        return Optional.ofNullable(sessionToken);
+    }
+
+    public static Optional<String> getSessionDeviceLabel() {
+        return Optional.ofNullable(sessionDeviceLabel);
     }
 
     /** Vrai si au moins un rôle coach est présent. */
