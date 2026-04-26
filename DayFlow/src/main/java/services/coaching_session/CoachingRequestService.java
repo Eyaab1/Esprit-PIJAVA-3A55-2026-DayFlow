@@ -1,10 +1,12 @@
 package services.coaching_session;
 
+import dto.coaching_session.CoachingRequestAIResponse;
 import model.coaching_session.CoachingRequest;
 import model.user.User;
 import services.CRUD;
 import utils.DbConnexion;
 
+import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,16 +20,75 @@ import java.util.Optional;
  */
 public class CoachingRequestService implements CRUD<CoachingRequest, Integer> {
 
-    private static final String COLUMNS = """
-            id, user_id, coach_id, message, status, created_at, responded_at,
-            goal, level, frequency, budget, coaching_type, priority, time_slot_id
-            """;
-
     private final Connection cnx;
+    private final boolean hasDetectedNeedColumn;
+    private final boolean hasCompatibilityScoreColumn;
+    private final boolean hasJustificationColumn;
+    private final boolean hasAssignedCoachIdColumn;
+    private final AIService aiService;
 
     public CoachingRequestService() {
         cnx = DbConnexion.getInstance().getCnx();
+        hasDetectedNeedColumn = hasColumn("coaching_request", "detected_need");
+        hasCompatibilityScoreColumn = hasColumn("coaching_request", "compatibility_score");
+        hasJustificationColumn = hasColumn("coaching_request", "justification");
+        hasAssignedCoachIdColumn = hasColumn("coaching_request", "assigned_coach_id");
+        aiService = new AIService();
     }
+
+  public CoachingRequestAIResponse analyzeMessage(String userMessage) {
+    try {
+        AIService.RecommendationResult aiResult = aiService.recommendCoach(userMessage);
+
+        if (aiResult == null
+                || aiResult.recommendedCoach() == null
+                || aiResult.recommendedCoach().getId() == null) {
+            return CoachingRequestAIResponse.failure(
+                    "Aucun coach adapté n'a été trouvé automatiquement."
+            );
+        }
+
+        String coachName = aiResult.recommendedCoach().getFirstName()
+                + " "
+                + aiResult.recommendedCoach().getLastName();
+
+        return CoachingRequestAIResponse.success(
+                aiResult.detectedNeed(),
+                aiResult.recommendedCoach().getId(),
+                coachName.trim(),
+                aiResult.compatibilityScore(),
+                aiResult.justification()
+        );
+
+    } catch (IllegalArgumentException e) {
+        return CoachingRequestAIResponse.failure(e.getMessage());
+
+    } catch (IllegalStateException e) {
+        return CoachingRequestAIResponse.failure(
+                "Service IA indisponible: " + e.getMessage()
+        );
+
+    } catch (SQLException e) {
+        return CoachingRequestAIResponse.failure(
+                "Erreur accès coachs: " + e.getMessage()
+        );
+
+    } catch (IOException e) {
+        return CoachingRequestAIResponse.failure(
+                "Erreur Hugging Face: " + e.getMessage()
+        );
+
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        return CoachingRequestAIResponse.failure(
+                "Analyse interrompue."
+        );
+    }
+}
+
+       
+        
+    
 
     @Override
     public void create(CoachingRequest entity) throws SQLException {
@@ -36,34 +97,70 @@ public class CoachingRequestService implements CRUD<CoachingRequest, Integer> {
 
     @Override
     public void insert(CoachingRequest r) throws SQLException {
-        String sql = """
-                INSERT INTO coaching_request (
-                    user_id, coach_id, message, status, created_at, responded_at,
-                    goal, level, frequency, budget, coaching_type, priority, time_slot_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """;
-
+        StringBuilder columns = new StringBuilder("""
+                user_id, coach_id, message, status, created_at, responded_at,
+                goal, level, frequency, budget, coaching_type, priority, time_slot_id
+                """);
+        StringBuilder placeholders = new StringBuilder("?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?");
+        if (hasDetectedNeedColumn) {
+            columns.append(", detected_need");
+            placeholders.append(", ?");
+        }
+        if (hasCompatibilityScoreColumn) {
+            columns.append(", compatibility_score");
+            placeholders.append(", ?");
+        }
+        if (hasJustificationColumn) {
+            columns.append(", justification");
+            placeholders.append(", ?");
+        }
+        if (hasAssignedCoachIdColumn) {
+            columns.append(", assigned_coach_id");
+            placeholders.append(", ?");
+        }
+        String sql = "INSERT INTO coaching_request (" + columns + ") VALUES (" + placeholders + ")";
         try (PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, r.getUserId());
-            ps.setInt(2, r.getCoachId());
-            ps.setString(3, r.getMessage());
-            ps.setString(4, r.getStatus());
-            ps.setTimestamp(5, toTimestamp(r.getCreatedAt()));
-            ps.setTimestamp(6, toTimestamp(r.getRespondedAt()));
-            ps.setString(7, r.getGoal());
-            ps.setString(8, r.getLevel());
-            ps.setString(9, r.getFrequency());
+            int idx = 1;
+            ps.setInt(idx++, r.getUserId());
+            ps.setInt(idx++, r.getCoachId());
+            ps.setString(idx++, r.getMessage());
+            ps.setString(idx++, r.getStatus());
+            ps.setTimestamp(idx++, toTimestamp(r.getCreatedAt()));
+            ps.setTimestamp(idx++, toTimestamp(r.getRespondedAt()));
+            ps.setString(idx++, r.getGoal());
+            ps.setString(idx++, r.getLevel());
+            ps.setString(idx++, r.getFrequency());
             if (r.getBudget() != null) {
-                ps.setDouble(10, r.getBudget());
+                ps.setDouble(idx++, r.getBudget());
             } else {
-                ps.setNull(10, Types.DOUBLE);
+                ps.setNull(idx++, Types.DOUBLE);
             }
-            ps.setString(11, r.getCoachingType());
-            ps.setString(12, r.getPriority());
+            ps.setString(idx++, r.getCoachingType());
+            ps.setString(idx++, r.getPriority());
             if (r.getTimeSlotId() != null) {
-                ps.setInt(13, r.getTimeSlotId());
+                ps.setInt(idx++, r.getTimeSlotId());
             } else {
-                ps.setNull(13, Types.INTEGER);
+                ps.setNull(idx++, Types.INTEGER);
+            }
+            if (hasDetectedNeedColumn) {
+                ps.setString(idx++, r.getDetectedNeed());
+            }
+            if (hasCompatibilityScoreColumn) {
+                if (r.getCompatibilityScore() != null) {
+                    ps.setInt(idx++, r.getCompatibilityScore());
+                } else {
+                    ps.setNull(idx++, Types.INTEGER);
+                }
+            }
+            if (hasJustificationColumn) {
+                ps.setString(idx++, r.getJustification());
+            }
+            if (hasAssignedCoachIdColumn) {
+                if (r.getAssignedCoachId() != null) {
+                    ps.setInt(idx++, r.getAssignedCoachId());
+                } else {
+                    ps.setNull(idx++, Types.INTEGER);
+                }
             }
 
             ps.executeUpdate();
@@ -77,33 +174,65 @@ public class CoachingRequestService implements CRUD<CoachingRequest, Integer> {
 
     @Override
     public void update(CoachingRequest r) throws SQLException {
-        String sql = """
+        StringBuilder sql = new StringBuilder("""
                 UPDATE coaching_request SET
                     message = ?, status = ?, goal = ?, level = ?, frequency = ?, budget = ?,
                     coaching_type = ?, priority = ?, responded_at = ?, time_slot_id = ?
-                WHERE id = ?
-                """;
-
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            ps.setString(1, r.getMessage());
-            ps.setString(2, r.getStatus());
-            ps.setString(3, r.getGoal());
-            ps.setString(4, r.getLevel());
-            ps.setString(5, r.getFrequency());
+                """);
+        if (hasDetectedNeedColumn) {
+            sql.append(", detected_need = ?");
+        }
+        if (hasCompatibilityScoreColumn) {
+            sql.append(", compatibility_score = ?");
+        }
+        if (hasJustificationColumn) {
+            sql.append(", justification = ?");
+        }
+        if (hasAssignedCoachIdColumn) {
+            sql.append(", assigned_coach_id = ?");
+        }
+        sql.append(" WHERE id = ?");
+        try (PreparedStatement ps = cnx.prepareStatement(sql.toString())) {
+            int idx = 1;
+            ps.setString(idx++, r.getMessage());
+            ps.setString(idx++, r.getStatus());
+            ps.setString(idx++, r.getGoal());
+            ps.setString(idx++, r.getLevel());
+            ps.setString(idx++, r.getFrequency());
             if (r.getBudget() != null) {
-                ps.setDouble(6, r.getBudget());
+                ps.setDouble(idx++, r.getBudget());
             } else {
-                ps.setNull(6, Types.DOUBLE);
+                ps.setNull(idx++, Types.DOUBLE);
             }
-            ps.setString(7, r.getCoachingType());
-            ps.setString(8, r.getPriority());
-            ps.setTimestamp(9, toTimestamp(r.getRespondedAt()));
+            ps.setString(idx++, r.getCoachingType());
+            ps.setString(idx++, r.getPriority());
+            ps.setTimestamp(idx++, toTimestamp(r.getRespondedAt()));
             if (r.getTimeSlotId() != null) {
-                ps.setInt(10, r.getTimeSlotId());
+                ps.setInt(idx++, r.getTimeSlotId());
             } else {
-                ps.setNull(10, Types.INTEGER);
+                ps.setNull(idx++, Types.INTEGER);
             }
-            ps.setInt(11, r.getId());
+            if (hasDetectedNeedColumn) {
+                ps.setString(idx++, r.getDetectedNeed());
+            }
+            if (hasCompatibilityScoreColumn) {
+                if (r.getCompatibilityScore() != null) {
+                    ps.setInt(idx++, r.getCompatibilityScore());
+                } else {
+                    ps.setNull(idx++, Types.INTEGER);
+                }
+            }
+            if (hasJustificationColumn) {
+                ps.setString(idx++, r.getJustification());
+            }
+            if (hasAssignedCoachIdColumn) {
+                if (r.getAssignedCoachId() != null) {
+                    ps.setInt(idx++, r.getAssignedCoachId());
+                } else {
+                    ps.setNull(idx++, Types.INTEGER);
+                }
+            }
+            ps.setInt(idx, r.getId());
 
             ps.executeUpdate();
         }
@@ -119,7 +248,7 @@ public class CoachingRequestService implements CRUD<CoachingRequest, Integer> {
     }
 
     public Optional<CoachingRequest> findById(int id) throws SQLException {
-        String sql = "SELECT " + COLUMNS + " FROM coaching_request WHERE id = ?";
+        String sql = "SELECT * FROM coaching_request WHERE id = ?";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -297,7 +426,7 @@ public class CoachingRequestService implements CRUD<CoachingRequest, Integer> {
     }
 
     private List<CoachingRequest> findByColumn(String column, int value) throws SQLException {
-        String sql = "SELECT " + COLUMNS + " FROM coaching_request WHERE " + column + " = ? ORDER BY created_at DESC";
+        String sql = "SELECT * FROM coaching_request WHERE " + column + " = ? ORDER BY created_at DESC";
         List<CoachingRequest> list = new ArrayList<>();
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, value);
@@ -331,12 +460,45 @@ public class CoachingRequestService implements CRUD<CoachingRequest, Integer> {
         r.setPriority(rs.getString("priority"));
         int ts = rs.getInt("time_slot_id");
         r.setTimeSlotId(rs.wasNull() ? null : ts);
+        try {
+            r.setDetectedNeed(rs.getString("detected_need"));
+        } catch (SQLException ignored) {
+            // Colonne absente : compat legacy
+        }
+        try {
+            int score = rs.getInt("compatibility_score");
+            r.setCompatibilityScore(rs.wasNull() ? null : score);
+        } catch (SQLException ignored) {
+            // Colonne absente : compat legacy
+        }
+        try {
+            r.setJustification(rs.getString("justification"));
+        } catch (SQLException ignored) {
+            // Colonne absente : compat legacy
+        }
+        try {
+            int assigned = rs.getInt("assigned_coach_id");
+            r.setAssignedCoachId(rs.wasNull() ? null : assigned);
+        } catch (SQLException ignored) {
+            // Colonne absente : compat legacy
+        }
         r.setStatus(rs.getString("status"));
         return r;
     }
 
     private static Timestamp toTimestamp(Date d) {
         return d == null ? null : new Timestamp(d.getTime());
+    }
+
+    private boolean hasColumn(String tableName, String columnName) {
+        try {
+            DatabaseMetaData metaData = cnx.getMetaData();
+            try (ResultSet rs = metaData.getColumns(null, null, tableName, columnName)) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     /**

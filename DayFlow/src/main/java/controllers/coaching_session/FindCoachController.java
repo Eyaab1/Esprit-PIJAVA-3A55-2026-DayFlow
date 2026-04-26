@@ -1,6 +1,8 @@
 package controllers.coaching_session;
 
 import controllers.navigation.NavigationManager;
+import dto.coaching_session.CoachingRequestAIResponse;
+import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -15,6 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 import model.coaching_session.CoachingRequest;
 import model.user.User;
 import services.account.UserService;
@@ -73,11 +76,29 @@ public class FindCoachController {
     private ComboBox<String> frequencyCombo;
     @FXML
     private TextField budgetField;
+    @FXML
+    private Label aiAnalysisStatusLabel;
+    @FXML
+    private VBox aiResultCard;
+    @FXML
+    private Label detectedNeedValueLabel;
+    @FXML
+    private Label recommendedCoachValueLabel;
+    @FXML
+    private Label compatibilityScoreValueLabel;
+    @FXML
+    private Label justificationValueLabel;
 
     private List<User> lastCoaches = new ArrayList<>();
+    private final PauseTransition aiDebounce = new PauseTransition(Duration.seconds(2));
+    private CoachingRequestAIResponse latestAiResponse;
+    private String latestAnalyzedMessage;
+    private long analysisSequence;
+    private static final int MIN_ANALYSIS_LENGTH = 12;
 
     @FXML
     private void initialize() {
+        System.out.println("INITIALIZE OK");
         try {
             specialityCombo.getItems().add("Toutes les spécialités");
             specialityCombo.getItems().addAll(userService.findAllCoachSpecialities());
@@ -121,7 +142,12 @@ public class FindCoachController {
             maxPriceField.setText("200");
 
             setupCoachCombo();
-            messageArea.textProperty().addListener((o, old, v) -> updateCharCount());
+            messageArea.textProperty().addListener((o, old, v) -> {
+                updateCharCount();
+                System.out.println("USER IS TYPING");
+                onMessageChanged(v);
+            });
+            setupAiCard();
             updateCharCount();
 
             loadCoaches();
@@ -164,6 +190,120 @@ public class FindCoachController {
     private void updateCharCount() {
         int n = messageArea.getText() != null ? messageArea.getText().length() : 0;
         charCountLabel.setText(n + " / 1000");
+    }
+
+    private void setupAiCard() {
+        if (aiResultCard != null) {
+            aiResultCard.setVisible(false);
+            aiResultCard.setManaged(false);
+        }
+        if (aiAnalysisStatusLabel != null) {
+            aiAnalysisStatusLabel.setText("Commencez à écrire votre message pour lancer l'analyse IA.");
+        }
+        aiDebounce.setOnFinished(event -> triggerAutomaticAiAnalysis());
+    }
+
+    private void onMessageChanged(String text) {
+        latestAiResponse = null;
+        latestAnalyzedMessage = null;
+        analysisSequence++;
+        if (text == null || text.trim().length() < MIN_ANALYSIS_LENGTH) {
+            hideAiResultCard();
+            if (aiAnalysisStatusLabel != null) {
+                aiAnalysisStatusLabel.setText("Écrivez au moins " + MIN_ANALYSIS_LENGTH + " caractères pour lancer l'analyse IA.");
+            }
+            return;
+        }
+        if (aiAnalysisStatusLabel != null) {
+            aiAnalysisStatusLabel.setText("Analyse IA planifiée dans 2 secondes...");
+        }
+        aiDebounce.playFromStart();
+    }
+
+    private void triggerAutomaticAiAnalysis() {
+        String message = messageArea.getText() == null ? "" : messageArea.getText().trim();
+        if (message.length() < MIN_ANALYSIS_LENGTH) {
+            return;
+        }
+        System.out.println("AI ANALYSIS STARTED");
+        final long requestId = analysisSequence;
+        if (aiAnalysisStatusLabel != null) {
+            aiAnalysisStatusLabel.setText("Analyse IA en cours...");
+        }
+        Thread worker = new Thread(() -> {
+            CoachingRequestAIResponse response = coachingRequestService.analyzeMessage(message);
+            javafx.application.Platform.runLater(() -> {
+                if (requestId != analysisSequence) {
+                    return;
+                }
+                if (!response.success()) {
+                    updateAiResultCardWithError(response.error());
+                    if (aiAnalysisStatusLabel != null) {
+                        aiAnalysisStatusLabel.setText("Analyse IA indisponible: " + response.error());
+                    }
+                    return;
+                }
+                latestAiResponse = response;
+                latestAnalyzedMessage = message;
+                updateAiResultCard(response);
+                selectRecommendedCoach(response.recommendedCoach());
+                if (aiAnalysisStatusLabel != null) {
+                    aiAnalysisStatusLabel.setText("Analyse IA prête. Vous pouvez envoyer la demande.");
+                }
+            });
+        }, "find-coach-ai-analysis");
+        worker.setDaemon(true);
+        worker.start();
+    }
+
+    private void selectRecommendedCoach(Integer coachId) {
+        if (coachId == null) {
+            return;
+        }
+        for (User coach : coachCombo.getItems()) {
+            if (coach.getId() != null && coach.getId().equals(coachId)) {
+                coachCombo.setValue(coach);
+                break;
+            }
+        }
+    }
+
+    private void hideAiResultCard() {
+        if (aiResultCard == null) {
+            return;
+        }
+        aiResultCard.setVisible(false);
+        aiResultCard.setManaged(false);
+    }
+
+    private void updateAiResultCard(CoachingRequestAIResponse response) {
+        if (aiResultCard == null) {
+            return;
+        }
+        detectedNeedValueLabel.setText("Besoin détecté : " + safe(response.detectedNeed()));
+        recommendedCoachValueLabel.setText("Coach recommandé : " + safe(response.coachName()));
+        compatibilityScoreValueLabel.setText("Score de compatibilité : " + response.compatibilityScore() + "%");
+        justificationValueLabel.setText("Justification : " + safe(response.justification()));
+        aiResultCard.setVisible(true);
+        aiResultCard.setManaged(true);
+        System.out.println("LABEL UPDATE");
+    }
+
+    private void updateAiResultCardWithError(String error) {
+        if (aiResultCard == null) {
+            return;
+        }
+        detectedNeedValueLabel.setText("Besoin détecté : -");
+        recommendedCoachValueLabel.setText("Coach recommandé : -");
+        compatibilityScoreValueLabel.setText("Score de compatibilité : -");
+        justificationValueLabel.setText("Justification : " + safe(error));
+        aiResultCard.setVisible(true);
+        aiResultCard.setManaged(true);
+        System.out.println("LABEL UPDATE");
+    }
+
+    private static String safe(String value) {
+        return value == null || value.isBlank() ? "-" : value;
     }
 
     @FXML
@@ -342,9 +482,49 @@ public class FindCoachController {
             new Alert(Alert.AlertType.WARNING, "Le message ne peut pas dépasser 1000 caractères.").showAndWait();
             return;
         }
+        if (latestAiResponse == null || !msg.equals(latestAnalyzedMessage)) {
+            new Alert(Alert.AlertType.WARNING, "Veuillez attendre la fin de l'analyse IA automatique avant d'envoyer.").showAndWait();
+            aiDebounce.playFromStart();
+            return;
+        }
+        if (!latestAiResponse.success()) {
+            new Alert(Alert.AlertType.WARNING, "Analyse IA invalide. Modifiez votre message puis réessayez.").showAndWait();
+            return;
+        }
 
         try {
-            coachingRequestService.createRequest(coach, me.get(), msg, CoachingRequest.STATUS_PENDING);
+            CoachingRequest request = new CoachingRequest();
+            request.setUserId(me.get().getId());
+            request.setCoachId(latestAiResponse.recommendedCoach());
+            request.setAssignedCoachId(latestAiResponse.recommendedCoach());
+            request.setMessage(msg);
+            request.setStatus(CoachingRequest.STATUS_PENDING);
+            request.setDetectedNeed(latestAiResponse.detectedNeed());
+            request.setCompatibilityScore(latestAiResponse.compatibilityScore());
+            request.setJustification(latestAiResponse.justification());
+
+            if (radioUrgent.isSelected()) {
+                request.setPriority(CoachingRequest.PRIORITY_URGENT);
+            } else if (radioMedium.isSelected()) {
+                request.setPriority(CoachingRequest.PRIORITY_MEDIUM);
+            } else {
+                request.setPriority(CoachingRequest.PRIORITY_NORMAL);
+            }
+            if (goalCombo.getValue() != null && !goalCombo.getValue().startsWith("Sélectionnez")) {
+                request.setGoal(goalCombo.getValue());
+            }
+            if (levelCombo.getValue() != null && !levelCombo.getValue().startsWith("Sélectionnez")) {
+                request.setLevel(levelCombo.getValue());
+            }
+            if (frequencyCombo.getValue() != null && !frequencyCombo.getValue().startsWith("Sélectionnez")) {
+                request.setFrequency(frequencyCombo.getValue());
+            }
+            Double budget = parseDoubleOrNull(budgetField.getText());
+            if (budget != null) {
+                request.setBudget(budget);
+            }
+
+            coachingRequestService.create(request);
             new Alert(Alert.AlertType.INFORMATION, "Votre demande a été envoyée avec succès !").showAndWait();
             messageArea.clear();
             updateCharCount();

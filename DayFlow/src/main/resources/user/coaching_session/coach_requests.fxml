@@ -7,9 +7,11 @@
 
 <ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controllers.coaching_session.CoachRequestsController"
-            fitToWidth="true" style="-fx-background-color: #f0f4f8; -fx-background: #f0f4f8;">
+            fitToWidth="true"
+            stylesheets="@coach_requests.css"
+            styleClass="root">
 
-    <VBox spacing="0" style="-fx-background-color: #f0f4f8;">
+    <VBox spacing="0">
         
         <!-- Navbar moderne -->
         <HBox alignment="CENTER_LEFT" spacing="20" 
@@ -27,22 +29,15 @@
             <Region HBox.hgrow="ALWAYS"/>
 
             <HBox spacing="8" alignment="CENTER">
-                <Button text="Accueil" styleClass="nav-button"
-                        style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 8 16 8 16; -fx-background-radius: 8;"/>
-                <Button text="Objectifs" styleClass="nav-button"
-                        style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 8 16 8 16; -fx-background-radius: 8;"/>
-                <Button text="Community" styleClass="nav-button"
-                        style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 8 16 8 16; -fx-background-radius: 8;"/>
-                <Button text="Calendrier" styleClass="nav-button"
-                        style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 8 16 8 16; -fx-background-radius: 8;"/>
-                <Button text="Favoris" styleClass="nav-button"
-                        style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 8 16 8 16; -fx-background-radius: 8;"/>
-                <Button text="Posts" styleClass="nav-button"
-                        style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 8 16 8 16; -fx-background-radius: 8;"/>
+                <Button text="Accueil" styleClass="nav-button"/>
+                <Button text="Objectifs" styleClass="nav-button"/>
+                <Button text="Communauté" styleClass="nav-button"/>
+                <Button text="Calendrier" styleClass="nav-button"/>
+                <Button text="Favoris" styleClass="nav-button"/>
+                <Button text="Posts" styleClass="nav-button"/>
                 <Button text="Mes demandes" styleClass="nav-button"
-                        style="-fx-background-color: #e0e7ff; -fx-text-fill: #4338ca; -fx-font-size: 14px; -fx-font-weight: 600; -fx-cursor: hand; -fx-padding: 8 16 8 16; -fx-background-radius: 10;"/>
-                <Button text="Gérer sessions" styleClass="nav-button"
-                        style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 8 16 8 16; -fx-background-radius: 8;"/>
+                        style="-fx-background-color: #e0e7ff; -fx-text-fill: #4338ca; -fx-font-weight: 700;"/>
+                <Button text="Gérer sessions" styleClass="nav-button"/>
             </HBox>
 
             <Button text="Déconnexion" 
@@ -50,24 +45,17 @@
         </HBox>
 
         <!-- Contenu principal -->
-        <VBox spacing="28" style="-fx-background-color: #f0f4f8;">
+        <VBox spacing="32">
             <padding>
-                <Insets top="32" right="40" bottom="40" left="40"/>
+                <Insets top="36" right="44" bottom="60" left="44"/>
             </padding>
             
             <!-- En-tête avec gradient -->
-            <VBox spacing="12" alignment="CENTER_LEFT"
-                  style="-fx-background-color: linear-gradient(to right, #6366f1, #8b5cf6); -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.3), 16, 0, 0, 4);">
-                <padding>
-                    <Insets top="32" right="32" bottom="32" left="32"/>
-                </padding>
-                
-                <Label text="Demandes de coaching" 
-                       style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: white;">
-                    <font><Font name="System Bold" size="32"/></font>
+            <VBox spacing="14" alignment="CENTER_LEFT" styleClass="hero-header">
+                <Label text="📋 Demandes de coaching" styleClass="hero-title">
+                    <font><Font name="System Bold" size="36"/></font>
                 </Label>
-                <Label text="Gérez les demandes reçues et planifiez vos sessions" 
-                       style="-fx-font-size: 16px; -fx-text-fill: rgba(255,255,255,0.9);">
+                <Label text="Gérez les demandes reçues et planifiez vos sessions" styleClass="hero-subtitle">
                     <font><Font size="16"/></font>
                 </Label>
             </VBox>

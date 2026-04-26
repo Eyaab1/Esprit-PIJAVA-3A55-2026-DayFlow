@@ -33,10 +33,15 @@ public class CoachingRequest {
     private Double budget;
     private String coachingType;
     private String priority;
+    private String detectedNeed;
+    private Integer compatibilityScore;
+    private String justification;
+    private Integer assignedCoachId;
 
     private Integer timeSlotId;
     private User user;
     private User coach;
+    private User assignedCoach;
     private TimeSlot timeSlot;
     /** OneToOne inverse : le côté propriétaire est {@link Session#coachingRequest}. */
     private Session session;
@@ -94,6 +99,35 @@ public class CoachingRequest {
 
     public User getCoach() {
         return coach;
+    }
+
+    public Integer getAssignedCoachId() {
+        return assignedCoachId;
+    }
+
+    public void setAssignedCoachId(Integer assignedCoachId) {
+        if (assignedCoachId != null && assignedCoachId <= 0) {
+            throw new IllegalArgumentException("Assigned coach ID invalide");
+        }
+        this.assignedCoachId = assignedCoachId;
+        if (assignedCoach != null && assignedCoach.getId() != null && !assignedCoach.getId().equals(assignedCoachId)) {
+            this.assignedCoach = null;
+        }
+        if (assignedCoachId != null) {
+            this.coachId = assignedCoachId;
+        }
+    }
+
+    public User getAssignedCoach() {
+        return assignedCoach;
+    }
+
+    public void setAssignedCoach(User assignedCoach) {
+        this.assignedCoach = assignedCoach;
+        if (assignedCoach != null && assignedCoach.getId() != null) {
+            this.assignedCoachId = assignedCoach.getId();
+            this.coachId = assignedCoach.getId();
+        }
     }
 
     public Integer getTimeSlotId() {
@@ -216,6 +250,39 @@ public class CoachingRequest {
         this.priority = priority;
     }
 
+    public String getDetectedNeed() {
+        return detectedNeed;
+    }
+
+    public void setDetectedNeed(String detectedNeed) {
+        if (detectedNeed != null && detectedNeed.length() > 255) {
+            throw new IllegalArgumentException("Besoin détecté trop long");
+        }
+        this.detectedNeed = detectedNeed;
+    }
+
+    public Integer getCompatibilityScore() {
+        return compatibilityScore;
+    }
+
+    public void setCompatibilityScore(Integer compatibilityScore) {
+        if (compatibilityScore != null && (compatibilityScore < 0 || compatibilityScore > 100)) {
+            throw new IllegalArgumentException("Le score de compatibilité doit être entre 0 et 100");
+        }
+        this.compatibilityScore = compatibilityScore;
+    }
+
+    public String getJustification() {
+        return justification;
+    }
+
+    public void setJustification(String justification) {
+        if (justification != null && justification.length() > 1000) {
+            throw new IllegalArgumentException("Justification trop longue");
+        }
+        this.justification = justification;
+    }
+
     public void setCreatedAt(Date createdAt) {
         if (createdAt == null) {
             throw new IllegalArgumentException("Date obligatoire");
@@ -318,5 +385,11 @@ public class CoachingRequest {
 
     public String getPriority() {
         return priority;
+    }
+
+    public boolean hasAiRecommendation() {
+        return detectedNeed != null && !detectedNeed.isBlank()
+                && compatibilityScore != null
+                && assignedCoachId != null;
     }
 }

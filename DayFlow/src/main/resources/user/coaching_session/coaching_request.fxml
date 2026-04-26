@@ -8,10 +8,10 @@
 <ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controllers.coaching_session.CoachingRequestController"
             fitToWidth="true"
-            style="-fx-background-color: #eef2ff; -fx-background: #eef2ff;">
+            stylesheets="@coaching_request.css"
+            styleClass="root">
 
-    <VBox spacing="0" alignment="TOP_CENTER"
-          style="-fx-background-color: #eef2ff;">
+    <VBox spacing="0" alignment="TOP_CENTER">
 
         <!-- Barre navigation — pastel -->
         <HBox alignment="CENTER_LEFT" spacing="20" maxWidth="Infinity"
@@ -20,10 +20,9 @@
                 <Insets top="14" right="32" bottom="14" left="32"/>
             </padding>
 
-            <Label text="DayFlow" styleClass="logo-text"
-                   style="-fx-font-size: 23px; -fx-font-weight: bold; -fx-text-fill: #6366f1;">
+            <Label text="DayFlow" styleClass="logo-text">
                 <font>
-                    <Font name="System Bold" size="23"/>
+                    <Font name="System Bold" size="24"/>
                 </font>
             </Label>
 
@@ -31,72 +30,51 @@
 
             <HBox spacing="6" alignment="CENTER">
                 <Button fx:id="accueilButton" text="Accueil" styleClass="nav-button"
-                        onAction="#handleAccueil"
-                        style="-fx-background-color: transparent; -fx-text-fill: #4b5563; -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 8 12 8 12; -fx-background-radius: 8;">
-                </Button>
+                        onAction="#handleAccueil"/>
                 <Button fx:id="objectifsButton" text="Objectifs" styleClass="nav-button"
-                        onAction="#handleObjectifs"
-                        style="-fx-background-color: transparent; -fx-text-fill: #4b5563; -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 8 12 8 12; -fx-background-radius: 8;">
-                </Button>
-                <Button fx:id="communityButton" text="Community" styleClass="nav-button"
-                        onAction="#handleCommunity"
-                        style="-fx-background-color: transparent; -fx-text-fill: #4b5563; -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 8 12 8 12; -fx-background-radius: 8;">
-                </Button>
+                        onAction="#handleObjectifs"/>
+                <Button fx:id="communityButton" text="Communauté" styleClass="nav-button"
+                        onAction="#handleCommunity"/>
                 <Button fx:id="calendrierButton" text="Calendrier" styleClass="nav-button"
-                        onAction="#handleCalendrier"
-                        style="-fx-background-color: transparent; -fx-text-fill: #4b5563; -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 8 12 8 12; -fx-background-radius: 8;">
-                </Button>
+                        onAction="#handleCalendrier"/>
                 <Button fx:id="favorisButton" text="Favoris" styleClass="nav-button"
-                        onAction="#handleFavoris"
-                        style="-fx-background-color: transparent; -fx-text-fill: #4b5563; -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 8 12 8 12; -fx-background-radius: 8;">
-                </Button>
+                        onAction="#handleFavoris"/>
                 <Button fx:id="postsButton" text="Posts" styleClass="nav-button"
-                        onAction="#handlePosts"
-                        style="-fx-background-color: transparent; -fx-text-fill: #4b5563; -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 8 12 8 12; -fx-background-radius: 8;">
-                </Button>
+                        onAction="#handlePosts"/>
                 <Button fx:id="mesDemandesButton" text="Mes demandes" styleClass="nav-button"
                         onAction="#handleMesDemandes"
-                        style="-fx-background-color: #e0e7ff; -fx-text-fill: #4338ca; -fx-font-size: 13px; -fx-font-weight: 600; -fx-cursor: hand; -fx-padding: 8 14 8 14; -fx-background-radius: 10;">
-                </Button>
+                        style="-fx-background-color: #e0e7ff; -fx-text-fill: #4338ca; -fx-font-weight: 700;"/>
             </HBox>
 
-            <Button fx:id="userButton" text="U" styleClass="user-button"
-                    style="-fx-background-color: linear-gradient(to bottom right, #a5b4fc, #f9a8d4); -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 50; -fx-min-width: 42; -fx-min-height: 42; -fx-cursor: hand;">
-            </Button>
+            <Button fx:id="userButton" text="HH" styleClass="user-button"/>
         </HBox>
 
         <!-- Contenu principal — centré, largeur max cohérente -->
-        <VBox spacing="32" alignment="TOP_CENTER" maxWidth="Infinity"
-               style="-fx-background-color: #eef2ff;">
+        <VBox spacing="36" alignment="TOP_CENTER" maxWidth="Infinity">
             <padding>
-                <Insets top="36" right="28" bottom="48" left="28"/>
+                <Insets top="40" right="32" bottom="60" left="32"/>
             </padding>
 
             <!-- Hero recherche -->
-            <VBox spacing="16" alignment="CENTER" maxWidth="1040">
-                <VBox spacing="10" alignment="CENTER"
-                      style="-fx-background-color: #e0e7ff; -fx-background-radius: 20; -fx-padding: 28 32 28 32;">
-                    <Label text="Trouvez votre coach idéal"
-                           style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #3730a3;">
+            <VBox spacing="20" alignment="CENTER" maxWidth="1100">
+                <VBox spacing="12" alignment="CENTER" styleClass="hero-section">
+                    <Label text="✨ Trouvez votre coach idéal" styleClass="hero-title">
                         <font>
-                            <Font name="System Bold" size="30"/>
+                            <Font name="System Bold" size="36"/>
                         </font>
                     </Label>
-                    <Label text="Recherchez parmi nos experts certifiés pour atteindre vos objectifs"
-                           style="-fx-font-size: 15px; -fx-text-fill: #5b21b6; -fx-wrap-text: true; -fx-text-alignment: center;">
+                    <Label text="Recherchez parmi nos experts certifiés pour atteindre vos objectifs" 
+                           styleClass="hero-subtitle" wrapText="true">
                         <font>
-                            <Font size="15"/>
+                            <Font size="16"/>
                         </font>
                     </Label>
-                    <HBox spacing="12" alignment="CENTER" maxWidth="640">
-                        <TextField fx:id="searchTextField" promptText="Rechercher un coach..."
-                                   HBox.hgrow="ALWAYS"
-                                   style="-fx-background-color: #ffffff; -fx-border-color: #c7d2fe; -fx-border-radius: 14; -fx-background-radius: 14; -fx-padding: 12 18 12 18; -fx-font-size: 14px;">
-                        </TextField>
-                        <Button fx:id="searchButton" text="Rechercher" styleClass="primary-button"
-                                style="-fx-background-color: #a5b4fc; -fx-text-fill: #1e1b4b; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 14; -fx-padding: 12 26 12 26; -fx-cursor: hand;">
+                    <HBox spacing="14" alignment="CENTER" maxWidth="680">
+                        <TextField fx:id="searchTextField" promptText="Rechercher un coach par nom ou spécialité..."
+                                   HBox.hgrow="ALWAYS" styleClass="search-field"/>
+                        <Button fx:id="searchButton" text="🔍 Rechercher" styleClass="search-button">
                             <font>
-                                <Font name="System Bold" size="14"/>
+                                <Font name="System Bold" size="15"/>
                             </font>
                         </Button>
                     </HBox>
@@ -104,179 +82,159 @@
             </VBox>
 
             <!-- Filtres -->
-            <VBox spacing="18" maxWidth="1040" alignment="TOP_LEFT"
-                  style="-fx-background-color: #fafbff; -fx-background-radius: 16; -fx-border-color: #e0e7ff; -fx-border-radius: 16; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.08), 14, 0, 0, 2);">
-                <padding>
-                    <Insets top="22" right="26" bottom="22" left="26"/>
-                </padding>
-
-                <Label text="Filtres avancés"
-                       style="-fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: #4338ca;">
+            <VBox spacing="20" maxWidth="1100" alignment="TOP_LEFT" styleClass="filter-card">
+                <Label text="🎯 Filtres avancés" styleClass="filter-title">
                     <font>
-                        <Font name="System Bold" size="17"/>
+                        <Font name="System Bold" size="19"/>
                     </font>
                 </Label>
 
-                <FlowPane hgap="14" vgap="14" prefWrapLength="900" columnHalignment="LEFT">
-                    <VBox spacing="6" minWidth="140" prefWidth="160">
-                        <Label text="Spécialité"
-                               style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #6b7280;"/>
-                        <ComboBox fx:id="specialiteComboBox" promptText="Toutes" maxWidth="Infinity"
-                                  styleClass="filter-combo"
-                                  style="-fx-background-color: #f5f3ff; -fx-border-color: #ddd6fe; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 8;"/>
+                <FlowPane hgap="16" vgap="16" prefWrapLength="950" columnHalignment="LEFT">
+                    <VBox spacing="8" minWidth="150" prefWidth="170">
+                        <Label text="Spécialité" styleClass="filter-label"/>
+                        <ComboBox fx:id="specialiteComboBox" promptText="Toutes" maxWidth="Infinity"/>
                     </VBox>
-                    <VBox spacing="6" minWidth="100" prefWidth="120">
-                        <Label text="Prix min"
-                               style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #6b7280;"/>
-                        <TextField fx:id="prixMinTextField" promptText="0" styleClass="filter-field"
-                                   style="-fx-background-color: #ecfdf5; -fx-border-color: #a7f3d0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10; -fx-font-size: 13px;"/>
+                    <VBox spacing="8" minWidth="110" prefWidth="130">
+                        <Label text="Prix min (€)" styleClass="filter-label"/>
+                        <TextField fx:id="prixMinTextField" promptText="0"/>
                     </VBox>
-                    <VBox spacing="6" minWidth="100" prefWidth="120">
-                        <Label text="Prix max"
-                               style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #6b7280;"/>
-                        <TextField fx:id="prixMaxTextField" promptText="1000" styleClass="filter-field"
-                                   style="-fx-background-color: #ecfdf5; -fx-border-color: #a7f3d0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10; -fx-font-size: 13px;"/>
+                    <VBox spacing="8" minWidth="110" prefWidth="130">
+                        <Label text="Prix max (€)" styleClass="filter-label"/>
+                        <TextField fx:id="prixMaxTextField" promptText="200"/>
                     </VBox>
-                    <VBox spacing="6" minWidth="120" prefWidth="140">
-                        <Label text="Note minimum"
-                               style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #6b7280;"/>
-                        <ComboBox fx:id="noteComboBox" promptText="Toutes" maxWidth="Infinity"
-                                  styleClass="filter-combo"
-                                  style="-fx-background-color: #fffbeb; -fx-border-color: #fde68a; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 8;"/>
+                    <VBox spacing="8" minWidth="130" prefWidth="150">
+                        <Label text="Note minimum" styleClass="filter-label"/>
+                        <ComboBox fx:id="noteComboBox" promptText="Toutes" maxWidth="Infinity"/>
                     </VBox>
-                    <VBox spacing="6" minWidth="120" prefWidth="160">
-                        <Label text="Disponibilité"
-                               style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #6b7280;"/>
-                        <ComboBox fx:id="disponibiliteComboBox" promptText="Toutes" maxWidth="Infinity"
-                                  styleClass="filter-combo"
-                                  style="-fx-background-color: #fce7f3; -fx-border-color: #fbcfe8; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 8;"/>
+                    <VBox spacing="8" minWidth="130" prefWidth="170">
+                        <Label text="Disponibilité" styleClass="filter-label"/>
+                        <ComboBox fx:id="disponibiliteComboBox" promptText="Toutes" maxWidth="Infinity"/>
                     </VBox>
-                    <VBox spacing="6" alignment="BOTTOM_LEFT" minWidth="100">
+                    <VBox spacing="8" alignment="BOTTOM_LEFT" minWidth="110">
                         <Label text=" " style="-fx-font-size: 12px;"/>
-                        <Button fx:id="applyFiltersButton" text="Appliquer" styleClass="primary-button"
-                                style="-fx-background-color: #99f6e4; -fx-text-fill: #115e59; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10 22 10 22; -fx-cursor: hand;"/>
+                        <Button fx:id="applyFiltersButton" text="Appliquer" styleClass="filter-button"/>
                     </VBox>
                 </FlowPane>
             </VBox>
 
             <!-- Liste coachs — grille fluide -->
-            <VBox spacing="14" maxWidth="1040" alignment="TOP_LEFT">
-                <VBox spacing="4">
-                    <Label text="Nos coachs disponibles"
-                           style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #3730a3;">
+            <VBox spacing="16" maxWidth="1100" alignment="TOP_LEFT">
+                <VBox spacing="6">
+                    <Label text="👥 Nos coachs disponibles" styleClass="section-title">
                         <font>
-                            <Font name="System Bold" size="22"/>
+                            <Font name="System Bold" size="26"/>
                         </font>
                     </Label>
-                    <Label text="Découvrez nos experts certifiés prêts à vous accompagner"
-                           style="-fx-font-size: 13px; -fx-text-fill: #6b7280;"/>
+                    <Label text="Découvrez nos experts certifiés prêts à vous accompagner" 
+                           styleClass="section-subtitle"/>
                 </VBox>
 
                 <ScrollPane fitToWidth="true" hbarPolicy="NEVER" pannable="false"
                             style="-fx-background-color: transparent; -fx-background: transparent;">
-                    <FlowPane fx:id="coachCardsFlow" hgap="16" vgap="16" alignment="TOP_LEFT"
-                              maxWidth="Infinity" prefWrapLength="980"
+                    <FlowPane fx:id="coachCardsFlow" hgap="20" vgap="20" alignment="TOP_LEFT"
+                              maxWidth="Infinity" prefWrapLength="1050"
                               style="-fx-background-color: transparent;"/>
                 </ScrollPane>
             </VBox>
 
             <!-- Formulaire demande -->
-            <VBox spacing="12" alignment="CENTER" maxWidth="1040">
-                <Label text="Faire une demande de coaching"
-                       style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #3730a3;">
+            <VBox spacing="14" alignment="CENTER" maxWidth="1100">
+                <Label text="✈️ Faire une demande de coaching" styleClass="section-title">
                     <font>
                         <Font name="System Bold" size="28"/>
                     </font>
                 </Label>
-                <Label text="Choisissez votre coach et décrivez vos objectifs"
-                       style="-fx-font-size: 15px; -fx-text-fill: #6b7280;">
+                <Label text="Choisissez votre coach et décrivez vos objectifs" styleClass="section-subtitle">
                     <font>
                         <Font size="15"/>
                     </font>
                 </Label>
             </VBox>
 
-            <HBox alignment="CENTER" maxWidth="1040">
-                <VBox spacing="22" maxWidth="720" HBox.hgrow="NEVER" fillWidth="true"
-                      style="-fx-background-color: #fefeff; -fx-background-radius: 18; -fx-border-color: #e0e7ff; -fx-border-radius: 18; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.07), 16, 0, 0, 3);">
-                    <padding>
-                        <Insets top="32" right="36" bottom="32" left="36"/>
-                    </padding>
+            <HBox alignment="CENTER" maxWidth="1100">
+                <VBox spacing="24" maxWidth="760" HBox.hgrow="NEVER" fillWidth="true" styleClass="form-card">
 
-                    <Label text="Votre demande"
-                           style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #6366f1; -fx-letter-spacing: 0.5;"/>
+                    <Label text="📝 VOTRE DEMANDE" styleClass="form-section-title"/>
 
-                    <VBox spacing="8">
-                        <Label text="Sélectionnez votre coach"
-                               style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #4b5563;"/>
-                        <ComboBox fx:id="coachComboBox" promptText="Choisir un coach..." maxWidth="Infinity"
-                                  style="-fx-background-color: #f8fafc; -fx-border-color: #c7d2fe; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;"/>
+                    <VBox spacing="10">
+                        <Label text="Sélectionnez votre coach" styleClass="form-field-label"/>
+                        <ComboBox fx:id="coachComboBox" promptText="Choisir un coach..." maxWidth="Infinity"/>
+                        <Label text="ℹ️ Choisissez le coach qui correspond le mieux à vos besoins" 
+                               styleClass="form-hint"/>
                     </VBox>
 
-                    <Separator style="-fx-background-color: #e0e7ff;"/>
+                    <Separator/>
 
-                    <VBox spacing="8">
-                        <Label text="Votre message"
-                               style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #4b5563;"/>
-                        <TextArea fx:id="messageTextArea" promptText="Décrivez vos objectifs et attentes..."
-                                  prefRowCount="5" wrapText="true"
-                                  style="-fx-background-color: #f8fafc; -fx-border-color: #c7d2fe; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 12; -fx-font-size: 13px;"/>
+                    <VBox spacing="10">
+                        <Label text="Votre message" styleClass="form-field-label"/>
+                        <TextArea fx:id="messageTextArea" 
+                                  promptText="Décrivez vos objectifs, votre niveau actuel, vos disponibilités et toute information utile pour le coach..."
+                                  prefRowCount="5" wrapText="true"/>
+                        <Label text="💬 Minimum 10 caractères, maximum 1000" styleClass="form-hint"/>
                     </VBox>
 
-                    <VBox spacing="8">
-                        <Label text="Priorité de la demande"
-                               style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #4b5563;"/>
-                        <HBox spacing="10" alignment="CENTER_LEFT"
-                              style="-fx-background-color: #f5f3ff; -fx-background-radius: 12; -fx-padding: 10 14 10 14; -fx-border-color: #e9d5ff; -fx-border-radius: 12; -fx-border-width: 1;">
-                            <RadioButton fx:id="normalRadio" text="Normal" selected="true"
-                                         style="-fx-font-size: 13px; -fx-text-fill: #4b5563;">
+                    <VBox spacing="10">
+                        <Label text="Priorité de la demande" styleClass="form-field-label"/>
+                        <HBox spacing="16" alignment="CENTER_LEFT" styleClass="priority-container">
+                            <RadioButton fx:id="normalRadio" text="Normal (réponse sous 48h)" selected="true">
                                 <toggleGroup>
                                     <ToggleGroup fx:id="priorityToggleGroup"/>
                                 </toggleGroup>
                             </RadioButton>
-                            <RadioButton fx:id="moyenRadio" text="Moyen" toggleGroup="$priorityToggleGroup"
-                                         style="-fx-font-size: 13px; -fx-text-fill: #4b5563;"/>
-                            <RadioButton fx:id="urgentRadio" text="Urgent" toggleGroup="$priorityToggleGroup"
-                                         style="-fx-font-size: 13px; -fx-text-fill: #4b5563;"/>
+                            <RadioButton fx:id="moyenRadio" text="Moyen (réponse sous 36h)" 
+                                         toggleGroup="$priorityToggleGroup"/>
+                            <RadioButton fx:id="urgentRadio" text="Urgent (réponse sous 24h)" 
+                                         toggleGroup="$priorityToggleGroup"/>
                         </HBox>
+                        <Label text="ℹ️ Les demandes urgentes sont traitées en priorité par les coaches" 
+                               styleClass="form-hint"/>
                     </VBox>
 
-                    <HBox spacing="14">
-                        <VBox spacing="8" HBox.hgrow="ALWAYS">
-                            <Label text="Objectif principal"
-                                   style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #4b5563;"/>
-                            <ComboBox fx:id="objectifComboBox" promptText="Sélectionner..." maxWidth="Infinity"
-                                      style="-fx-background-color: #fff7ed; -fx-border-color: #fed7aa; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;"/>
+                    <HBox spacing="16">
+                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                            <Label text="Objectif principal" styleClass="form-field-label"/>
+                            <ComboBox fx:id="objectifComboBox" promptText="Sélectionner..." maxWidth="Infinity"/>
                         </VBox>
-                        <VBox spacing="8" HBox.hgrow="ALWAYS">
-                            <Label text="Niveau actuel"
-                                   style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #4b5563;"/>
-                            <ComboBox fx:id="niveauComboBox" promptText="Sélectionner..." maxWidth="Infinity"
-                                      style="-fx-background-color: #fff7ed; -fx-border-color: #fed7aa; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;"/>
+                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                            <Label text="Niveau actuel" styleClass="form-field-label"/>
+                            <ComboBox fx:id="niveauComboBox" promptText="Sélectionner..." maxWidth="Infinity"/>
                         </VBox>
                     </HBox>
 
-                    <HBox spacing="14">
-                        <VBox spacing="8" HBox.hgrow="ALWAYS">
-                            <Label text="Fréquence souhaitée"
-                                   style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #4b5563;"/>
-                            <ComboBox fx:id="frequenceComboBox" promptText="Sélectionner..." maxWidth="Infinity"
-                                      style="-fx-background-color: #ecfeff; -fx-border-color: #a5f3fc; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;"/>
+                    <HBox spacing="16">
+                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                            <Label text="Fréquence souhaitée" styleClass="form-field-label"/>
+                            <ComboBox fx:id="frequenceComboBox" promptText="Sélectionner..." maxWidth="Infinity"/>
                         </VBox>
-                        <VBox spacing="8" HBox.hgrow="ALWAYS">
-                            <Label text="Budget par séance"
-                                   style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #4b5563;"/>
-                            <TextField fx:id="budgetTextField" promptText="Ex: 50€"
-                                       style="-fx-background-color: #ecfeff; -fx-border-color: #a5f3fc; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10; -fx-font-size: 13px;"/>
+                        <VBox spacing="10">
+                            <Label text="Budget par séance (€)" styleClass="form-field-label"/>
+                            <TextField fx:id="budgetTextField" promptText="Ex: 50" prefWidth="160"/>
                         </VBox>
                     </HBox>
 
-                    <Button fx:id="submitButton" text="Envoyer ma demande" maxWidth="Infinity"
-                            style="-fx-background-color: linear-gradient(to right, #a5b4fc, #c4b5fd); -fx-text-fill: #1e1b4b; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 12; -fx-padding: 14 28 14 28; -fx-cursor: hand;">
+                    <Button fx:id="submitButton" text="✈️ Envoyer ma demande" maxWidth="Infinity" 
+                            styleClass="submit-button">
                         <font>
-                            <Font name="System Bold" size="15"/>
+                            <Font name="System Bold" size="17"/>
                         </font>
                     </Button>
+
+                    <Label fx:id="aiAnalysisStatusLabel"
+                           text="Commencez à écrire votre message pour lancer l'analyse IA."
+                           wrapText="true" styleClass="form-hint"/>
+
+                    <VBox fx:id="aiResultCard" spacing="12" visible="false" managed="false" 
+                          styleClass="ai-result-card">
+                        <Label text="🤖 Résultat de l'analyse IA" styleClass="ai-result-title"/>
+                        <Label fx:id="detectedNeedValueLabel" text="Besoin détecté : -" 
+                               wrapText="true" styleClass="ai-result-label"/>
+                        <Label fx:id="recommendedCoachValueLabel" text="Coach recommandé : -" 
+                               wrapText="true" styleClass="ai-result-label"/>
+                        <Label fx:id="compatibilityScoreValueLabel" text="Score de compatibilité : -" 
+                               wrapText="true" styleClass="ai-result-label"/>
+                        <Label fx:id="justificationValueLabel" text="Justification : -" 
+                               wrapText="true" styleClass="ai-result-label"/>
+                    </VBox>
                 </VBox>
             </HBox>
         </VBox>
