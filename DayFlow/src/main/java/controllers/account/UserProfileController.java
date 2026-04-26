@@ -6,15 +6,23 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import model.interaction.Post;
+import model.profile.ProfileAnalysisResult;
+import model.profile.AiArchetypeProfile;
+import model.profile.OnboardingAnswers;
 import model.user.User;
 import services.account.UserService;
 import services.chatroom.ChatroomService;
@@ -22,6 +30,9 @@ import services.chatroom.ChatroomService.ChatroomListItem;
 import services.interaction.PostService;
 import services.interaction.PostService.PostWithStats;
 import services.interaction.SavedPostService;
+import services.profile.ProfileAnalyzerService;
+import services.profile.AiProfileGeneratorService;
+import services.profile.UserAiProfileStorageService;
 import session.AppSession;
 import session.ChatroomNav;
 import utils.HtmlPlainText;
@@ -44,9 +55,13 @@ public class UserProfileController {
     private final PostService postService = new PostService();
     private final SavedPostService savedPostService = new SavedPostService();
     private final ChatroomService chatroomService = new ChatroomService();
+    private final ProfileAnalyzerService profileAnalyzerService = new ProfileAnalyzerService();
+    private final AiProfileGeneratorService aiProfileGeneratorService = new AiProfileGeneratorService();
+    private final UserAiProfileStorageService userAiProfileStorageService = new UserAiProfileStorageService();
 
     private final ToggleGroup tabGroup = new ToggleGroup();
     private int userId;
+    private User loadedUser;
 
     @FXML
     private Label heroAvatarLabel;
@@ -57,9 +72,25 @@ public class UserProfileController {
     @FXML
     private Label sideEmailLabel;
     @FXML
+    private Label sideNameLabel;
+    @FXML
+    private Label sidePhoneLabel;
+    @FXML
     private Label sideAgeLabel;
     @FXML
     private Label sideMemberLabel;
+    @FXML
+    private TextField editFirstNameField;
+    @FXML
+    private TextField editLastNameField;
+    @FXML
+    private TextField editPhoneField;
+    @FXML
+    private TextField editAgeField;
+    @FXML
+    private Button editPersonalInfoButton;
+    @FXML
+    private Button savePersonalInfoButton;
     @FXML
     private Label statPublishedLabel;
     @FXML
@@ -82,6 +113,14 @@ public class UserProfileController {
     private Hyperlink openFeedLink;
     @FXML
     private VBox contentBox;
+    @FXML
+    private Button runAnalysisButton;
+    @FXML
+    private Label aiSummaryLabel;
+    @FXML
+    private Label archetypeNameLabel;
+    @FXML
+    private Label archetypeDescriptionLabel;
 
     @FXML
     private void initialize() {
@@ -104,10 +143,109 @@ public class UserProfileController {
         });
 
         openFeedLink.setOnAction(e -> onOpenFeed());
+        runAnalysisButton.setOnAction(e -> onRunProfileAnalysis());
+        editPersonalInfoButton.setOnAction(e -> onEditPersonalInfo());
+        savePersonalInfoButton.setOnAction(e -> onSavePersonalInfo());
 
         loadUserHeader();
         refreshStatsAndTabs();
+        loadSavedAiProfile();
         tabPosts.setSelected(true);
+    }
+
+    private void loadSavedAiProfile() {
+        try {
+            Optional<UserAiProfileStorageService.StoredAiProfile> saved = userAiProfileStorageService.findByUserId(userId);
+            if (saved.isEmpty()) {
+                return;
+            }
+            UserAiProfileStorageService.StoredAiProfile data = saved.get();
+            renderArchetype(data.profile());
+        } catch (SQLException e) {
+            new Alert(Alert.AlertType.ERROR, "Cannot load saved AI profile: " + e.getMessage()).showAndWait();
+        }
+    }
+
+    private void renderArchetype(AiArchetypeProfile profile) {
+        archetypeNameLabel.setText(profile.getArchetypeName());
+        archetypeDescriptionLabel.setText(profile.getDescription());
+        if (profile.getDescription() == null || profile.getDescription().isBlank()) {
+            archetypeDescriptionLabel.setText(profile.getShortBio() == null ? "" : profile.getShortBio());
+        }
+    }
+
+    private void onRunProfileAnalysis() {
+        try {
+            Optional<OnboardingAnswers> answersOpt = askOnboardingAnswers();
+            if (answersOpt.isEmpty()) {
+                return;
+            }
+            ProfileAnalysisResult result = profileAnalyzerService.analyzeCurrentUserProfile(userId);
+            AiArchetypeProfile archetype = aiProfileGeneratorService.generateProfile(answersOpt.get());
+            userAiProfileStorageService.saveOrUpdate(userId, answersOpt.get(), archetype);
+            renderArchetype(archetype);
+            String firstReco = result.getRecommendations().isEmpty() ? "No recommendation." : result.getRecommendations().getFirst();
+            aiSummaryLabel.setText("Score " + result.getScore() + "/100 - " + firstReco);
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "Cannot analyze profile: " + e.getMessage()).showAndWait();
+        }
+    }
+
+    private Optional<OnboardingAnswers> askOnboardingAnswers() throws SQLException {
+        Optional<UserAiProfileStorageService.StoredAiProfile> saved = userAiProfileStorageService.findByUserId(userId);
+        OnboardingAnswers defaults = saved.map(UserAiProfileStorageService.StoredAiProfile::answers)
+                .orElse(new OnboardingAnswers("", "", "", "", ""));
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("AI Profile Form");
+        dialog.setHeaderText("Answer quickly to generate your archetype.");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(8);
+
+        TextArea goals = new TextArea(defaults.goals());
+        TextArea challenges = new TextArea(defaults.challenges());
+        TextArea motivation = new TextArea(defaults.motivationStyle());
+        TextArea planning = new TextArea(defaults.planningStyle());
+        TextArea interests = new TextArea(defaults.interests());
+
+        goals.setPromptText("Goals");
+        challenges.setPromptText("Challenges");
+        motivation.setPromptText("Motivation style");
+        planning.setPromptText("Planning style");
+        interests.setPromptText("Interests");
+
+        goals.setPrefRowCount(2);
+        challenges.setPrefRowCount(2);
+        motivation.setPrefRowCount(1);
+        planning.setPrefRowCount(1);
+        interests.setPrefRowCount(2);
+
+        grid.add(new Label("Goals"), 0, 0);
+        grid.add(goals, 1, 0);
+        grid.add(new Label("Challenges"), 0, 1);
+        grid.add(challenges, 1, 1);
+        grid.add(new Label("Motivation"), 0, 2);
+        grid.add(motivation, 1, 2);
+        grid.add(new Label("Planning"), 0, 3);
+        grid.add(planning, 1, 3);
+        grid.add(new Label("Interests"), 0, 4);
+        grid.add(interests, 1, 4);
+
+        dialog.getDialogPane().setContent(grid);
+        Optional<ButtonType> result = dialog.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.OK) {
+            return Optional.empty();
+        }
+        return Optional.of(new OnboardingAnswers(
+                goals.getText(),
+                challenges.getText(),
+                motivation.getText(),
+                planning.getText(),
+                interests.getText()
+        ));
     }
 
     private void loadUserHeader() {
@@ -118,11 +256,16 @@ public class UserProfileController {
                 return;
             }
             User user = u.get();
+            loadedUser = user;
             heroAvatarLabel.setText(initials(user.getFirstName(), user.getLastName()));
             heroNameLabel.setText(fullName(user));
             heroEmailLabel.setText(user.getEmail() != null ? user.getEmail() : "");
 
+            sideNameLabel.setText("NOM : " + fullName(user));
             sideEmailLabel.setText("EMAIL : " + (user.getEmail() != null ? user.getEmail() : "—"));
+            sidePhoneLabel.setText("TEL : " + ((user.getPhoneNumber() != null && !user.getPhoneNumber().isBlank())
+                    ? user.getPhoneNumber()
+                    : "—"));
             if (user.getAge() != null) {
                 sideAgeLabel.setText("ÂGE : " + user.getAge() + " ans");
             } else {
@@ -133,8 +276,78 @@ public class UserProfileController {
             } else {
                 sideMemberLabel.setText("MEMBRE DEPUIS : —");
             }
+            setPersonalInfoEditMode(false);
         } catch (SQLException e) {
             heroNameLabel.setText("Erreur : " + e.getMessage());
+        }
+    }
+
+    private void onEditPersonalInfo() {
+        setPersonalInfoEditMode(true);
+    }
+
+    private void onSavePersonalInfo() {
+        savePersonalInfo();
+    }
+
+    private void setPersonalInfoEditMode(boolean editMode) {
+        editFirstNameField.setVisible(editMode);
+        editFirstNameField.setManaged(editMode);
+        editLastNameField.setVisible(editMode);
+        editLastNameField.setManaged(editMode);
+        editPhoneField.setVisible(editMode);
+        editPhoneField.setManaged(editMode);
+        editAgeField.setVisible(editMode);
+        editAgeField.setManaged(editMode);
+
+        sideNameLabel.setVisible(!editMode);
+        sideNameLabel.setManaged(!editMode);
+        sidePhoneLabel.setVisible(!editMode);
+        sidePhoneLabel.setManaged(!editMode);
+        sideAgeLabel.setVisible(!editMode);
+        sideAgeLabel.setManaged(!editMode);
+
+        savePersonalInfoButton.setVisible(editMode);
+        savePersonalInfoButton.setManaged(editMode);
+        if (editMode && loadedUser != null) {
+            editFirstNameField.setText(loadedUser.getFirstName() == null ? "" : loadedUser.getFirstName());
+            editLastNameField.setText(loadedUser.getLastName() == null ? "" : loadedUser.getLastName());
+            editPhoneField.setText(loadedUser.getPhoneNumber() == null ? "" : loadedUser.getPhoneNumber());
+            editAgeField.setText(loadedUser.getAge() == null ? "" : String.valueOf(loadedUser.getAge()));
+        }
+    }
+
+    private void savePersonalInfo() {
+        if (loadedUser == null || loadedUser.getId() == null) {
+            return;
+        }
+        try {
+            String firstName = editFirstNameField.getText() == null ? "" : editFirstNameField.getText().trim();
+            String lastName = editLastNameField.getText() == null ? "" : editLastNameField.getText().trim();
+            String phone = editPhoneField.getText() == null ? "" : editPhoneField.getText().trim();
+            String ageText = editAgeField.getText() == null ? "" : editAgeField.getText().trim();
+            if (firstName.isBlank() || lastName.isBlank()) {
+                throw new IllegalArgumentException("First name and last name are required.");
+            }
+            Integer age = null;
+            if (!ageText.isBlank()) {
+                age = Integer.parseInt(ageText);
+                if (age < 13 || age > 120) {
+                    throw new IllegalArgumentException("Age must be between 13 and 120.");
+                }
+            }
+
+            loadedUser.setFirstName(firstName);
+            loadedUser.setLastName(lastName);
+            loadedUser.setPhoneNumber(phone.isBlank() ? null : phone);
+            loadedUser.setAge(age);
+            userService.update(loadedUser);
+            loadUserHeader();
+            aiSummaryLabel.setText("Personal info updated.");
+        } catch (NumberFormatException e) {
+            new Alert(Alert.AlertType.ERROR, "Age must be a valid number.").showAndWait();
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "Cannot update personal info: " + e.getMessage()).showAndWait();
         }
     }
 
@@ -317,4 +530,5 @@ public class UserProfileController {
         String s = (fn + " " + ln).trim();
         return s.isEmpty() ? "Utilisateur" : s;
     }
+
 }

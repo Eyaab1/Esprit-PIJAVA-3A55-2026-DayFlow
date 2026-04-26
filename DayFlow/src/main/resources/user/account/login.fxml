@@ -21,7 +21,9 @@
             <TextField fx:id="emailField" promptText="Email address" prefHeight="38.0" prefWidth="360.0" />
             <PasswordField fx:id="passwordField" promptText="Password" prefHeight="38.0" prefWidth="360.0" />
             <Button fx:id="loginButton" mnemonicParsing="false" prefHeight="40.0" prefWidth="360.0" styleClass="primary-button" text="Login" />
+            <Button fx:id="googleLoginButton" mnemonicParsing="false" prefHeight="38.0" prefWidth="360.0" styleClass="secondary-button" text="Continue with Google" />
             <Hyperlink fx:id="forgotPasswordLink" text="Forgot password?" />
+            <Hyperlink fx:id="resetWithTokenLink" text="Already have a reset token?" />
             <Label text="Don't have an account yet?" />
             <Button fx:id="goToSignupButton" mnemonicParsing="false" prefHeight="38.0" prefWidth="360.0" styleClass="secondary-button" text="Create account" />
          </children>

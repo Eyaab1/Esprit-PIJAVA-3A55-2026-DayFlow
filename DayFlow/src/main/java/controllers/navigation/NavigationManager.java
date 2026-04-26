@@ -118,6 +118,8 @@ public final class NavigationManager {
         return path.contains("/user/account/landing")
                 || path.contains("/user/account/login")
                 || path.contains("/user/account/signup")
+                || path.contains("/user/account/forgot_password")
+                || path.contains("/user/account/reset_password")
                 || path.contains("/admin/");
     }
 }

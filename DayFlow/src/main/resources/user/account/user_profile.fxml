@@ -3,6 +3,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.BorderPane?>
@@ -35,9 +37,22 @@
          <children>
             <VBox spacing="10" styleClass="profile-side-card">
                <children>
-                  <Label styleClass="profile-side-title" text="👤  Informations personnelles" />
+                  <HBox alignment="CENTER_LEFT" spacing="8">
+                     <children>
+                        <Label styleClass="profile-side-title" text="👤  Informations personnelles" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button fx:id="savePersonalInfoButton" text="Valider" styleClass="profile-save-btn" visible="false" managed="false" />
+                        <Button fx:id="editPersonalInfoButton" text="🖉" styleClass="profile-edit-btn" />
+                     </children>
+                  </HBox>
+                  <Label fx:id="sideNameLabel" styleClass="profile-side-line" text="NOM —" />
                   <Label fx:id="sideEmailLabel" styleClass="profile-side-line" text="EMAIL —" />
+                  <Label fx:id="sidePhoneLabel" styleClass="profile-side-line" text="TEL —" />
                   <Label fx:id="sideAgeLabel" styleClass="profile-side-line" text="ÂGE —" />
+                  <TextField fx:id="editFirstNameField" promptText="First name" visible="false" managed="false" />
+                  <TextField fx:id="editLastNameField" promptText="Last name" visible="false" managed="false" />
+                  <TextField fx:id="editPhoneField" promptText="Phone number" visible="false" managed="false" />
+                  <TextField fx:id="editAgeField" promptText="Age" visible="false" managed="false" />
                   <Label fx:id="sideMemberLabel" styleClass="profile-side-line" text="MEMBRE DEPUIS —" />
                </children>
                <padding>
@@ -100,6 +115,35 @@
                   <Hyperlink fx:id="openFeedLink" onAction="#onOpenFeed" styleClass="profile-feed-link" text="Voir le fil →" />
                </children>
             </HBox>
+            <VBox spacing="10" styleClass="profile-ai-hero">
+               <children>
+                  <HBox alignment="CENTER_LEFT" spacing="10">
+                     <children>
+                        <Label styleClass="profile-ai-badge" text="✴" />
+                        <VBox spacing="3" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label text="AI Profile Analyzer" styleClass="profile-ai-title" />
+                              <Label text="One click to refresh your profile insights." styleClass="profile-ai-subtitle" />
+                           </children>
+                        </VBox>
+                        <Button fx:id="runAnalysisButton" text="Analyze now" styleClass="btn-open-chat" />
+                     </children>
+                  </HBox>
+                  <Label fx:id="aiSummaryLabel" styleClass="profile-ai-summary" text="No analysis yet." wrapText="true" />
+                  <HBox alignment="CENTER_LEFT" spacing="12" styleClass="profile-archetype-card">
+                     <children>
+                        <Label styleClass="profile-ai-badge" text="✴" />
+                        <VBox spacing="2" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label fx:id="archetypeNameLabel" wrapText="true" text="Your archetype will appear here" styleClass="profile-archetype-name" />
+                              <Label fx:id="archetypeDescriptionLabel" wrapText="true" text="Click Analyze now to generate your AI archetype." styleClass="profile-archetype-desc" />
+                           </children>
+                        </VBox>
+                        <Label text="›" styleClass="profile-archetype-arrow" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
             <VBox spacing="8" styleClass="profile-tabs-wrap">
                <children>
                   <HBox spacing="8" alignment="CENTER_LEFT">

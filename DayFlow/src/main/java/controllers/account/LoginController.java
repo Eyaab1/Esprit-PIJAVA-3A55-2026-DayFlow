@@ -9,7 +9,7 @@ import javafx.scene.control.TextField;
 import model.user.User;
 import controllers.components.NavbarController;
 import controllers.navigation.NavigationManager;
-import services.account.UserService;
+import services.account.AuthService;
 import session.AppSession;
 
 import java.io.IOException;
@@ -18,7 +18,7 @@ import java.util.Optional;
 
 public class LoginController {
 
-    private final UserService userService = new UserService();
+    private final AuthService authService = new AuthService();
 
     @FXML
     private TextField emailField;
@@ -30,17 +30,23 @@ public class LoginController {
     private Button goToSignupButton;
     @FXML
     private Hyperlink forgotPasswordLink;
+    @FXML
+    private Button googleLoginButton;
+    @FXML
+    private Hyperlink resetWithTokenLink;
 
     @FXML
     private void initialize() {
         loginButton.setOnAction(e -> onLogin());
         goToSignupButton.setOnAction(e -> navigateToSignup());
         forgotPasswordLink.setOnAction(e -> onForgotPassword());
+        googleLoginButton.setOnAction(e -> onGoogleLogin());
+        resetWithTokenLink.setOnAction(e -> onResetWithToken());
     }
 
     private void onLogin() {
         try {
-            Optional<User> user = userService.login(emailField.getText(), passwordField.getText());
+            Optional<User> user = authService.login(emailField.getText(), passwordField.getText());
             if (user.isPresent()) {
                 User u = user.get();
                 AppSession.setCurrentUser(u);
@@ -61,6 +67,8 @@ public class LoginController {
             }
         } catch (SQLException ex) {
             new Alert(Alert.AlertType.ERROR, "Erreur base de données : " + ex.getMessage()).showAndWait();
+        } catch (IllegalStateException ex) {
+            new Alert(Alert.AlertType.WARNING, ex.getMessage()).showAndWait();
         }
     }
 
@@ -73,6 +81,35 @@ public class LoginController {
     }
 
     private void onForgotPassword() {
-        new Alert(Alert.AlertType.INFORMATION, "Fonctionnalité à venir.").showAndWait();
+        try {
+            AuthNavigation.showForgotPassword();
+        } catch (IOException ex) {
+            new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
+        }
+    }
+
+    private void onResetWithToken() {
+        try {
+            AuthNavigation.showResetPassword();
+        } catch (IOException ex) {
+            new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
+        }
+    }
+
+    private void onGoogleLogin() {
+        try {
+            User u = authService.loginWithGoogle();
+            AppSession.setCurrentUser(u);
+            NavbarController.refreshFromSession();
+            if (AppSession.isAdmin()) {
+                NavigationManager.show("/admin/admin_shell.fxml", "DayFlow — Administration");
+            } else if (AppSession.isCoach()) {
+                NavigationManager.show("/user/account/coach_dashboard.fxml", "DayFlow — Coach");
+            } else {
+                NavigationManager.show("/user/account/user_dashboard.fxml", "DayFlow — Accueil");
+            }
+        } catch (Exception ex) {
+            new Alert(Alert.AlertType.ERROR, "Google login failed: " + ex.getMessage()).showAndWait();
+        }
     }
 }

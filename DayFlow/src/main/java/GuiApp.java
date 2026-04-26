@@ -1,3 +1,4 @@
+import config.DatabaseMigrator;
 import controllers.account.ShellController;
 import controllers.navigation.NavigationManager;
 import javafx.application.Application;
@@ -16,6 +17,7 @@ public class GuiApp extends Application {
     @Override
     public void start(Stage stage) {
         try {
+            DatabaseMigrator.migrate();
             FXMLLoader shellLoader = new FXMLLoader(GuiApp.class.getResource("/user/account/app_root.fxml"));
             Parent shellRoot = shellLoader.load();
             ShellController shell = shellLoader.getController();

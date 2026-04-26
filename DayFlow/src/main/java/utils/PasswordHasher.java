@@ -1,6 +1,6 @@
 package utils;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.mindrot.jbcrypt.BCrypt;
 
 /**
  * BCrypt facteur 13 (aligné sur Symfony). Les hash {@code $2y$} PHP sont normalisés en {@code $2a$} pour la vérif Java.
@@ -8,20 +8,26 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public final class PasswordHasher {
 
     private static final int BCRYPT_STRENGTH = 13;
-    private static final BCryptPasswordEncoder ENCODER = new BCryptPasswordEncoder(BCRYPT_STRENGTH);
 
     private PasswordHasher() {
     }
 
     public static String hash(String plainPassword) {
-        return ENCODER.encode(plainPassword);
+        if (plainPassword == null || plainPassword.isBlank()) {
+            throw new IllegalArgumentException("plainPassword is required");
+        }
+        return BCrypt.hashpw(plainPassword, BCrypt.gensalt(BCRYPT_STRENGTH));
     }
 
     public static boolean matches(String plainPassword, String storedHash) {
         if (plainPassword == null || storedHash == null || storedHash.isBlank()) {
             return false;
         }
-        return ENCODER.matches(plainPassword, normalizeSymfonyBcrypt(storedHash));
+        try {
+            return BCrypt.checkpw(plainPassword, normalizeSymfonyBcrypt(storedHash));
+        } catch (IllegalArgumentException ex) {
+            return false;
+        }
     }
 
     private static String normalizeSymfonyBcrypt(String hash) {

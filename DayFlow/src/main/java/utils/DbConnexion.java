@@ -1,14 +1,16 @@
 package utils;
 
+import config.AppConfig;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public final class DbConnexion {
 
-    private static final String URL = "jdbc:postgresql://localhost:5432/pidev_db";
-    private static final String USER = "postgres";
-    private static final String PASSWORD = "admin";
+    private static final String URL = AppConfig.dbUrl();
+    private static final String USER = AppConfig.dbUser();
+    private static final String PASSWORD = AppConfig.dbPassword();
 
     private static volatile DbConnexion instance;
 
