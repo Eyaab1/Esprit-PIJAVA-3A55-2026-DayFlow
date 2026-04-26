@@ -2,6 +2,7 @@ package controllers.postModule;
 
 import model.interaction.Comment;
 import services.comment.CommentService;
+import services.post.moderation.ModerationRejectedException;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -23,6 +24,9 @@ public class CommentController {
             commentService.addComment(comment);
             return "Comment added successfully with ID: " + comment.getId();
         } catch (SQLException e) {
+            if (e instanceof ModerationRejectedException) {
+                return e.getMessage();
+            }
             return "Error adding comment: " + e.getMessage();
         }
     }
@@ -35,6 +39,9 @@ public class CommentController {
             commentService.addComment(comment);
             return "Reply added successfully with ID: " + comment.getId();
         } catch (SQLException e) {
+            if (e instanceof ModerationRejectedException) {
+                return e.getMessage();
+            }
             return "Error adding reply: " + e.getMessage();
         }
     }
@@ -62,6 +69,9 @@ public class CommentController {
             commentService.updateComment(comment);
             return "Comment updated successfully";
         } catch (SQLException e) {
+            if (e instanceof ModerationRejectedException) {
+                return e.getMessage();
+            }
             return "Error updating comment: " + e.getMessage();
         }
     }

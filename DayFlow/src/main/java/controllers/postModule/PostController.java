@@ -4,6 +4,7 @@ import model.interaction.Comment;
 import model.interaction.Post;
 import model.interaction.Tag;
 import services.comment.CommentService;
+import services.post.moderation.ModerationRejectedException;
 import services.post.PostService;
 import services.tag.TagService;
 
@@ -33,6 +34,9 @@ public class PostController {
             postService.createPost(post);
             return "Post created successfully with ID: " + post.getId();
         } catch (SQLException e) {
+            if (e instanceof ModerationRejectedException) {
+                return e.getMessage();
+            }
             return "Error creating post: " + e.getMessage();
         }
     }
@@ -60,6 +64,9 @@ public class PostController {
             postService.updatePost(post);
             return "Post updated successfully";
         } catch (SQLException e) {
+            if (e instanceof ModerationRejectedException) {
+                return e.getMessage();
+            }
             return "Error updating post: " + e.getMessage();
         }
     }

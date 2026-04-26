@@ -22,6 +22,7 @@ import model.user.User;
 import services.UserServices.UserService;
 import services.comment.CommentService;
 import services.post.PostLikeService;
+import services.post.moderation.ModerationRejectedException;
 import services.post.PostService;
 import services.post.SavedPostService;
 import services.tag.TagService;
@@ -670,8 +671,37 @@ public class PostsFeedController {
         commentCard.setStyle("-fx-border-color: #e0e0e0; -fx-border-radius: 4; -fx-background-color: #f9f9f9;");
 
         Label contentLbl = new Label(name + " — " + htmlToPlainText(c.getContent()));
+        Label authorLbl = new Label(name);
+        authorLbl.getStyleClass().add("comment-author");
+
+        contentLbl.setText(htmlToPlainText(c.getContent()));
         contentLbl.setWrapText(true);
         contentLbl.getStyleClass().add("post-body");
+        contentLbl.getStyleClass().add("comment-text");
+
+        Region ownerSpacer = new Region();
+        HBox.setHgrow(ownerSpacer, Priority.ALWAYS);
+
+        HBox ownerActionsRow = new HBox(0);
+        ownerActionsRow.setAlignment(Pos.CENTER_LEFT);
+        ownerActionsRow.setFillHeight(true);
+        ownerActionsRow.setMaxWidth(Double.MAX_VALUE);
+        ownerActionsRow.getChildren().addAll(authorLbl, ownerSpacer);
+
+        boolean isOwner = currentUserId != null && Objects.equals(currentUserId, c.getCommenterId());
+        if (isOwner) {
+            MenuItem editItem = new MenuItem("Modifier");
+            MenuItem deleteItem = new MenuItem("Supprimer");
+
+            MenuButton optionsMenu = new MenuButton("⋮", null, editItem, deleteItem);
+            optionsMenu.getStyleClass().add("comment-options-btn");
+            optionsMenu.setFocusTraversable(false);
+
+            editItem.setOnAction(e -> enterCommentEditMode(commentCard, c, contentLbl, ownerActionsRow));
+            deleteItem.setOnAction(e -> confirmDeleteComment(c));
+
+            ownerActionsRow.getChildren().add(optionsMenu);
+        }
 
         int likeCount = getCommentLikeCount(c.getId());
 
@@ -809,6 +839,7 @@ public class PostsFeedController {
             }
         });
 
+        commentCard.getChildren().add(ownerActionsRow);
         commentCard.getChildren().addAll(contentLbl, actionsRow, repliesContainer, replyInputRow);
 
         return commentCard;
@@ -878,6 +909,99 @@ public class PostsFeedController {
      * Le contenu peut venir du web (Symfony / éditeur riche) avec des balises HTML.
      * {@link Text} JavaFX n'interprète pas le HTML — on affiche du texte lisible sans balises.
      */
+    private void confirmDeleteComment(Comment comment) {
+        ButtonType yesButton = new ButtonType("Oui", ButtonBar.ButtonData.OK_DONE);
+        ButtonType noButton = new ButtonType("Non", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Supprimer le commentaire");
+        confirmation.setHeaderText(null);
+        confirmation.setContentText("Êtes-vous sûr de vouloir supprimer ce commentaire ?");
+        confirmation.getButtonTypes().setAll(yesButton, noButton);
+
+        Optional<ButtonType> result = confirmation.showAndWait();
+        if (result.isEmpty() || result.get() != yesButton) {
+            return;
+        }
+
+        try {
+            commentService.deleteComment(comment.getId());
+            refreshFeed();
+        } catch (SQLException e) {
+            showError("Suppression du commentaire", e);
+        }
+    }
+
+    private void enterCommentEditMode(VBox commentCard, Comment comment, Label contentLbl, HBox ownerActionsRow) {
+        TextArea editArea = new TextArea(htmlToPlainText(comment.getContent()));
+        editArea.getStyleClass().add("comment-edit-field");
+        editArea.setWrapText(true);
+        editArea.setPrefRowCount(3);
+
+        Button cancelBtn = new Button("Annuler");
+        cancelBtn.getStyleClass().add("comment-secondary-btn");
+
+        Button updateBtn = new Button("Mettre à jour");
+        updateBtn.getStyleClass().add("btn-comment-reply");
+
+        HBox editActions = new HBox(8, cancelBtn, updateBtn);
+        editActions.setAlignment(Pos.CENTER_LEFT);
+        editActions.getStyleClass().add("comment-edit-actions");
+
+        int contentIndex = commentCard.getChildren().indexOf(contentLbl);
+        if (contentIndex >= 0) {
+            commentCard.getChildren().add(contentIndex + 1, editActions);
+            commentCard.getChildren().set(contentIndex, editArea);
+        }
+
+        ownerActionsRow.setDisable(true);
+
+        cancelBtn.setOnAction(e -> exitCommentEditMode(commentCard, contentLbl, editArea, editActions, ownerActionsRow));
+        updateBtn.setOnAction(e -> updateComment(comment, editArea, contentLbl, commentCard, editActions, ownerActionsRow));
+
+        editArea.requestFocus();
+        editArea.positionCaret(editArea.getText().length());
+    }
+
+    private void exitCommentEditMode(VBox commentCard, Label contentLbl, TextArea editArea, HBox editActions, HBox ownerActionsRow) {
+        int editIndex = commentCard.getChildren().indexOf(editArea);
+        if (editIndex >= 0) {
+            commentCard.getChildren().set(editIndex, contentLbl);
+        }
+        commentCard.getChildren().remove(editActions);
+        ownerActionsRow.setDisable(false);
+    }
+
+    private void updateComment(Comment comment, TextArea editArea, Label contentLbl, VBox commentCard,
+                               HBox editActions, HBox ownerActionsRow) {
+        String updatedText = editArea.getText() != null ? editArea.getText().trim() : "";
+        if (updatedText.isEmpty()) {
+            new Alert(Alert.AlertType.WARNING, "Le commentaire ne peut pas être vide.").showAndWait();
+            return;
+        }
+
+        String originalContent = comment.getContent();
+        try {
+            comment.setContent(updatedText);
+            commentService.updateComment(comment);
+            User u = userService.findById(comment.getCommenterId()).orElse(null);
+            String name = u != null
+                    ? ((u.getFirstName() != null ? u.getFirstName() : "") + " "
+                    + (u.getLastName() != null ? u.getLastName() : "")).trim()
+                    : ("#" + comment.getCommenterId());
+            if (name.isBlank()) {
+                name = "Utilisateur";
+            }
+            contentLbl.setText(name + " — " + htmlToPlainText(updatedText));
+            contentLbl.setText(htmlToPlainText(updatedText));
+            exitCommentEditMode(commentCard, contentLbl, editArea, editActions, ownerActionsRow);
+            refreshFeed();
+        } catch (SQLException e) {
+            comment.setContent(originalContent);
+            showError("Mise à jour du commentaire", e);
+        }
+    }
+
     private static String htmlToPlainText(String raw) {
         if (raw == null || raw.isBlank()) {
             return "";
@@ -915,6 +1039,10 @@ public class PostsFeedController {
 
     /** Boîte d’erreur standard pour les échecs SQL. */
     private static void showError(String ctx, SQLException e) {
+        if (e instanceof ModerationRejectedException moderationRejectedException) {
+            new Alert(Alert.AlertType.WARNING, moderationRejectedException.getMessage()).showAndWait();
+            return;
+        }
         new Alert(Alert.AlertType.ERROR, ctx + " : " + e.getMessage()).showAndWait();
     }
 
