@@ -13,7 +13,7 @@ import javafx.scene.layout.VBox;
 import model.reclamation.Reclamation;
 import model.reclamation.Response;
 import services.ai.GroqAIService;
-import services.reclamation.ReclamationService;
+import services.reclamation_services.ReclamationService;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -212,7 +212,13 @@ public class AdminReclamationsController {
             sb.append("Type: ").append(typeLabelFr(rec.getType())).append("\n");
             sb.append("Statut: ").append(statusLabelFr(rec.getStatus())).append("\n");
             sb.append("Utilisateur ID: ").append(rec.getUserId() != null ? rec.getUserId() : "—").append("\n");
-            sb.append("Date: ").append(rec.getCreatedAt() != null ? rec.getCreatedAt().format(DATE_FMT) : "—").append("\n\n");
+            sb.append("Date: ").append(rec.getCreatedAt() != null ? rec.getCreatedAt().format(DATE_FMT) : "—").append("\n");
+            
+            // Show photo path if exists
+            if (rec.getPhotoPath() != null && !rec.getPhotoPath().isBlank()) {
+                sb.append("Preuve jointe: ").append(rec.getPhotoPath()).append("\n");
+            }
+            sb.append("\n");
 
             sb.append("═══ CONTENU ═══\n\n");
             sb.append(stripHtmlForDisplay(rec.getContent())).append("\n\n");
@@ -235,13 +241,42 @@ public class AdminReclamationsController {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Détail de la réclamation");
             alert.setHeaderText("Réclamation #" + rec.getId());
+            
+            VBox content = new VBox(10);
+            
             TextArea area = new TextArea(sb.toString());
             area.setEditable(false);
             area.setWrapText(true);
             area.setPrefRowCount(18);
             area.setMaxWidth(Double.MAX_VALUE);
-            alert.getDialogPane().setContent(area);
-            alert.getDialogPane().setPrefWidth(600);
+            
+            content.getChildren().add(area);
+            
+            // Show image if exists
+            if (rec.getPhotoPath() != null && !rec.getPhotoPath().isBlank()) {
+                try {
+                    java.io.File imageFile = new java.io.File(rec.getPhotoPath());
+                    if (imageFile.exists()) {
+                        javafx.scene.image.ImageView imageView = new javafx.scene.image.ImageView();
+                        javafx.scene.image.Image image = new javafx.scene.image.Image(imageFile.toURI().toString());
+                        imageView.setImage(image);
+                        imageView.setFitWidth(400);
+                        imageView.setPreserveRatio(true);
+                        
+                        Label imageLabel = new Label("📎 Preuve jointe :");
+                        imageLabel.setStyle("-fx-font-weight:bold;-fx-font-size:13px;");
+                        
+                        content.getChildren().addAll(imageLabel, imageView);
+                    }
+                } catch (Exception e) {
+                    Label errorLabel = new Label("⚠ Impossible de charger l'image");
+                    errorLabel.setStyle("-fx-text-fill:#dc2626;");
+                    content.getChildren().add(errorLabel);
+                }
+            }
+            
+            alert.getDialogPane().setContent(content);
+            alert.getDialogPane().setPrefWidth(650);
             alert.showAndWait();
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();

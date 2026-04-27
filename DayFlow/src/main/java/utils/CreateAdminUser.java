@@ -1,7 +1,6 @@
 package utils;
 
 import enums.UserRole;
-import services.account.UserService;
 import model.user.User;
 
 import java.sql.Connection;
@@ -43,7 +42,7 @@ public class CreateAdminUser {
             
         } catch (IllegalArgumentException e) {
             System.err.println("❌ Error: " + e.getMessage());
-            if (e.getMessage().contains("déjà utilisé")) {
+            if (e.getMessage().contains("déjà utilisé") || e.getMessage().contains("already exists")) {
                 System.out.println("\n✅ Admin user already exists. You can login with:");
                 System.out.println("  Email: admin@dayflow.com");
                 System.out.println("  Password: Admin123! (if not changed)");
@@ -87,8 +86,7 @@ public class CreateAdminUser {
         }
 
         // Check if user already exists
-        UserService userService = new UserService();
-        if (userService.findByEmail(email).isPresent()) {
+        if (userExists(email)) {
             throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà.");
         }
 
@@ -129,6 +127,22 @@ public class CreateAdminUser {
                 return admin;
             }
             throw new SQLException("Failed to create admin user");
+        }
+    }
+
+    /**
+     * Checks if a user with the given email already exists.
+     */
+    private static boolean userExists(String email) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM \"user\" WHERE LOWER(email) = LOWER(?)";
+        Connection conn = DbConnexion.getConnection();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email.trim());
+            var rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+            return false;
         }
     }
 
