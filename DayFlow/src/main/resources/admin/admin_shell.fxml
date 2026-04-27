@@ -47,7 +47,12 @@
                 </styleClass>
             </Button>
             <Button styleClass="admin-nav-btn" text="Réclamations" onAction="#onNavPlaceholder" maxWidth="Infinity" alignment="CENTER_LEFT"/>
-            <Button styleClass="admin-nav-btn" text="Logs de modération" onAction="#onNavPlaceholder" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+            <Button fx:id="navModerationLogsBtn" text="Logs de modération"
+                    onAction="#onNavModerationLogs" maxWidth="Infinity" alignment="CENTER_LEFT">
+                <styleClass>
+                    <String fx:value="admin-nav-btn"/>
+                </styleClass>
+            </Button>
             <Label styleClass="admin-nav-section" text="COACHING"/>
             <Button fx:id="navCoachesBtn" text="Coachs"
                     onAction="#onNavCoaches" maxWidth="Infinity" alignment="CENTER_LEFT">

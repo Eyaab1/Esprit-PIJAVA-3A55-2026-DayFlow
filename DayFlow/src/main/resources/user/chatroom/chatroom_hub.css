@@ -214,6 +214,18 @@
 }
 .input-icon:hover { -fx-opacity: 0.85; }
 
+.input-tool-button {
+    -fx-background-color: #f0f1f8;
+    -fx-text-fill: #374151;
+    -fx-background-radius: 12;
+    -fx-padding: 8 10;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+.input-tool-button:hover {
+    -fx-background-color: #e8e9f8;
+}
+
 .chat-field {
     -fx-background-color: #f0f1f8;
     -fx-background-radius: 24;

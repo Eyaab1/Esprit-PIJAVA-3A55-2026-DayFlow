@@ -1,4 +1,4 @@
-package services.chatroom_module;
+package services.chatroom;
 
 import javax.sound.sampled.*;
 import java.io.File;

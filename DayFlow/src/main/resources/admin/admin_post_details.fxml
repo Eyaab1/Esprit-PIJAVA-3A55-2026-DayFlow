@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.admin.AdminPostDetailsController" styleClass="admin-root" stylesheets="@admin.css">
+    <content>
+        <VBox styleClass="admin-content" spacing="14">
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Button fx:id="backBtn" text="← Retour" onAction="#onBack" styleClass="admin-filter-btn"/>
+                <Label fx:id="pageTitle" styleClass="admin-page-title" text="Détail du post"/>
+                <Region HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <VBox styleClass="admin-card" spacing="10">
+                <Label fx:id="postTitleLabel" style="-fx-font-size:22px; -fx-font-weight:bold; -fx-text-fill:#4c1d95;" text="Titre"/>
+                <Label fx:id="postMetaLabel" styleClass="admin-page-sub" text="Auteur • date"/>
+                <HBox spacing="14" alignment="CENTER_LEFT">
+                    <Label text="Statut :" style="-fx-font-weight:bold;"/>
+                    <Label fx:id="postStatusLabel" styleClass="admin-badge"/>
+                    <Label text="Tags :" style="-fx-font-weight:bold;"/>
+                    <Label fx:id="postTagsLabel" styleClass="admin-page-sub"/>
+                </HBox>
+                <Label text="Contenu" style="-fx-font-size:14px; -fx-font-weight:bold;"/>
+                <Label fx:id="postContentLabel" wrapText="true" style="-fx-font-size:13px; -fx-text-fill:#1f2937;"/>
+            </VBox>
+
+            <VBox styleClass="admin-card" spacing="12">
+                <Label text="Analytics globales" style="-fx-font-size:16px; -fx-font-weight:bold; -fx-text-fill:#1e1b4b;"/>
+                <GridPane hgap="12" vgap="10">
+                    <Label text="Vues :" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <Label fx:id="viewsLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-font-weight:bold;"/>
+                    <Label text="Clics :" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                    <Label fx:id="clicksLabel" GridPane.rowIndex="0" GridPane.columnIndex="3" style="-fx-font-weight:bold;"/>
+                    <Label text="Likes :" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <Label fx:id="likesLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-font-weight:bold;"/>
+                    <Label text="Commentaires :" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                    <Label fx:id="commentsCountLabel" GridPane.rowIndex="1" GridPane.columnIndex="3" style="-fx-font-weight:bold;"/>
+                    <Label text="CTR :" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <Label fx:id="ctrLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-font-weight:bold;"/>
+                    <Label text="Tendance :" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                    <Label fx:id="trendLabel" GridPane.rowIndex="2" GridPane.columnIndex="3" style="-fx-font-weight:bold;"/>
+                </GridPane>
+                <HBox alignment="CENTER_LEFT">
+                    <BarChart fx:id="analyticsChart" prefHeight="170" prefWidth="360" minWidth="360" maxWidth="360" categoryGap="20" barGap="6">
+                        <xAxis>
+                            <CategoryAxis/>
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis/>
+                        </yAxis>
+                    </BarChart>
+                </HBox>
+            </VBox>
+
+            <VBox styleClass="admin-card" spacing="10">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Commentaires" style="-fx-font-size:16px; -fx-font-weight:bold; -fx-text-fill:#1e1b4b;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <ComboBox fx:id="commentsSortCombo" prefWidth="160" onAction="#onCommentsSortChange"/>
+                </HBox>
+                <VBox fx:id="commentsBox" spacing="10">
+                    <padding>
+                        <Insets top="2"/>
+                    </padding>
+                </VBox>
+            </VBox>
+        </VBox>
+    </content>
+</ScrollPane>

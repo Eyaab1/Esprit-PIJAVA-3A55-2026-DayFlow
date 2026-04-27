@@ -14,6 +14,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,22 +65,23 @@ public class ModerationService {
     }
 
     public void validatePostContent(Integer userId, String entityType, String title, String content) throws SQLException {
+        User user = ensureUserCanInteract(userId);
         ModerationResult titleResult = analyzeText(title, "post_title");
         ModerationResult contentResult = analyzeText(content, "post_content");
         ModerationResult mergedResult = ModerationResult.merge("post", toxicityThreshold, titleResult, contentResult);
 
         if (mergedResult.isRejected()) {
-            User user = findUser(userId);
-            logService.logRejectedAttempt(user, entityType, previewPost(title, content), mergedResult);
+            String exact = "Titre: " + normalizeForPreview(title) + "\nContenu: " + normalizeForPreview(content);
+            logService.logRejectedAttempt(user, entityType, exact, previewPost(title, content), mergedResult);
             throw new ModerationRejectedException(mergedResult.getUserMessage(), mergedResult);
         }
     }
 
     public void validateCommentContent(Integer userId, String entityType, String content) throws SQLException {
+        User user = ensureUserCanInteract(userId);
         ModerationResult result = analyzeText(content, "comment");
         if (result.isRejected()) {
-            User user = findUser(userId);
-            logService.logRejectedAttempt(user, entityType, preview(content), result);
+            logService.logRejectedAttempt(user, entityType, normalizeForPreview(content), preview(content), result);
             throw new ModerationRejectedException(result.getUserMessage(), result);
         }
     }
@@ -173,6 +175,39 @@ public class ModerationService {
         } catch (SQLException e) {
             return null;
         }
+    }
+
+    private User ensureUserCanInteract(Integer userId) throws SQLException {
+        User user = findUser(userId);
+        if (user == null) {
+            return null;
+        }
+        String status = user.getStatus() == null ? "" : user.getStatus().trim().toLowerCase();
+        LocalDateTime now = LocalDateTime.now();
+
+        if ("temp_banned".equals(status)) {
+            LocalDateTime bannedUntil = user.getBannedUntil();
+            if (bannedUntil == null || now.isBefore(bannedUntil)) {
+                String untilText = bannedUntil != null ? (" jusqu'au " + bannedUntil) : "";
+                throw new ModerationRejectedException(
+                        "Votre compte est temporairement suspendu" + untilText + ".",
+                        ModerationResult.fromScores("ban_status", toxicityThreshold, Map.of())
+                );
+            }
+            userService.updateModerationStatus(user.getId(), "active", null, null);
+            user.setStatus("active");
+            user.setBannedUntil(null);
+            user.setBanReason(null);
+            return user;
+        }
+
+        if ("banned".equals(status) || "permanent_banned".equals(status)) {
+            throw new ModerationRejectedException(
+                    "Votre compte est banni définitivement.",
+                    ModerationResult.fromScores("ban_status", toxicityThreshold, Map.of())
+            );
+        }
+        return user;
     }
 
     private static Properties loadApplicationProperties() {

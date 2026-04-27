@@ -41,6 +41,7 @@ import utils.HtmlPlainText;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -500,7 +501,7 @@ public class UserProfileController {
             } else if (sel == tabScheduled) {
                 fillPostCards(postService.findProfilePostsByAuthorAndStatus(userId, PostStatus.SCHEDULED));
             } else if (sel == tabDrafts) {
-                fillPostCards(postService.findProfilePostsByAuthorAndStatus(userId, PostStatus.DRAFT));
+                fillDraftCards(postService.findProfilePostsByAuthorAndStatus(userId, PostStatus.DRAFT));
             } else if (sel == tabChatrooms) {
                 fillChatroomCards(chatroomService.findAccessibleForUser(userId));
             } else if (sel == tabLoginSecurity) {
@@ -523,6 +524,16 @@ public class UserProfileController {
         }
         for (PostWithStats row : rows) {
             contentBox.getChildren().add(buildPostCard(row));
+        }
+    }
+
+    private void fillDraftCards(List<PostWithStats> rows) {
+        if (rows.isEmpty()) {
+            contentBox.getChildren().add(new Label("Aucun brouillon pour le moment."));
+            return;
+        }
+        for (PostWithStats row : rows) {
+            contentBox.getChildren().add(buildDraftCard(row));
         }
     }
 
@@ -560,6 +571,141 @@ public class UserProfileController {
 
         card.getChildren().addAll(head, content, foot);
         return card;
+    }
+
+    private VBox buildDraftCard(PostWithStats row) {
+        Post p = row.post();
+        VBox card = buildPostCard(row);
+
+        HBox actions = new HBox(8);
+        actions.setAlignment(Pos.CENTER_LEFT);
+
+        Button openEditBtn = new Button("Ouvrir / Modifier");
+        openEditBtn.getStyleClass().add("profile-draft-edit-btn");
+        openEditBtn.setOnAction(e -> openDraftEditor(p));
+
+        Button publishBtn = new Button("Publier");
+        publishBtn.getStyleClass().add("profile-draft-publish-btn");
+        publishBtn.setOnAction(e -> publishDraft(p));
+
+        Button deleteBtn = new Button("Supprimer");
+        deleteBtn.getStyleClass().add("profile-draft-delete-btn");
+        deleteBtn.setOnAction(e -> deleteDraft(p));
+
+        actions.getChildren().addAll(openEditBtn, publishBtn, deleteBtn);
+        card.getChildren().add(actions);
+        return card;
+    }
+
+    private void openDraftEditor(Post draft) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Modifier le brouillon");
+        dialog.setHeaderText("Brouillon #" + draft.getId());
+        ButtonType saveType = new ButtonType("Enregistrer");
+        ButtonType publishType = new ButtonType("Publier");
+        ButtonType deleteType = new ButtonType("Supprimer");
+        dialog.getDialogPane().getButtonTypes().addAll(saveType, publishType, deleteType, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        TextField titleField = new TextField(draft.getTitle() == null ? "" : draft.getTitle());
+        titleField.setPromptText("Titre");
+        TextArea contentArea = new TextArea(draft.getContent() == null ? "" : HtmlPlainText.toPlain(draft.getContent()));
+        contentArea.setPromptText("Contenu");
+        contentArea.setPrefRowCount(8);
+        contentArea.setWrapText(true);
+
+        grid.add(new Label("Titre"), 0, 0);
+        grid.add(titleField, 1, 0);
+        grid.add(new Label("Contenu"), 0, 1);
+        grid.add(contentArea, 1, 1);
+        dialog.getDialogPane().setContent(grid);
+
+        Optional<ButtonType> result = dialog.showAndWait();
+        if (result.isEmpty() || result.get() == ButtonType.CANCEL) {
+            return;
+        }
+        if (result.get() == deleteType) {
+            deleteDraft(draft);
+            return;
+        }
+
+        String title = titleField.getText() == null ? "" : titleField.getText().trim();
+        String content = contentArea.getText() == null ? "" : contentArea.getText().trim();
+        if (title.isBlank()) {
+            new Alert(Alert.AlertType.WARNING, "Le titre est obligatoire.").showAndWait();
+            return;
+        }
+
+        draft.setTitle(title);
+        draft.setContent(content.isBlank() ? null : content);
+        draft.setUpdatedAt(LocalDateTime.now());
+
+        if (result.get() == publishType) {
+            publishDraft(draft);
+        } else {
+            saveDraft(draft);
+        }
+    }
+
+    private void saveDraft(Post draft) {
+        try {
+            draft.setStatus(PostStatus.DRAFT);
+            draft.setScheduledAt(null);
+            postService.updatePost(draft);
+            refreshStatsAndTabs();
+            refreshTabContent();
+            new Alert(Alert.AlertType.INFORMATION, "Brouillon mis à jour.").showAndWait();
+        } catch (SQLException e) {
+            new Alert(Alert.AlertType.ERROR, "Sauvegarde brouillon impossible : " + e.getMessage()).showAndWait();
+        }
+    }
+
+    private void publishDraft(Post draft) {
+        Alert confirm = new Alert(
+                Alert.AlertType.CONFIRMATION,
+                "Publier ce brouillon maintenant ?",
+                ButtonType.YES,
+                ButtonType.NO
+        );
+        Optional<ButtonType> confirmResult = confirm.showAndWait();
+        if (confirmResult.isEmpty() || confirmResult.get() != ButtonType.YES) {
+            return;
+        }
+        try {
+            draft.setStatus(PostStatus.PUBLISHED);
+            draft.setScheduledAt(null);
+            draft.setUpdatedAt(LocalDateTime.now());
+            postService.updatePost(draft);
+            refreshStatsAndTabs();
+            refreshTabContent();
+            new Alert(Alert.AlertType.INFORMATION, "Brouillon publié avec succès.").showAndWait();
+        } catch (SQLException e) {
+            new Alert(Alert.AlertType.ERROR, "Publication impossible : " + e.getMessage()).showAndWait();
+        }
+    }
+
+    private void deleteDraft(Post draft) {
+        Alert confirm = new Alert(
+                Alert.AlertType.CONFIRMATION,
+                "Supprimer définitivement ce brouillon ?",
+                ButtonType.YES,
+                ButtonType.NO
+        );
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.YES) {
+            return;
+        }
+        try {
+            postService.deletePost(draft.getId());
+            refreshStatsAndTabs();
+            refreshTabContent();
+            new Alert(Alert.AlertType.INFORMATION, "Brouillon supprimé.").showAndWait();
+        } catch (SQLException e) {
+            new Alert(Alert.AlertType.ERROR, "Suppression impossible : " + e.getMessage()).showAndWait();
+        }
     }
 
     private static String statusFr(PostStatus s) {

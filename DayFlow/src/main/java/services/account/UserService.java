@@ -38,7 +38,7 @@ public class UserService implements CRUD<User, Integer> {
     private static final String SELECT_BY_EMAIL = """
             SELECT id, first_name, last_name, email, password, roles,
                    phone_number, age, status, speciality, specialities, availability,
-                   rating, review_count, price_per_session, bio, photo_url,
+                   rating, review_count, price_per_session, bio, photo_url, banned_until, ban_reason,
                    profile_picture_name, profile_picture_size, created_at
             FROM "user" WHERE LOWER(email) = LOWER(?)
             """;
@@ -46,7 +46,7 @@ public class UserService implements CRUD<User, Integer> {
     private static final String SELECT_BY_ID = """
             SELECT id, first_name, last_name, email, password, roles,
                    phone_number, age, status, speciality, specialities, availability,
-                   rating, review_count, price_per_session, bio, photo_url,
+                   rating, review_count, price_per_session, bio, photo_url, banned_until, ban_reason,
                    profile_picture_name, profile_picture_size, created_at
             FROM "user" WHERE id = ?
             """;
@@ -63,7 +63,13 @@ public class UserService implements CRUD<User, Integer> {
                 first_name = ?, last_name = ?, email = ?, password = ?,
                 roles = ?, phone_number = ?, age = ?, status = ?, speciality = ?,
                 availability = ?, rating = ?, review_count = ?,
-                price_per_session = ?, bio = ?, photo_url = ?
+                price_per_session = ?, bio = ?, photo_url = ?, banned_until = ?, ban_reason = ?
+            WHERE id = ?
+            """;
+
+    private static final String UPDATE_USER_MODERATION_STATUS = """
+            UPDATE "user"
+            SET status = ?, banned_until = ?, ban_reason = ?
             WHERE id = ?
             """;
 
@@ -75,7 +81,7 @@ public class UserService implements CRUD<User, Integer> {
     private static final String USER_FULL_SELECT = """
             SELECT id, first_name, last_name, email, password, roles,
                    phone_number, age, status, speciality, specialities, availability,
-                   rating, review_count, price_per_session, bio, photo_url,
+                   rating, review_count, price_per_session, bio, photo_url, banned_until, ban_reason,
                    profile_picture_name, profile_picture_size
             """;
 
@@ -319,6 +325,16 @@ public class UserService implements CRUD<User, Integer> {
             } else {
                 ps.setString(i++, user.getPhotoUrl());
             }
+            if (user.getBannedUntil() == null) {
+                ps.setNull(i++, Types.TIMESTAMP);
+            } else {
+                ps.setTimestamp(i++, Timestamp.valueOf(user.getBannedUntil()));
+            }
+            if (user.getBanReason() == null || user.getBanReason().isBlank()) {
+                ps.setNull(i++, Types.VARCHAR);
+            } else {
+                ps.setString(i++, user.getBanReason());
+            }
             ps.setInt(i, user.getId());
             ps.executeUpdate();
         }
@@ -360,6 +376,25 @@ public class UserService implements CRUD<User, Integer> {
             }
         }
         return Optional.empty();
+    }
+
+    public void updateModerationStatus(int userId, String status, java.time.LocalDateTime bannedUntil, String banReason) throws SQLException {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(UPDATE_USER_MODERATION_STATUS)) {
+            ps.setString(1, status);
+            if (bannedUntil == null) {
+                ps.setNull(2, Types.TIMESTAMP);
+            } else {
+                ps.setTimestamp(2, Timestamp.valueOf(bannedUntil));
+            }
+            if (banReason == null || banReason.isBlank()) {
+                ps.setNull(3, Types.VARCHAR);
+            } else {
+                ps.setString(3, banReason);
+            }
+            ps.setInt(4, userId);
+            ps.executeUpdate();
+        }
     }
 
     private PGobject toJsonRoles(List<String> roles) throws SQLException {
@@ -421,6 +456,12 @@ public class UserService implements CRUD<User, Integer> {
         u.setPhotoUrl(rs.getString("photo_url"));
         if (rs.wasNull()) {
             u.setPhotoUrl(null);
+        }
+        Timestamp bannedUntilTs = rs.getTimestamp("banned_until");
+        u.setBannedUntil(bannedUntilTs != null ? bannedUntilTs.toLocalDateTime() : null);
+        u.setBanReason(rs.getString("ban_reason"));
+        if (rs.wasNull()) {
+            u.setBanReason(null);
         }
         applyCreatedAtIfPresent(u, rs);
         return u;

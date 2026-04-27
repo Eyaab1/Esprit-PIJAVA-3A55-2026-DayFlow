@@ -30,15 +30,17 @@
             </HBox>
             <VBox styleClass="admin-posts-table-wrap" spacing="0">
                 <HBox spacing="12" styleClass="admin-posts-header" alignment="CENTER_LEFT">
-                    <Label minWidth="300" text="Titre" style="-fx-font-weight:bold;"/>
-                    <Label minWidth="160" text="Auteur" style="-fx-font-weight:bold;"/>
-                    <Label minWidth="110" text="Publié le" style="-fx-font-weight:bold;"/>
-                    <Label minWidth="72" text="CTR" style="-fx-font-weight:bold;"/>
-                    <Label minWidth="88" text="Tendance" style="-fx-font-weight:bold;"/>
-                    <Label minWidth="88" text="Statut" style="-fx-font-weight:bold;"/>
-                    <Label minWidth="56" text="" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="360" prefWidth="360" maxWidth="360" text="Titre" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="170" prefWidth="170" maxWidth="170" text="Auteur" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="110" prefWidth="110" maxWidth="110" text="Publié le" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="60" prefWidth="60" maxWidth="60" text="Vues" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="60" prefWidth="60" maxWidth="60" text="Clics" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="70" prefWidth="70" maxWidth="70" text="CTR" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="120" prefWidth="120" maxWidth="120" text="Tendance" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="95" prefWidth="95" maxWidth="95" text="Statut" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="44" prefWidth="44" maxWidth="44" text="" style="-fx-font-weight:bold;"/>
                 </HBox>
-                <ScrollPane fitToWidth="true" maxHeight="720" style="-fx-background-color:transparent;">
+                <ScrollPane fx:id="postsRowsScrollPane" fitToWidth="true" maxHeight="720" style="-fx-background-color:transparent;">
                     <VBox fx:id="postsRowsBox" spacing="0"/>
                 </ScrollPane>
             </VBox>

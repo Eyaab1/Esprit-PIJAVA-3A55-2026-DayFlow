@@ -11,139 +11,42 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import model.user.User;
 import services.admin.AdminModerationService;
 import services.admin.AdminModerationService.ModerationAction;
 import services.admin.AdminModerationService.ModerationIncidentRow;
-import services.admin.AdminStatsService;
-import services.admin.AdminStatsService.RecentRequestRow;
-import services.admin.AdminStatsService.RecentSessionRow;
 import session.AppSession;
-import model.user.User;
 
-import java.io.IOException;
 import java.sql.SQLException;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Tableau de bord admin — listes récentes (cartes KPI / graphiques retirés provisoirement).
- */
-public class AdminDashboardController {
+public class AdminModerationLogsController {
 
-    private final AdminStatsService statsService = new AdminStatsService();
     private final AdminModerationService moderationService = new AdminModerationService();
-    private AdminShellController shell;
 
-    @FXML
-    private VBox recentRequestsBox;
-    @FXML
-    private VBox recentSessionsBox;
     @FXML
     private VBox moderationLogsBox;
 
-    public void setShell(AdminShellController shell) {
-        this.shell = shell;
-    }
-
     @FXML
     private void initialize() {
-        refreshAll();
+        refresh();
     }
 
-    @FXML
-    private void onViewAllRequests() {
-        try {
-            if (shell != null) {
-                shell.loadUsers();
-            }
-        } catch (IOException ex) {
-            new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
-        }
-    }
-
-    private void refreshAll() {
-        try {
-            fillRecentRequests(statsService.findRecentRequests(6));
-            fillRecentSessions(statsService.findRecentSessions(6));
-            fillModerationLogs(moderationService.findRecentIncidents(20));
-        } catch (SQLException ex) {
-            new Alert(Alert.AlertType.ERROR, "Données admin : " + ex.getMessage()).showAndWait();
-        }
-    }
-
-    private void fillRecentRequests(List<RecentRequestRow> rows) {
-        recentRequestsBox.getChildren().clear();
-        for (RecentRequestRow r : rows) {
-            recentRequestsBox.getChildren().add(buildRequestRow(r));
-        }
-    }
-
-    private void fillRecentSessions(List<RecentSessionRow> rows) {
-        recentSessionsBox.getChildren().clear();
-        for (RecentSessionRow r : rows) {
-            recentSessionsBox.getChildren().add(buildSessionRow(r));
-        }
-    }
-
-    private void fillModerationLogs(List<ModerationIncidentRow> rows) {
+    private void refresh() {
         moderationLogsBox.getChildren().clear();
-        if (rows.isEmpty()) {
-            moderationLogsBox.getChildren().add(new Label("Aucun incident de modération pour le moment."));
-            return;
+        try {
+            List<ModerationIncidentRow> rows = moderationService.findRecentIncidents(100);
+            if (rows.isEmpty()) {
+                moderationLogsBox.getChildren().add(new Label("Aucun incident de modération pour le moment."));
+                return;
+            }
+            for (ModerationIncidentRow row : rows) {
+                moderationLogsBox.getChildren().add(buildModerationRow(row));
+            }
+        } catch (SQLException e) {
+            new Alert(Alert.AlertType.ERROR, "Chargement des logs de modération impossible : " + e.getMessage()).showAndWait();
         }
-        for (ModerationIncidentRow row : rows) {
-            moderationLogsBox.getChildren().add(buildModerationRow(row));
-        }
-    }
-
-    private HBox buildRequestRow(RecentRequestRow r) {
-        VBox left = new VBox(4);
-        Label name = new Label(r.userName());
-        name.setStyle("-fx-font-weight:bold;-fx-font-size:14px;");
-        String msg = r.message() == null || r.message().isBlank() ? "—" : truncate(r.message(), 80);
-        Label message = new Label(msg);
-        message.setStyle("-fx-text-fill:#64748b;-fx-font-size:12px;");
-        Label when = new Label(formatDateTime(r.createdAt()));
-        when.setStyle("-fx-text-fill:#94a3b8;-fx-font-size:11px;");
-        left.getChildren().addAll(name, message, when);
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        Label badge = new Label(humanStatus(r.status()));
-        badge.getStyleClass().addAll("admin-badge", badgeClassFor(r.status()));
-
-        HBox row = new HBox(12, left, spacer, badge);
-        row.setAlignment(Pos.CENTER_LEFT);
-        row.getStyleClass().add("admin-list-row");
-        return row;
-    }
-
-    private HBox buildSessionRow(RecentSessionRow r) {
-        VBox left = new VBox(4);
-        Label title = new Label("Session #" + r.id());
-        title.setStyle("-fx-font-weight:bold;-fx-font-size:14px;");
-        Label coach = new Label("Coach : " + r.coachName());
-        coach.setStyle("-fx-text-fill:#64748b;-fx-font-size:12px;");
-        Label client = new Label("Client : " + r.clientName());
-        client.setStyle("-fx-text-fill:#64748b;-fx-font-size:12px;");
-        Label when = new Label(formatDateTime(r.createdAt()));
-        when.setStyle("-fx-text-fill:#94a3b8;-fx-font-size:11px;");
-        left.getChildren().addAll(title, coach, client, when);
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        Label badge = new Label(humanStatus(r.status()));
-        badge.getStyleClass().addAll("admin-badge", badgeClassFor(r.status()));
-
-        HBox row = new HBox(12, left, spacer, badge);
-        row.setAlignment(Pos.CENTER_LEFT);
-        row.getStyleClass().add("admin-list-row");
-        return row;
     }
 
     private VBox buildModerationRow(ModerationIncidentRow r) {
@@ -151,7 +54,7 @@ public class AdminDashboardController {
         card.getStyleClass().add("admin-list-row");
 
         String when = r.createdAt() != null ? r.createdAt().toString().replace('T', ' ') : "—";
-        String content = r.contentText() == null || r.contentText().isBlank() ? "—" : truncate(r.contentText(), 240);
+        String content = r.contentText() == null || r.contentText().isBlank() ? "—" : truncate(r.contentText(), 280);
         String detected = r.detectedReason() == null || r.detectedReason().isBlank() ? "Raison non précisée" : r.detectedReason();
         String flags = r.flaggedAttributes() == null || r.flaggedAttributes().isBlank() ? "—" : r.flaggedAttributes();
         String account = r.accountStatus() == null || r.accountStatus().isBlank() ? "unknown" : r.accountStatus();
@@ -165,6 +68,7 @@ public class AdminDashboardController {
         Label meta = new Label(
                 "Type: " + (r.entityType() == null ? "—" : r.entityType())
                         + " • Warn: " + (r.warningStatus() == null ? "—" : r.warningStatus())
+                        + " • Incident: " + (r.incidentStatus() == null ? "—" : r.incidentStatus())
                         + " • Compte: " + account
         );
         meta.setStyle("-fx-text-fill:#64748b; -fx-font-size:11px;");
@@ -176,7 +80,7 @@ public class AdminDashboardController {
         body.setStyle("-fx-font-size:11px;");
 
         Button ignoreBtn = new Button("Ignorer");
-        Button warnBtn = new Button("Warning only");
+        Button warnBtn = new Button("Warning");
         Button tempBanBtn = new Button("Ban temporaire");
         Button permBanBtn = new Button("Ban permanent");
         ignoreBtn.getStyleClass().add("admin-filter-btn");
@@ -193,9 +97,11 @@ public class AdminDashboardController {
         tempBanBtn.setOnAction(e -> applyModerationAction(r, ModerationAction.TEMP_BAN));
         permBanBtn.setOnAction(e -> applyModerationAction(r, ModerationAction.PERMANENT_BAN));
 
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
         HBox actions = new HBox(8, ignoreBtn, warnBtn, tempBanBtn, permBanBtn);
         actions.setAlignment(Pos.CENTER_LEFT);
-        card.getChildren().addAll(header, meta, reason, body, actions);
+        card.getChildren().addAll(header, meta, reason, body, actions, spacer);
         return card;
     }
 
@@ -250,7 +156,7 @@ public class AdminDashboardController {
                     reason,
                     days
             );
-            refreshAll();
+            refresh();
         } catch (SQLException ex) {
             new Alert(Alert.AlertType.ERROR, "Action modération impossible : " + ex.getMessage()).showAndWait();
         }
@@ -261,40 +167,5 @@ public class AdminDashboardController {
             return s;
         }
         return s.substring(0, max - 1) + "…";
-    }
-
-    private static String formatDateTime(Date d) {
-        if (d == null) {
-            return "—";
-        }
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy 'à' HH:mm");
-        return fmt.format(d.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
-    }
-
-    private static String humanStatus(String raw) {
-        if (raw == null || raw.isBlank()) {
-            return "—";
-        }
-        return raw.replace('_', ' ');
-    }
-
-    private static String badgeClassFor(String status) {
-        if (status == null) {
-            return "badge-default";
-        }
-        String s = status.toLowerCase().trim();
-        if (s.contains("accept")) {
-            return "badge-accepted";
-        }
-        if (s.contains("pending") || s.contains("attente")) {
-            return "badge-pending";
-        }
-        if (s.contains("scheduling")) {
-            return "badge-scheduling";
-        }
-        if (s.contains("proposed")) {
-            return "badge-proposed";
-        }
-        return "badge-default";
     }
 }

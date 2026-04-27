@@ -35,6 +35,8 @@ public class AdminShellController {
     @FXML
     private Button navPostsBtn;
     @FXML
+    private Button navModerationLogsBtn;
+    @FXML
     private Button navCoachesBtn;
     @FXML
     private Button navCoachRequestsBtn;
@@ -50,6 +52,7 @@ public class AdminShellController {
                 navUsersBtn,
                 navGoalsBtn,
                 navPostsBtn,
+                navModerationLogsBtn,
                 navCoachesBtn,
                 navCoachRequestsBtn
         );
@@ -92,6 +95,11 @@ public class AdminShellController {
     @FXML
     private void onNavCoaches() throws IOException {
         loadCoaches();
+    }
+
+    @FXML
+    private void onNavModerationLogs() throws IOException {
+        loadModerationLogs();
     }
 
     @FXML
@@ -138,7 +146,19 @@ public class AdminShellController {
     }
 
     public void loadPosts() throws IOException {
-        loadCenter("/admin/admin_posts.fxml", navPostsBtn);
+        FXMLLoader loader = loadCenter("/admin/admin_posts.fxml", navPostsBtn);
+        AdminPostsController c = loader.getController();
+        c.setShell(this);
+    }
+
+    public void loadPostDetails(int postId) throws IOException {
+        FXMLLoader loader = loadCenter("/admin/admin_post_details.fxml", navPostsBtn);
+        AdminPostDetailsController c = loader.getController();
+        c.setContext(this, postId);
+    }
+
+    public void loadModerationLogs() throws IOException {
+        loadCenter("/admin/admin_moderation_logs.fxml", navModerationLogsBtn);
     }
 
     public void loadCoaches() throws IOException {

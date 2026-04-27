@@ -28,6 +28,11 @@
                     <VBox fx:id="recentSessionsBox" spacing="0"/>
                 </VBox>
             </HBox>
+            <VBox styleClass="admin-card" spacing="8">
+                <Label styleClass="admin-card-title" text="Moderation Logs"/>
+                <Label styleClass="admin-page-sub" text="Incidents les plus récents (du plus récent au plus ancien)."/>
+                <VBox fx:id="moderationLogsBox" spacing="0"/>
+            </VBox>
             <Region minHeight="12"/>
         </VBox>
     </content>

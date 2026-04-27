@@ -43,7 +43,7 @@
 .hero-dashboard {
     -fx-padding: 48 48 52 48;
     -fx-background-radius: 28;
-    -fx-background-color: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 50%, #fce7f3 100%);
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #e0f2fe 0%, #ddd6fe 50%, #fce7f3 100%);
     -fx-border-color: rgba(255, 255, 255, 0.6);
     -fx-border-width: 2;
     -fx-border-radius: 28;
@@ -115,7 +115,7 @@
     -fx-max-width: 56px;
     -fx-max-height: 56px;
     -fx-alignment: center;
-    -fx-background-color: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%);
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #e0f2fe 0%, #ddd6fe 100%);
     -fx-background-radius: 28;
     -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.15), 10, 0, 0, 3);
 }
@@ -202,7 +202,7 @@
     -fx-max-width: 68;
     -fx-max-height: 68;
     -fx-background-radius: 34;
-    -fx-background-color: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #f472b6 0%, #ec4899 100%);
     -fx-text-fill: white;
     -fx-font-size: 28px;
     -fx-cursor: hand;
@@ -210,7 +210,7 @@
 }
 
 .fab-feedback:hover {
-    -fx-background-color: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #ec4899 0%, #db2777 100%);
     -fx-effect: dropshadow(gaussian, rgba(236, 72, 153, 0.6), 28, 0, 0, 12);
     -fx-scale-x: 1.08;
     -fx-scale-y: 1.08;

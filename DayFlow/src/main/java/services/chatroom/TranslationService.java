@@ -1,4 +1,4 @@
-package services.chatroom_module;
+package services.chatroom;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,17 +27,17 @@ public class TranslationService {
             .connectTimeout(Duration.ofSeconds(8))
             .build();
 
-    /** Langues disponibles : label → code ISO */
+    /** Langues disponibles : label -> code ISO */
     public static final Map<String, String> LANGUAGES = new LinkedHashMap<>();
     static {
-        LANGUAGES.put("Français",   "fr");
-        LANGUAGES.put("English",    "en");
-        LANGUAGES.put("العربية",    "ar");
-        LANGUAGES.put("Español",    "es");
-        LANGUAGES.put("Deutsch",    "de");
-        LANGUAGES.put("Italiano",   "it");
-        LANGUAGES.put("Português",  "pt");
-        LANGUAGES.put("中文",        "zh");
+        LANGUAGES.put("Français", "fr");
+        LANGUAGES.put("English", "en");
+        LANGUAGES.put("العربية", "ar");
+        LANGUAGES.put("Español", "es");
+        LANGUAGES.put("Deutsch", "de");
+        LANGUAGES.put("Italiano", "it");
+        LANGUAGES.put("Português", "pt");
+        LANGUAGES.put("中文", "zh");
     }
 
     /**
@@ -45,28 +45,32 @@ public class TranslationService {
      * Détecte automatiquement la langue source.
      */
     public String translate(String text, String targetLang) throws Exception {
-        if (text == null || text.isBlank())
+        if (text == null || text.isBlank()) {
             throw new IllegalArgumentException("Texte vide.");
-        if (text.length() > 500)
+        }
+        if (text.length() > 500) {
             throw new IllegalArgumentException("Texte trop long (max 500 chars).");
-        if (!LANGUAGES.containsValue(targetLang))
+        }
+        if (!LANGUAGES.containsValue(targetLang)) {
             throw new IllegalArgumentException("Langue non supportée : " + targetLang);
+        }
 
         String clean = text.trim();
 
-        // Essayer toutes les langues sources possibles jusqu'à obtenir une vraie traduction
+        // Essayer plusieurs sources jusqu'a une vraie traduction.
         String[] candidates = buildSourceCandidates(clean, targetLang);
-
         for (String sourceLang : candidates) {
             try {
                 String result = callMyMemory(clean, sourceLang, targetLang);
-                // Vérifier que la traduction est différente du texte original
-                if (result != null && !result.isBlank()
+                if (result != null
+                        && !result.isBlank()
                         && !result.equalsIgnoreCase(clean)
                         && !result.toLowerCase().contains("mymemory")) {
                     return result;
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+                // Continue sur le fallback suivant.
+            }
         }
 
         throw new Exception("Traduction indisponible pour ce texte. Réessayez avec une autre langue.");
@@ -74,7 +78,7 @@ public class TranslationService {
 
     private String callMyMemory(String text, String sourceLang, String targetLang) throws Exception {
         String encodedText = URLEncoder.encode(text, StandardCharsets.UTF_8);
-        String pair        = URLEncoder.encode(sourceLang + "|" + targetLang, StandardCharsets.UTF_8);
+        String pair = URLEncoder.encode(sourceLang + "|" + targetLang, StandardCharsets.UTF_8);
         String url = MYMEMORY_URL + "?q=" + encodedText + "&langpair=" + pair;
 
         HttpRequest req = HttpRequest.newBuilder()
@@ -85,8 +89,9 @@ public class TranslationService {
                 .build();
 
         HttpResponse<String> resp = HTTP.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() != 200)
+        if (resp.statusCode() != 200) {
             throw new Exception("HTTP " + resp.statusCode());
+        }
 
         JsonNode root = JSON.readTree(resp.body());
         int status = root.path("responseStatus").asInt();
@@ -99,18 +104,15 @@ public class TranslationService {
     }
 
     /**
-     * Construit la liste des langues sources à essayer dans l'ordre.
-     * Priorité : langue détectée → autres langues communes.
+     * Construit la liste des langues sources a essayer dans l'ordre.
      */
     private String[] buildSourceCandidates(String text, String targetLang) {
         String detected = detectSourceLang(text);
-        // Si détecté == cible, on essaie d'autres langues
         if (detected.equals(targetLang)) {
             return targetLang.equals("en")
                     ? new String[]{"fr", "es", "de", "it", "ar"}
                     : new String[]{"en", "fr", "es", "de", "it"};
         }
-        // Sinon : détecté en premier, puis fallbacks
         return new String[]{detected, "en", "fr", "es"};
     }
 

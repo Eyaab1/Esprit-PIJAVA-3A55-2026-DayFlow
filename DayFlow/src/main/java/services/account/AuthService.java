@@ -5,6 +5,7 @@ import model.user.User;
 import utils.PasswordHasher;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
@@ -82,6 +83,7 @@ public class AuthService {
         if (user.isEmpty() || user.get().getId() == null) {
             return new LoginResult(Optional.empty(), null);
         }
+        ensureAccountIsAllowedToLogin(user.get());
 
         int recentFailed = lockoutService.recentFailedAttempts(normalized);
         AccountSecurityService.LoginSuccessMeta loginMeta = accountSecurityService.registerSuccessfulLogin(
@@ -139,5 +141,27 @@ public class AuthService {
     }
 
     public record LoginResult(Optional<User> user, AccountSecurityService.LoginSuccessMeta securityMeta) {
+    }
+
+    private void ensureAccountIsAllowedToLogin(User user) throws SQLException {
+        if (user == null || user.getId() == null) {
+            return;
+        }
+        String status = user.getStatus() == null ? "" : user.getStatus().trim().toLowerCase(Locale.ROOT);
+        LocalDateTime now = LocalDateTime.now();
+        if ("temp_banned".equals(status)) {
+            LocalDateTime until = user.getBannedUntil();
+            if (until == null || now.isBefore(until)) {
+                throw new IllegalStateException("Compte suspendu temporairement jusqu'au " + (until != null ? until : "date inconnue") + ".");
+            }
+            userService.updateModerationStatus(user.getId(), "active", null, null);
+            user.setStatus("active");
+            user.setBannedUntil(null);
+            user.setBanReason(null);
+            return;
+        }
+        if ("banned".equals(status) || "permanent_banned".equals(status)) {
+            throw new IllegalStateException("Compte banni définitivement.");
+        }
     }
 }

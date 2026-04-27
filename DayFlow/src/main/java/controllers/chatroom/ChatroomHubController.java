@@ -24,9 +24,13 @@ import services.chatroom.GoalChatroomLifecycleService;
 import services.chatroom.GoalParticipationService;
 import services.chatroom.MessageService;
 import services.chatroom.ReactionService;
+import services.chatroom.AudioRecorderService;
+import services.chatroom.TranslationService;
 import session.AppSession;
 import session.ChatroomNav;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -34,6 +38,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import javax.sound.sampled.LineUnavailableException;
 
 public class ChatroomHubController {
 
@@ -54,6 +59,8 @@ public class ChatroomHubController {
     private final GoalChatroomLifecycleService lifecycle           = new GoalChatroomLifecycleService();
     private final UserService                  userService         = new UserService();
     private final ReactionService              reactionService     = new ReactionService();
+    private final AudioRecorderService         audioRecorderService = new AudioRecorderService();
+    private final TranslationService           translationService   = new TranslationService();
 
     // ── FXML ──────────────────────────────────────────────────────────────
     @FXML private ListView<ChatroomListItem>   chatListView;
@@ -74,6 +81,10 @@ public class ChatroomHubController {
     @FXML private Label                        memberCountLabel;
     @FXML private Label                        photoCount;
     @FXML private Label                        videoCount;
+    @FXML private Button                       micButton;
+    @FXML private Button                       translateButton;
+    @FXML private ChoiceBox<String>            translateLangChoice;
+    @FXML private Label                        inputStatusLabel;
     // ── Recherche messages ────────────────────────────────────────────────
     @FXML private HBox                         searchMsgBar;
     @FXML private TextField                    msgSearchField;
@@ -90,6 +101,7 @@ public class ChatroomHubController {
     private ObservableList<ChatroomListItem>   allRooms;
     private FilteredList<ChatroomListItem>     roomFilter;
     private final Map<Integer, String>         userNameCache = new HashMap<>();
+    private volatile boolean                   recordingInProgress = false;
 
     // ══════════════════════════════════════════════════════════════════════
     // INIT
@@ -155,6 +167,7 @@ public class ChatroomHubController {
         }
 
         messageField.setOnAction(e -> onSendMessage());
+        setupTranslationChoice();
 
         // Compteur de caractères en temps réel
         messageField.textProperty().addListener((obs, old, val) -> {
@@ -177,6 +190,17 @@ public class ChatroomHubController {
         }));
         messagePollTimeline.setCycleCount(Timeline.INDEFINITE);
         messagePollTimeline.play();
+    }
+
+    private void setupTranslationChoice() {
+        if (translateLangChoice == null) return;
+        translateLangChoice.getItems().setAll(TranslationService.LANGUAGES.keySet());
+        if (!translateLangChoice.getItems().isEmpty()) {
+            translateLangChoice.setValue("English");
+            if (translateLangChoice.getValue() == null) {
+                translateLangChoice.setValue(translateLangChoice.getItems().getFirst());
+            }
+        }
     }
 
     // ══════════════════════════════════════════════════════════════════════
@@ -747,6 +771,97 @@ public class ChatroomHubController {
         } catch (SQLException | IllegalArgumentException e) {
             messagesBox.getChildren().add(emptyState("⚠️ " + e.getMessage()));
         }
+    }
+
+    @FXML
+    private void onTranslateInput() {
+        String text = messageField.getText() == null ? "" : messageField.getText().trim();
+        if (text.isEmpty()) {
+            showInputStatus("Entrez un message avant traduction.", true);
+            return;
+        }
+
+        String label = translateLangChoice != null ? translateLangChoice.getValue() : null;
+        if (label == null || label.isBlank()) {
+            showInputStatus("Choisissez une langue cible.", true);
+            return;
+        }
+        String target = TranslationService.LANGUAGES.get(label);
+        if (target == null) {
+            showInputStatus("Langue non supportée.", true);
+            return;
+        }
+
+        translateButton.setDisable(true);
+        showInputStatus("Traduction en cours...", false);
+
+        Thread worker = new Thread(() -> {
+            try {
+                String translated = translationService.translate(text, target);
+                Platform.runLater(() -> {
+                    messageField.setText(translated);
+                    translateButton.setDisable(false);
+                    showInputStatus("Message traduit vers " + label + ".", false);
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    translateButton.setDisable(false);
+                    showInputStatus("Traduction échouée: " + e.getMessage(), true);
+                });
+            }
+        }, "chat-translation-worker");
+        worker.setDaemon(true);
+        worker.start();
+    }
+
+    @FXML
+    private void onToggleRecording() {
+        if (!recordingInProgress) {
+            if (!AudioRecorderService.isMicAvailable()) {
+                showInputStatus("Microphone non disponible.", true);
+                return;
+            }
+            try {
+                audioRecorderService.startRecording();
+                recordingInProgress = true;
+                micButton.setText("⏹");
+                showInputStatus("Enregistrement en cours...", false);
+            } catch (LineUnavailableException | IOException e) {
+                showInputStatus("Erreur micro: " + e.getMessage(), true);
+            }
+            return;
+        }
+
+        int duration = audioRecorderService.stopRecording();
+        recordingInProgress = false;
+        micButton.setText("🎤");
+        File out = audioRecorderService.getOutputFile();
+        if (out != null) {
+            String msg = "[AUDIO] " + out.getPath().replace("\\", "/") + " (" + duration + "s)";
+            if (messageField.getText() == null || messageField.getText().isBlank()) {
+                messageField.setText(msg);
+            } else {
+                messageField.setText(messageField.getText().trim() + " " + msg);
+            }
+            showInputStatus("Audio prêt: appuyez sur envoyer.", false);
+        } else {
+            showInputStatus("Aucun audio enregistré.", true);
+        }
+    }
+
+    private void showInputStatus(String text, boolean error) {
+        if (inputStatusLabel == null) return;
+        inputStatusLabel.setText(text == null ? "" : text);
+        inputStatusLabel.setVisible(true);
+        inputStatusLabel.setManaged(true);
+        inputStatusLabel.setStyle(error
+                ? "-fx-text-fill:#ef4444; -fx-font-size:11px;"
+                : "-fx-text-fill:#6c63ff; -fx-font-size:11px;");
+        new Timeline(new KeyFrame(Duration.seconds(3), e -> {
+            inputStatusLabel.setText("");
+            inputStatusLabel.setVisible(false);
+            inputStatusLabel.setManaged(false);
+        })).play();
     }
 
     /** Bordure rouge + tooltip sur le champ message */

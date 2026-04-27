@@ -12,6 +12,7 @@ import utils.DbConnexion;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.List;
 
 public class PostService implements CRUD<Post, Integer> {
@@ -68,6 +69,18 @@ public class PostService implements CRUD<Post, Integer> {
             FROM post
             WHERE slug = ? AND id <> ?
             LIMIT 1
+            """;
+
+    private static final String INCREMENT_VIEW_COUNT = """
+            UPDATE post
+            SET view_count = COALESCE(view_count, 0) + ?
+            WHERE id = ?
+            """;
+
+    private static final String INCREMENT_CLICK_COUNT = """
+            UPDATE post
+            SET click_count = COALESCE(click_count, 0) + 1
+            WHERE id = ?
             """;
 
     @Override
@@ -206,6 +219,34 @@ public class PostService implements CRUD<Post, Integer> {
 
     public void deletePost(int id) throws SQLException {
         delete(id);
+    }
+
+    public void incrementClickCount(int postId) throws SQLException {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(INCREMENT_CLICK_COUNT)) {
+            ps.setInt(1, postId);
+            ps.executeUpdate();
+        }
+    }
+
+    public void batchIncrementViewCounts(Map<Integer, Integer> incrementsByPostId) throws SQLException {
+        if (incrementsByPostId == null || incrementsByPostId.isEmpty()) {
+            return;
+        }
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(INCREMENT_VIEW_COUNT)) {
+            for (Map.Entry<Integer, Integer> entry : incrementsByPostId.entrySet()) {
+                Integer postId = entry.getKey();
+                Integer increment = entry.getValue();
+                if (postId == null || increment == null || increment <= 0) {
+                    continue;
+                }
+                ps.setInt(1, increment);
+                ps.setInt(2, postId);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        }
     }
 
     public void publishDueScheduledPosts() throws SQLException {

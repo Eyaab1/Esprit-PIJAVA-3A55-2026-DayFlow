@@ -2,7 +2,6 @@ package controllers.account;
 
 import controllers.navigation.NavigationManager;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import model.user.User;
@@ -153,7 +152,7 @@ public class UserDashboardController {
         try {
             NavigationManager.show("/user/coaching_session/find_coach.fxml", "DayFlow — Trouver un coach");
         } catch (IOException e) {
-            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+            showNavigationError("Impossible d'ouvrir Trouver un coach.");
         }
     }
 
@@ -172,12 +171,17 @@ public class UserDashboardController {
         try {
             NavigationManager.show("/user/reclamation/mes_reclamations.fxml", "DayFlow — Mes réclamations");
         } catch (IOException e) {
-            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+            showNavigationError("Impossible d'ouvrir Mes réclamations.");
         }
     }
 
-    private static void toastSoon(String module) {
-        new Alert(Alert.AlertType.INFORMATION,
-                module + " — bientôt disponible.").showAndWait();
+    private void toastSoon(String module) {
+        greetingLabel.setText(module + " — bientôt disponible.");
+    }
+
+    private void showNavigationError(String message) {
+        if (greetingLabel != null) {
+            greetingLabel.setText(message);
+        }
     }
 }

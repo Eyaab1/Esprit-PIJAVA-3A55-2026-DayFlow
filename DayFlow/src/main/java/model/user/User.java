@@ -34,6 +34,8 @@ public class User {
     private String phoneNumber;
     private Integer age;
     private String status;
+    private LocalDateTime bannedUntil;
+    private String banReason;
     private String speciality;
     private List<String> specialities;
     private String availability;
@@ -180,6 +182,22 @@ public class User {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public LocalDateTime getBannedUntil() {
+        return bannedUntil;
+    }
+
+    public void setBannedUntil(LocalDateTime bannedUntil) {
+        this.bannedUntil = bannedUntil;
+    }
+
+    public String getBanReason() {
+        return banReason;
+    }
+
+    public void setBanReason(String banReason) {
+        this.banReason = banReason;
     }
 
     public String getSpeciality() {
