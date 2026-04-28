@@ -344,6 +344,11 @@
     -fx-background-color: #fee2e2;
     -fx-text-fill: #991b1b;
 }
+.badge-scheduled {
+    -fx-background-color: #fef3c7;
+    -fx-text-fill: #92400e;
+}
+
 .badge-status-temp {
     -fx-background-color: #fef3c7;
     -fx-text-fill: #92400e;
@@ -357,4 +362,9 @@
 .badge-user {
     -fx-background-color: #e0f2fe;
     -fx-text-fill: #0369a1;
+}
+
+.badge-hidden {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #475569;
 }

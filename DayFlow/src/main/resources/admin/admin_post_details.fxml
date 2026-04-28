@@ -12,68 +12,140 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
 
 <ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="controllers.admin.AdminPostDetailsController" styleClass="admin-root" stylesheets="@admin.css">
+            fx:controller="controllers.admin.AdminPostDetailsController" styleClass="admin-root" stylesheets="@admin_post_details.css">
     <content>
-        <VBox styleClass="admin-content" spacing="14">
-            <HBox alignment="CENTER_LEFT" spacing="10">
-                <Button fx:id="backBtn" text="← Retour" onAction="#onBack" styleClass="admin-filter-btn"/>
-                <Label fx:id="pageTitle" styleClass="admin-page-title" text="Détail du post"/>
+        <VBox styleClass="admin-content" spacing="20">
+            <!-- Top Navigation Bar -->
+            <HBox alignment="CENTER_LEFT" spacing="12" styleClass="details-top-bar">
+                <Button fx:id="backBtn" text="← Retour" onAction="#onBack" styleClass="details-back-btn"/>
+                <Label fx:id="pageTitle" styleClass="details-page-title" text="Détail du post"/>
                 <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Supprimer" styleClass="details-action-btn, action-delete" onAction="#onDeletePost"/>
             </HBox>
 
-            <VBox styleClass="admin-card" spacing="10">
-                <Label fx:id="postTitleLabel" style="-fx-font-size:22px; -fx-font-weight:bold; -fx-text-fill:#4c1d95;" text="Titre"/>
-                <Label fx:id="postMetaLabel" styleClass="admin-page-sub" text="Auteur • date"/>
-                <HBox spacing="14" alignment="CENTER_LEFT">
-                    <Label text="Statut :" style="-fx-font-weight:bold;"/>
-                    <Label fx:id="postStatusLabel" styleClass="admin-badge"/>
-                    <Label text="Tags :" style="-fx-font-weight:bold;"/>
-                    <Label fx:id="postTagsLabel" styleClass="admin-page-sub"/>
-                </HBox>
-                <Label text="Contenu" style="-fx-font-size:14px; -fx-font-weight:bold;"/>
-                <Label fx:id="postContentLabel" wrapText="true" style="-fx-font-size:13px; -fx-text-fill:#1f2937;"/>
-            </VBox>
+            <!-- Main Content: Post Details (Left) + Analytics (Right) -->
+            <HBox spacing="20" alignment="TOP_LEFT">
+                <!-- LEFT: Post Details Card -->
+                <VBox styleClass="details-header-card" spacing="16" HBox.hgrow="ALWAYS">
+                    <!-- Title -->
+                    <Label fx:id="postTitleLabel" styleClass="details-post-title" text="Titre du post" wrapText="true"/>
+                    
+                    <!-- Author Info Row -->
+                    <HBox spacing="14" alignment="CENTER_LEFT">
+                        <Label fx:id="authorAvatar" styleClass="details-avatar" text="AB"/>
+                        <VBox spacing="2">
+                            <Label fx:id="authorNameLabel" styleClass="details-author-name" text="Auteur"/>
+                            <Label fx:id="authorEmailLabel" styleClass="details-author-email" text="email@example.com"/>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <VBox spacing="2" alignment="CENTER_RIGHT">
+                            <Label fx:id="publishDateLabel" styleClass="details-publish-date" text="28 avril 2026"/>
+                            <Label fx:id="publishTimeLabel" styleClass="details-publish-time" text="14:30"/>
+                        </VBox>
+                    </HBox>
 
-            <VBox styleClass="admin-card" spacing="12">
-                <Label text="Analytics globales" style="-fx-font-size:16px; -fx-font-weight:bold; -fx-text-fill:#1e1b4b;"/>
-                <GridPane hgap="12" vgap="10">
-                    <Label text="Vues :" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                    <Label fx:id="viewsLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-font-weight:bold;"/>
-                    <Label text="Clics :" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
-                    <Label fx:id="clicksLabel" GridPane.rowIndex="0" GridPane.columnIndex="3" style="-fx-font-weight:bold;"/>
-                    <Label text="Likes :" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                    <Label fx:id="likesLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-font-weight:bold;"/>
-                    <Label text="Commentaires :" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-                    <Label fx:id="commentsCountLabel" GridPane.rowIndex="1" GridPane.columnIndex="3" style="-fx-font-weight:bold;"/>
-                    <Label text="CTR :" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                    <Label fx:id="ctrLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-font-weight:bold;"/>
-                    <Label text="Tendance :" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
-                    <Label fx:id="trendLabel" GridPane.rowIndex="2" GridPane.columnIndex="3" style="-fx-font-weight:bold;"/>
-                </GridPane>
-                <HBox alignment="CENTER_LEFT">
-                    <BarChart fx:id="analyticsChart" prefHeight="170" prefWidth="360" minWidth="360" maxWidth="360" categoryGap="20" barGap="6">
-                        <xAxis>
-                            <CategoryAxis/>
-                        </xAxis>
-                        <yAxis>
-                            <NumberAxis/>
-                        </yAxis>
-                    </BarChart>
-                </HBox>
-            </VBox>
+                    <!-- Status and Tags Row -->
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Label fx:id="postStatusLabel" styleClass="details-status-badge" text="Publié"/>
+                        <Label fx:id="postTagsLabel" styleClass="details-tags" text="motivation, bien-être"/>
+                    </HBox>
 
-            <VBox styleClass="admin-card" spacing="10">
-                <HBox alignment="CENTER_LEFT" spacing="10">
-                    <Label text="Commentaires" style="-fx-font-size:16px; -fx-font-weight:bold; -fx-text-fill:#1e1b4b;"/>
+                    <!-- Content Box -->
+                    <VBox styleClass="details-content-box" spacing="8">
+                        <Label text="Contenu" styleClass="details-section-label"/>
+                        <Label fx:id="postContentLabel" wrapText="true" styleClass="details-content-text" text="Contenu du post..."/>
+                    </VBox>
+                </VBox>
+
+                <!-- RIGHT: Analytics Section -->
+                <VBox spacing="14" styleClass="details-analytics-sidebar">
+                    <Label text="Analytics" styleClass="details-sidebar-title"/>
+                    
+                    <!-- KPI Cards Grid (Compact) -->
+                    <VBox spacing="10">
+                        <!-- Views Card -->
+                        <HBox styleClass="details-kpi-card-compact" spacing="12" alignment="CENTER_LEFT">
+                            <Label styleClass="details-kpi-icon-compact, kpi-icon-views" text="👁"/>
+                            <VBox spacing="2">
+                                <Label text="Vues" styleClass="details-kpi-label-compact"/>
+                                <Label fx:id="viewsLabel" styleClass="details-kpi-value-compact" text="0"/>
+                            </VBox>
+                        </HBox>
+
+                        <!-- Clicks Card -->
+                        <HBox styleClass="details-kpi-card-compact" spacing="12" alignment="CENTER_LEFT">
+                            <Label styleClass="details-kpi-icon-compact, kpi-icon-clicks" text="🖱"/>
+                            <VBox spacing="2">
+                                <Label text="Clics" styleClass="details-kpi-label-compact"/>
+                                <Label fx:id="clicksLabel" styleClass="details-kpi-value-compact" text="0"/>
+                            </VBox>
+                        </HBox>
+
+                        <!-- Likes Card -->
+                        <HBox styleClass="details-kpi-card-compact" spacing="12" alignment="CENTER_LEFT">
+                            <Label styleClass="details-kpi-icon-compact, kpi-icon-likes" text="❤"/>
+                            <VBox spacing="2">
+                                <Label text="Likes" styleClass="details-kpi-label-compact"/>
+                                <Label fx:id="likesLabel" styleClass="details-kpi-value-compact" text="0"/>
+                            </VBox>
+                        </HBox>
+
+                        <!-- Comments Card -->
+                        <HBox styleClass="details-kpi-card-compact" spacing="12" alignment="CENTER_LEFT">
+                            <Label styleClass="details-kpi-icon-compact, kpi-icon-comments" text="💬"/>
+                            <VBox spacing="2">
+                                <Label text="Commentaires" styleClass="details-kpi-label-compact"/>
+                                <Label fx:id="commentsCountLabel" styleClass="details-kpi-value-compact" text="0"/>
+                            </VBox>
+                        </HBox>
+
+                        <!-- CTR Card -->
+                        <HBox styleClass="details-kpi-card-compact" spacing="12" alignment="CENTER_LEFT">
+                            <Label styleClass="details-kpi-icon-compact, kpi-icon-ctr" text="📊"/>
+                            <VBox spacing="2">
+                                <Label text="CTR" styleClass="details-kpi-label-compact"/>
+                                <Label fx:id="ctrLabel" styleClass="details-kpi-value-compact" text="0%"/>
+                            </VBox>
+                        </HBox>
+
+                        <!-- Trend Card -->
+                        <HBox styleClass="details-kpi-card-compact" spacing="12" alignment="CENTER_LEFT">
+                            <Label styleClass="details-kpi-icon-compact, kpi-icon-trend" text="📈"/>
+                            <VBox spacing="2">
+                                <Label text="Tendance" styleClass="details-kpi-label-compact"/>
+                                <Label fx:id="trendLabel" styleClass="details-kpi-value-compact" text="—"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Chart Card (Compact) -->
+                    <VBox styleClass="details-chart-card-compact" spacing="10">
+                        <Label text="Graphique" styleClass="details-chart-title-compact"/>
+                        <BarChart fx:id="analyticsChart" prefHeight="180" prefWidth="280" categoryGap="20" barGap="8" styleClass="details-chart">
+                            <xAxis>
+                                <CategoryAxis side="BOTTOM" styleClass="chart-axis"/>
+                            </xAxis>
+                            <yAxis>
+                                <NumberAxis side="LEFT" styleClass="chart-axis"/>
+                            </yAxis>
+                        </BarChart>
+                    </VBox>
+                </VBox>
+            </HBox>
+
+            <!-- Comments Section -->
+            <VBox spacing="16">
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <Label text="Commentaires" styleClass="details-section-title"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <ComboBox fx:id="commentsSortCombo" prefWidth="160" onAction="#onCommentsSortChange"/>
+                    <ComboBox fx:id="commentsSortCombo" styleClass="details-sort-combo" prefWidth="160" onAction="#onCommentsSortChange"/>
                 </HBox>
-                <VBox fx:id="commentsBox" spacing="10">
-                    <padding>
-                        <Insets top="2"/>
-                    </padding>
+                
+                <VBox styleClass="details-comments-card" spacing="12">
+                    <VBox fx:id="commentsBox" spacing="12"/>
                 </VBox>
             </VBox>
         </VBox>

@@ -342,3 +342,206 @@
 .btn-comment-reply:hover {
     -fx-background-color: #1d4ed8;
 }
+
+/* ===== INLINE POST CREATION FORM STYLES ===== */
+
+.create-post-form {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14;
+    -fx-padding: 16 20;
+    -fx-spacing: 8;
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.15), 16, 0, 0, 3);
+    -fx-border-color: #e9d5ff;
+    -fx-border-width: 1;
+    -fx-border-radius: 14;
+    -fx-max-width: 720;
+}
+
+.create-post-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #7c3aed;
+    -fx-padding: 0 0 4 0;
+}
+
+.create-post-error {
+    -fx-text-fill: #dc2626;
+    -fx-font-weight: 600;
+    -fx-font-size: 12px;
+    -fx-padding: 8 12;
+    -fx-background-color: #fef2f2;
+    -fx-border-color: #fecaca;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-wrap-text: true;
+}
+
+.form-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #374151;
+    -fx-padding: 4 0 2 0;
+}
+
+.form-hint {
+    -fx-font-size: 11px;
+    -fx-text-fill: #7c3aed;
+    -fx-font-style: italic;
+    -fx-padding: 0 0 2 0;
+}
+
+.form-input {
+    -fx-background-color: #f9fafb;
+    -fx-background-radius: 10;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 8 12;
+    -fx-font-size: 13px;
+    -fx-text-fill: #111827;
+    -fx-pref-height: 32;
+}
+
+.form-input:focused {
+    -fx-border-color: #7c3aed;
+    -fx-background-color: #ffffff;
+}
+
+.form-textarea {
+    -fx-background-color: #f9fafb;
+    -fx-background-radius: 10;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 8 12;
+    -fx-font-size: 13px;
+    -fx-text-fill: #111827;
+    -fx-wrap-text: true;
+    -fx-pref-height: 90;
+}
+
+.form-textarea:focused {
+    -fx-border-color: #7c3aed;
+    -fx-background-color: #ffffff;
+}
+
+.form-textarea .content {
+    -fx-background-color: transparent;
+}
+
+.form-combo {
+    -fx-background-color: #f9fafb;
+    -fx-background-radius: 10;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 6 10;
+    -fx-font-size: 13px;
+    -fx-pref-height: 32;
+}
+
+.form-combo:focused {
+    -fx-border-color: #7c3aed;
+    -fx-background-color: #ffffff;
+}
+
+.form-datepicker {
+    -fx-background-color: #f9fafb;
+    -fx-background-radius: 10;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 6 10;
+    -fx-font-size: 13px;
+    -fx-pref-height: 32;
+}
+
+.form-datepicker:focused {
+    -fx-border-color: #7c3aed;
+    -fx-background-color: #ffffff;
+}
+
+.form-actions {
+    -fx-spacing: 10;
+    -fx-padding: 6 0 0 0;
+    -fx-alignment: center-left;
+}
+
+.btn-primary {
+    -fx-background-color: #7c3aed;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-font-size: 14px;
+    -fx-padding: 9 22;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #6d28d9;
+}
+
+.btn-secondary {
+    -fx-background-color: #e5e7eb;
+    -fx-text-fill: #374151;
+    -fx-font-weight: 600;
+    -fx-font-size: 13px;
+    -fx-padding: 8 16;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: #d1d5db;
+}
+
+.btn-cancel-post {
+    -fx-background-color: transparent;
+    -fx-text-fill: #6b7280;
+    -fx-font-weight: 600;
+    -fx-font-size: 13px;
+    -fx-padding: 9 18;
+    -fx-background-radius: 10;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-cursor: hand;
+}
+
+.btn-cancel-post:hover {
+    -fx-background-color: #f3f4f6;
+    -fx-border-color: #d1d5db;
+}
+
+/* ===== SUCCESS ALERT STYLES ===== */
+
+.success-alert {
+    -fx-text-fill: #065f46;
+    -fx-font-weight: 600;
+    -fx-font-size: 14px;
+    -fx-padding: 12 16;
+    -fx-background-color: #d1fae5;
+    -fx-border-color: #6ee7b7;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-wrap-text: true;
+    -fx-max-width: 720;
+}
+
+/* ===== WARNING ALERT STYLES ===== */
+
+.warning-alert {
+    -fx-text-fill: #92400e;
+    -fx-font-weight: 600;
+    -fx-font-size: 14px;
+    -fx-padding: 12 16;
+    -fx-background-color: #fef3c7;
+    -fx-border-color: #fbbf24;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-wrap-text: true;
+    -fx-max-width: 720;
+}

@@ -123,7 +123,7 @@ public class SecurityAlertMailService {
 
         String safeName = (displayName == null || displayName.isBlank()) ? "User" : displayName;
         String safeReason = (reason == null || reason.isBlank()) ? "Violation des règles de modération." : reason;
-        String subject = permanent ? "DayFlow - Compte banni définitivement" : "DayFlow - Compte suspendu temporairement";
+        String subject = permanent ? "Suspension définitive de votre compte DayFlow" : "Suspension temporaire de votre compte DayFlow";
         String body = buildBanBodyHtml(safeName, permanent, days, safeReason);
 
         try {
@@ -164,19 +164,32 @@ public class SecurityAlertMailService {
                                            boolean permanent,
                                            Integer days,
                                            String reason) {
-        String banLine = permanent
-                ? "<p><strong>Votre compte a été banni définitivement.</strong></p>"
-                : "<p><strong>Votre compte a été suspendu temporairement pour "
-                + escapeHtml(String.valueOf(days != null ? days : 1))
-                + " jour(s).</strong></p>";
-        return "<html><body style=\"font-family:Arial,sans-serif;color:#1f2937;line-height:1.5;\">"
-                + "<h2 style=\"margin-bottom:12px;\">Notification de modération</h2>"
-                + "<p>Bonjour " + escapeHtml(displayName) + ",</p>"
-                + banLine
-                + "<p><strong>Raison :</strong> " + escapeHtml(reason) + "</p>"
-                + "<p>Si vous pensez qu'il s'agit d'une erreur, contactez l'équipe DayFlow.</p>"
-                + "<p>DayFlow Team</p>"
-                + "</body></html>";
+        if (permanent) {
+            // Permanent ban message
+            return "<html><body style=\"font-family:Arial,sans-serif;color:#1f2937;line-height:1.6;\">"
+                    + "<h2 style=\"color:#7c3aed;margin-bottom:16px;\">Suspension définitive de votre compte DayFlow</h2>"
+                    + "<p>Bonjour " + escapeHtml(displayName) + ",</p>"
+                    + "<p><strong>Votre compte a été définitivement suspendu pour non-respect des règles de la communauté.</strong></p>"
+                    + "<p><strong>Raison :</strong> " + escapeHtml(reason) + "</p>"
+                    + "<p>Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administration DayFlow.</p>"
+                    + "<p style=\"margin-top:24px;\">Cordialement,<br/>Administration DayFlow</p>"
+                    + "</body></html>";
+        } else {
+            // Temporary ban message with end date
+            int banDays = (days != null && days > 0) ? days : 1;
+            java.time.LocalDateTime endDate = java.time.LocalDateTime.now().plusDays(banDays);
+            String formattedEndDate = endDate.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy à HH:mm"));
+            
+            return "<html><body style=\"font-family:Arial,sans-serif;color:#1f2937;line-height:1.6;\">"
+                    + "<h2 style=\"color:#7c3aed;margin-bottom:16px;\">Suspension temporaire de votre compte DayFlow</h2>"
+                    + "<p>Bonjour " + escapeHtml(displayName) + ",</p>"
+                    + "<p>Votre compte a été temporairement suspendu pour non-respect des règles de la communauté (contenu toxique / langage inapproprié).</p>"
+                    + "<p><strong>Durée de la suspension :</strong> " + banDays + " jour" + (banDays > 1 ? "s" : "") + "</p>"
+                    + "<p><strong>Votre accès sera rétabli le :</strong> " + formattedEndDate + "</p>"
+                    + "<p style=\"margin-top:16px;\">Merci de respecter les règles de la communauté lors de vos prochaines interactions.</p>"
+                    + "<p style=\"margin-top:24px;\">Cordialement,<br/>Administration DayFlow</p>"
+                    + "</body></html>";
+        }
     }
 
     private static String escapeHtml(String value) {

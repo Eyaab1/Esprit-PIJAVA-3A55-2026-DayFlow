@@ -13,6 +13,7 @@ import services.account.AccountSecurityService;
 import services.account.AuthService;
 import services.account.IpGeolocationService;
 import services.account.SecurityAlertMailService;
+import services.admin.ModerationActionService;
 import session.AppSession;
 
 import java.io.IOException;
@@ -25,6 +26,7 @@ public class LoginController {
     private final AccountSecurityService accountSecurityService = new AccountSecurityService();
     private final IpGeolocationService ipGeolocationService = new IpGeolocationService();
     private final SecurityAlertMailService securityAlertMailService = new SecurityAlertMailService();
+    private final ModerationActionService moderationActionService = new ModerationActionService();
 
     @FXML
     private TextField emailField;
@@ -59,6 +61,8 @@ public class LoginController {
             Optional<User> user = loginResult.user();
             if (user.isPresent()) {
                 User u = user.get();
+                // Lift expired posting ban if applicable
+                moderationActionService.liftExpiredPostingBan(u.getId());
                 if (loginResult.securityMeta() != null) {
                     AppSession.setCurrentUser(u, loginResult.securityMeta().sessionToken(), loginResult.securityMeta().deviceLabel());
                     if (loginResult.securityMeta().suspicious()) {
@@ -121,6 +125,8 @@ public class LoginController {
             clearMessage();
             User u = authService.loginWithGoogle();
             if (u.getId() != null) {
+                // Lift expired posting ban if applicable
+                moderationActionService.liftExpiredPostingBan(u.getId());
                 AccountSecurityService.LoginSuccessMeta meta = accountSecurityService.registerSuccessfulLogin(u.getId(), u.getEmail());
                 AppSession.setCurrentUser(u, meta.sessionToken(), meta.deviceLabel());
                 if (meta.suspicious()) {

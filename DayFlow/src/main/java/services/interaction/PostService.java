@@ -7,6 +7,7 @@ import enums.PostStatus;
 import model.interaction.Post;
 import org.postgresql.util.PGobject;
 import services.CRUD;
+import services.admin.ModerationActionService;
 import services.post.moderation.ModerationService;
 import utils.DbConnexion;
 
@@ -19,6 +20,7 @@ public class PostService implements CRUD<Post, Integer> {
 
     private static final ObjectMapper JSON = new ObjectMapper();
     private static final ModerationService MODERATION = new ModerationService();
+    private static final ModerationActionService ACTION_SERVICE = new ModerationActionService();
 
     private static final String INSERT_POST = """
             INSERT INTO post (
@@ -97,6 +99,11 @@ public class PostService implements CRUD<Post, Integer> {
         if (post.getCreatedById() == null) {
             throw new SQLException("createdById is required");
         }
+        // Check if user is banned from posting
+        ACTION_SERVICE.liftExpiredPostingBan(post.getCreatedById());
+        if (ACTION_SERVICE.isPostingBanned(post.getCreatedById())) {
+            throw new SQLException("You are temporarily banned from posting. Ban expires on: " + ACTION_SERVICE.getPostingBanUntil(post.getCreatedById()));
+        }
         MODERATION.validatePostContent(post.getCreatedById(), "post", post.getTitle(), post.getContent());
         Connection c = DbConnexion.getConnection();
         post.setSlug(generateUniqueSlug(c, post.getSlug(), post.getTitle(), null));
@@ -135,6 +142,11 @@ public class PostService implements CRUD<Post, Integer> {
         // FIX: added null safety checks for update
         if (post.getTitle() == null || post.getTitle().isBlank()) {
             throw new SQLException("Post title is required");
+        }
+        // Check if user is banned from posting
+        ACTION_SERVICE.liftExpiredPostingBan(post.getCreatedById());
+        if (ACTION_SERVICE.isPostingBanned(post.getCreatedById())) {
+            throw new SQLException("You are temporarily banned from posting. Ban expires on: " + ACTION_SERVICE.getPostingBanUntil(post.getCreatedById()));
         }
         MODERATION.validatePostContent(post.getCreatedById(), "post_edit", post.getTitle(), post.getContent());
         Connection c = DbConnexion.getConnection();

@@ -3,8 +3,11 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -34,6 +37,57 @@
                   <Insets bottom="8.0" left="0.0" right="0.0" top="0.0" />
                </padding>
             </HBox>
+            
+            <!-- Success Alert (hidden by default) -->
+            <Label fx:id="successAlert" managed="false" styleClass="success-alert" visible="false" wrapText="true" />
+            
+            <!-- Warning Alert (hidden by default) -->
+            <Label fx:id="warningAlert" managed="false" styleClass="warning-alert" visible="false" wrapText="true" />
+            
+            <!-- Inline Post Creation Form (hidden by default) -->
+            <VBox fx:id="createPostForm" managed="false" styleClass="create-post-form" visible="false">
+               <children>
+                  <Label styleClass="create-post-title" text="Créer un nouveau post" />
+                  
+                  <!-- Error Label -->
+                  <Label fx:id="createPostErrorLabel" managed="false" styleClass="create-post-error" visible="false" wrapText="true" />
+                  
+                  <!-- Title Field -->
+                  <Label styleClass="form-label" text="Titre *" />
+                  <TextField fx:id="createPostTitleField" promptText="Entrez le titre de votre post" styleClass="form-input" />
+                  
+                  <!-- Content Area -->
+                  <Label styleClass="form-label" text="Contenu" />
+                  <TextArea fx:id="createPostContentArea" prefRowCount="4" promptText="Partagez vos pensées..." styleClass="form-textarea" wrapText="true" />
+                  
+                  <!-- Auto-tag hint -->
+                  <Label styleClass="form-hint" text="✨ Les tags seront générés automatiquement par IA" />
+                  
+                  <!-- Status Combo -->
+                  <Label styleClass="form-label" text="Statut" />
+                  <ComboBox fx:id="createPostStatusCombo" prefWidth="250.0" styleClass="form-combo" />
+                  
+                  <!-- Date Picker (hidden by default, shown when "Programmer" is selected) -->
+                  <Label fx:id="createPostDateLabel" managed="false" styleClass="form-label" text="Date de publication" visible="false" />
+                  <DatePicker fx:id="createPostDatePicker" managed="false" prefWidth="250.0" styleClass="form-datepicker" visible="false" />
+                  
+                  <!-- Time Field (hidden by default, shown when "Programmer" is selected) -->
+                  <Label fx:id="createPostTimeLabel" managed="false" styleClass="form-label" text="Heure (HH:mm)" visible="false" />
+                  <TextField fx:id="createPostTimeField" managed="false" prefWidth="250.0" promptText="14:30" styleClass="form-input" visible="false" />
+                  
+                  <!-- Action Buttons -->
+                  <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="form-actions">
+                     <children>
+                        <Button mnemonicParsing="false" onAction="#onPublishPost" styleClass="btn-primary" text="Publier" />
+                        <Button mnemonicParsing="false" onAction="#onCancelPost" styleClass="btn-cancel-post" text="Annuler" />
+                     </children>
+                  </HBox>
+               </children>
+               <padding>
+                  <Insets bottom="16.0" left="20.0" right="20.0" top="16.0" />
+               </padding>
+            </VBox>
+            
             <!-- Scrollable viewport for the feed; fitToWidth=true stretches content to the pane width. -->
             <ScrollPane fx:id="scrollPane" fitToWidth="true" styleClass="posts-scroll" VBox.vgrow="ALWAYS">
                <!-- Single child of ScrollPane: the scrollable body. -->
