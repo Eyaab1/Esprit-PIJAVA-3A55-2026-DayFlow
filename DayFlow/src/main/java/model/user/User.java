@@ -36,6 +36,8 @@ public class User {
     private String status;
     private LocalDateTime bannedUntil;
     private String banReason;
+    private LocalDateTime postingBannedUntil;
+    private String postingBanReason;
     private String speciality;
     private List<String> specialities;
     private String availability;
@@ -198,6 +200,22 @@ public class User {
 
     public void setBanReason(String banReason) {
         this.banReason = banReason;
+    }
+
+    public LocalDateTime getPostingBannedUntil() {
+        return postingBannedUntil;
+    }
+
+    public void setPostingBannedUntil(LocalDateTime postingBannedUntil) {
+        this.postingBannedUntil = postingBannedUntil;
+    }
+
+    public String getPostingBanReason() {
+        return postingBanReason;
+    }
+
+    public void setPostingBanReason(String postingBanReason) {
+        this.postingBanReason = postingBanReason;
     }
 
     public String getSpeciality() {

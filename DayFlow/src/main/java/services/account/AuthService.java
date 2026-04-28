@@ -152,8 +152,12 @@ public class AuthService {
         if ("temp_banned".equals(status)) {
             LocalDateTime until = user.getBannedUntil();
             if (until == null || now.isBefore(until)) {
-                throw new IllegalStateException("Compte suspendu temporairement jusqu'au " + (until != null ? until : "date inconnue") + ".");
+                String formattedDate = until != null 
+                    ? until.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy à HH:mm"))
+                    : "date inconnue";
+                throw new IllegalStateException("Votre compte est temporairement suspendu jusqu'au " + formattedDate + " pour non-respect des règles de la communauté.");
             }
+            // Ban expiré - réactiver le compte automatiquement
             userService.updateModerationStatus(user.getId(), "active", null, null);
             user.setStatus("active");
             user.setBannedUntil(null);
@@ -161,7 +165,7 @@ public class AuthService {
             return;
         }
         if ("banned".equals(status) || "permanent_banned".equals(status)) {
-            throw new IllegalStateException("Compte banni définitivement.");
+            throw new IllegalStateException("Votre compte a été banni définitivement pour non-respect des règles de la communauté.");
         }
     }
 }

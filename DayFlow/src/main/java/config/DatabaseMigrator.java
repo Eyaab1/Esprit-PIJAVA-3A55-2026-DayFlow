@@ -14,6 +14,10 @@ public final class DatabaseMigrator {
                 .baselineOnMigrate(true)
                 .baselineVersion(MigrationVersion.fromVersion("0"))
                 .load();
+        
+        // Repair any checksum mismatches before migrating
+        flyway.repair();
+        
         flyway.migrate();
     }
 }

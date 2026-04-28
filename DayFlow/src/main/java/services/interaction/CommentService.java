@@ -2,6 +2,7 @@ package services.interaction;
 
 import model.interaction.Comment;
 import services.CRUD;
+import services.admin.ModerationActionService;
 import services.post.moderation.ModerationService;
 import utils.DbConnexion;
 
@@ -13,6 +14,7 @@ import java.util.List;
 public class CommentService implements CRUD<Comment, Integer> {
 
     private static final ModerationService MODERATION = new ModerationService();
+    private static final ModerationActionService ACTION_SERVICE = new ModerationActionService();
 
     private static final String INSERT_COMMENT = """
             INSERT INTO comment (content, created_at, post_id, commenter_id, parent_comment_id)
@@ -58,6 +60,11 @@ public class CommentService implements CRUD<Comment, Integer> {
         if (comment.getPostId() == null || comment.getCommenterId() == null) {
             throw new SQLException("postId and commenterId are required");
         }
+        // Check if user is banned from posting
+        ACTION_SERVICE.liftExpiredPostingBan(comment.getCommenterId());
+        if (ACTION_SERVICE.isPostingBanned(comment.getCommenterId())) {
+            throw new SQLException("You are temporarily banned from posting. Ban expires on: " + ACTION_SERVICE.getPostingBanUntil(comment.getCommenterId()));
+        }
         MODERATION.validateCommentContent(comment.getCommenterId(), "comment", comment.getContent());
         Connection c = DbConnexion.getConnection();
         try (PreparedStatement ps = c.prepareStatement(INSERT_COMMENT, Statement.RETURN_GENERATED_KEYS)) {
@@ -90,6 +97,11 @@ public class CommentService implements CRUD<Comment, Integer> {
         }
         if (comment.getPostId() == null || comment.getCommenterId() == null) {
             throw new SQLException("postId and commenterId are required");
+        }
+        // Check if user is banned from posting
+        ACTION_SERVICE.liftExpiredPostingBan(comment.getCommenterId());
+        if (ACTION_SERVICE.isPostingBanned(comment.getCommenterId())) {
+            throw new SQLException("You are temporarily banned from posting. Ban expires on: " + ACTION_SERVICE.getPostingBanUntil(comment.getCommenterId()));
         }
         MODERATION.validateCommentContent(comment.getCommenterId(), "comment_edit", comment.getContent());
         Connection c = DbConnexion.getConnection();

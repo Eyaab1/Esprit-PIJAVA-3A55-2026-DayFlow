@@ -2,17 +2,30 @@
 
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
 <ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controllers.admin.AdminModerationLogsController" styleClass="admin-root" stylesheets="@admin.css">
     <content>
-        <VBox styleClass="admin-content" spacing="14">
-            <Label styleClass="admin-page-title" text="Moderation Logs"/>
-            <Label styleClass="admin-page-sub"
-                   text="Incidents de modération triés du plus récent au plus ancien. Gérez les warnings et bans."/>
-            <VBox styleClass="admin-card" spacing="8">
-                <VBox fx:id="moderationLogsBox" spacing="0"/>
+        <VBox styleClass="admin-content" spacing="18">
+            <VBox spacing="6">
+                <Label styleClass="admin-page-title" text="Moderation Logs"/>
+                <Label styleClass="admin-page-sub" text="Incidents de modération triés du plus récent au plus ancien"/>
+            </VBox>
+            <VBox styleClass="admin-posts-table-wrap" spacing="0">
+                <HBox spacing="12" styleClass="admin-posts-header" alignment="CENTER_LEFT">
+                    <Label minWidth="160" prefWidth="160" maxWidth="160" text="Timestamp" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="180" prefWidth="180" maxWidth="180" text="User Email" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="120" prefWidth="120" maxWidth="120" text="Entity Type" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="250" prefWidth="250" maxWidth="250" text="Content Preview" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="140" prefWidth="140" maxWidth="140" text="Highest Attribute" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="100" prefWidth="100" maxWidth="100" text="Highest Score" style="-fx-font-weight:bold;"/>
+                    <Label minWidth="280" prefWidth="280" maxWidth="280" text="Actions" style="-fx-font-weight:bold;"/>
+                </HBox>
+                <ScrollPane fx:id="moderationRowsScrollPane" fitToWidth="true" maxHeight="720" style="-fx-background-color:transparent;">
+                    <VBox fx:id="moderationRowsBox" spacing="0"/>
+                </ScrollPane>
             </VBox>
         </VBox>
     </content>

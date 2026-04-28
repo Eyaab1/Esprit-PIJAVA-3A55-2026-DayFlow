@@ -20,6 +20,7 @@ import model.interaction.Post;
 import model.interaction.Tag;
 import model.user.User;
 import services.account.UserService;
+import services.calendar.GoogleCalendarService;
 import services.interaction.AutoTaggingService;
 import services.interaction.CommentService;
 import services.interaction.PostLikeService;
@@ -61,10 +62,35 @@ public class PostsFeedController {
     private VBox postsContainer;
     @FXML
     private ScrollPane scrollPane;
+    @FXML
+    private Label successAlert;
+    @FXML
+    private Label warningAlert;
+    
+    // Inline form fields
+    @FXML
+    private VBox createPostForm;
+    @FXML
+    private Label createPostErrorLabel;
+    @FXML
+    private TextField createPostTitleField;
+    @FXML
+    private TextArea createPostContentArea;
+    @FXML
+    private ComboBox<String> createPostStatusCombo;
+    @FXML
+    private Label createPostDateLabel;
+    @FXML
+    private DatePicker createPostDatePicker;
+    @FXML
+    private Label createPostTimeLabel;
+    @FXML
+    private TextField createPostTimeField;
 
     private final PostService postService = new PostService();
     private final TagService tagService = new TagService();
     private final AutoTaggingService autoTaggingService = new AutoTaggingService();
+    private final GoogleCalendarService googleCalendarService = new GoogleCalendarService();
     private final CommentService commentService = new CommentService();
     private final PostLikeService postLikeService = new PostLikeService();
     private final SavedPostService savedPostService = new SavedPostService();
@@ -100,6 +126,27 @@ public class PostsFeedController {
         filterCombo.setOnAction(e -> refreshFeed());
 
         tagCombo.setOnAction(e -> refreshFeed());
+        
+        // Initialize inline form status combo
+        createPostStatusCombo.setItems(FXCollections.observableArrayList(
+                "Brouillon",
+                "Publier maintenant",
+                "Programmer"
+        ));
+        createPostStatusCombo.getSelectionModel().select("Publier maintenant");
+        
+        // Show/hide date/time fields based on status selection
+        createPostStatusCombo.setOnAction(e -> {
+            boolean isScheduled = "Programmer".equals(createPostStatusCombo.getValue());
+            createPostDateLabel.setVisible(isScheduled);
+            createPostDateLabel.setManaged(isScheduled);
+            createPostDatePicker.setVisible(isScheduled);
+            createPostDatePicker.setManaged(isScheduled);
+            createPostTimeLabel.setVisible(isScheduled);
+            createPostTimeLabel.setManaged(isScheduled);
+            createPostTimeField.setVisible(isScheduled);
+            createPostTimeField.setManaged(isScheduled);
+        });
 
         // Add scroll listener for infinite scroll / lazy loading after layout is ready
         Platform.runLater(() -> {
@@ -140,75 +187,56 @@ public class PostsFeedController {
 
     @FXML
     private void onCreatePost() {
+        System.out.println("DEBUG: onCreatePost() called");
+        
         if (AppSession.getCurrentUser().isEmpty()) {
             new Alert(Alert.AlertType.WARNING, "Connectez-vous pour créer un post.").showAndWait();
             return;
         }
 
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Nouveau post");
-        dialog.setHeaderText("Créer un post");
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        TextField titleField = new TextField();
-        titleField.setPromptText("Titre");
-        TextArea contentArea = new TextArea();
-        contentArea.setPromptText("Contenu");
-        contentArea.setPrefRowCount(6);
-        contentArea.setWrapText(true);
-        ComboBox<String> statusCombo = new ComboBox<>();
-        statusCombo.setItems(FXCollections.observableArrayList(
-                "Brouillon",
-                "Publier maintenant",
-                "Programmer"
-        ));
-        statusCombo.getSelectionModel().select("Publier maintenant");
-
-        DatePicker datePicker = new DatePicker();
-        datePicker.setVisible(false);
-        datePicker.setManaged(false);
-
-        TextField timeField = new TextField();
-        timeField.setPromptText("HH:mm");
-        timeField.setVisible(false);
-        timeField.setManaged(false);
-
-        statusCombo.setOnAction(e -> {
-            boolean isScheduled = "Programmer".equals(statusCombo.getValue());
-            datePicker.setVisible(isScheduled);
-            datePicker.setManaged(isScheduled);
-            timeField.setVisible(isScheduled);
-            timeField.setManaged(isScheduled);
-        });
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(10));
-        grid.add(new Label("Titre :"), 0, 0);
-        grid.add(titleField, 1, 0);
-        grid.add(new Label("Contenu :"), 0, 1);
-        grid.add(contentArea, 1, 1);
-        Label autoTagHint = new Label("Tags générés automatiquement (IA)");
-        autoTagHint.getStyleClass().add("post-meta");
-        grid.add(new Label("Tags :"), 0, 2);
-        grid.add(autoTagHint, 1, 2);
-        grid.add(new Label("Statut :"), 0, 3);
-        grid.add(statusCombo, 1, 3);
-        grid.add(new Label("Date :"), 0, 4);
-        grid.add(datePicker, 1, 4);
-        grid.add(new Label("Heure :"), 0, 5);
-        grid.add(timeField, 1, 5);
-        dialog.getDialogPane().setContent(grid);
-
-        Optional<ButtonType> result = dialog.showAndWait();
-        if (result.isEmpty() || result.get() != ButtonType.OK) {
+        // Check if form is initialized
+        if (createPostForm == null) {
+            System.err.println("ERROR: createPostForm is null - FXML binding failed");
+            new Alert(Alert.AlertType.ERROR, "Erreur: Le formulaire n'est pas initialisé.").showAndWait();
             return;
         }
-        String title = titleField.getText() != null ? titleField.getText().trim() : "";
-        String content = contentArea.getText() != null ? contentArea.getText().trim() : "";
+        
+        System.out.println("DEBUG: Form found, current visibility: " + createPostForm.isVisible());
+
+        // Toggle form visibility
+        boolean isVisible = createPostForm.isVisible();
+        createPostForm.setVisible(!isVisible);
+        createPostForm.setManaged(!isVisible);
+        
+        System.out.println("DEBUG: New visibility: " + createPostForm.isVisible());
+        
+        // If showing form, clear previous data and errors
+        if (!isVisible) {
+            clearPostForm();
+        }
+    }
+    
+    @FXML
+    private void onCancelPost() {
+        // Hide form and clear fields
+        createPostForm.setVisible(false);
+        createPostForm.setManaged(false);
+        clearPostForm();
+    }
+    
+    @FXML
+    private void onPublishPost() {
+        // Hide previous errors
+        createPostErrorLabel.setVisible(false);
+        createPostErrorLabel.setManaged(false);
+        
+        String title = createPostTitleField.getText() != null ? createPostTitleField.getText().trim() : "";
+        String content = createPostContentArea.getText() != null ? createPostContentArea.getText().trim() : "";
+        
         if (title.isEmpty()) {
-            new Alert(Alert.AlertType.WARNING, "Le titre est obligatoire.").showAndWait();
+            createPostErrorLabel.setText("Le titre est obligatoire.");
+            createPostErrorLabel.setVisible(true);
+            createPostErrorLabel.setManaged(true);
             return;
         }
 
@@ -221,24 +249,29 @@ public class PostsFeedController {
         post.setViewCount(0);
         post.setClickCount(0);
         LocalDateTime now = LocalDateTime.now();
-        String selectedStatus = statusCombo.getValue();
+        
+        String selectedStatus = createPostStatusCombo.getValue();
         if ("Brouillon".equals(selectedStatus)) {
             post.setStatus(PostStatus.DRAFT);
             post.setCreatedAt(now);
             post.setScheduledAt(null);
         } else if ("Programmer".equals(selectedStatus)) {
-            if (datePicker.getValue() == null || timeField.getText() == null || timeField.getText().isBlank()) {
-                new Alert(Alert.AlertType.WARNING, "La date et l'heure sont obligatoires pour programmer un post.").showAndWait();
+            if (createPostDatePicker.getValue() == null || createPostTimeField.getText() == null || createPostTimeField.getText().isBlank()) {
+                createPostErrorLabel.setText("La date et l'heure sont obligatoires pour programmer un post.");
+                createPostErrorLabel.setVisible(true);
+                createPostErrorLabel.setManaged(true);
                 return;
             }
             try {
-                LocalTime time = LocalTime.parse(timeField.getText().trim());
-                LocalDateTime scheduled = LocalDateTime.of(datePicker.getValue(), time);
+                LocalTime time = LocalTime.parse(createPostTimeField.getText().trim());
+                LocalDateTime scheduled = LocalDateTime.of(createPostDatePicker.getValue(), time);
                 post.setStatus(PostStatus.SCHEDULED);
                 post.setScheduledAt(scheduled);
                 post.setCreatedAt(now);
             } catch (Exception ex) {
-                new Alert(Alert.AlertType.WARNING, "Heure invalide. Utilisez le format HH:mm.").showAndWait();
+                createPostErrorLabel.setText("Heure invalide. Utilisez le format HH:mm.");
+                createPostErrorLabel.setVisible(true);
+                createPostErrorLabel.setManaged(true);
                 return;
             }
         } else {
@@ -246,6 +279,7 @@ public class PostsFeedController {
             post.setCreatedAt(now);
             post.setScheduledAt(null);
         }
+        
         if (post.getSlug() == null) {
             post.setSlug(title.toLowerCase(Locale.FRENCH).replace(" ", "-").replaceAll("[^a-z0-9\\-]", ""));
         }
@@ -254,14 +288,65 @@ public class PostsFeedController {
             postService.insert(post);
             int pid = post.getId();
             autoTaggingService.generateAndAttachTags(pid, title, content);
+            
+            // Si le post est programmé, créer un événement Google Calendar
+            if (post.getStatus() == PostStatus.SCHEDULED && post.getScheduledAt() != null) {
+                try {
+                    String eventId = googleCalendarService.createScheduledPostEvent(title, post.getScheduledAt());
+                    if (eventId != null) {
+                        System.out.println("Événement Google Calendar créé pour le post ID " + pid + ": " + eventId);
+                        // TODO: Optionnel - stocker eventId dans la base de données pour référence future
+                    } else {
+                        System.err.println("Échec de la création de l'événement Google Calendar pour le post ID " + pid);
+                    }
+                } catch (Exception calendarEx) {
+                    // Ne pas bloquer la création du post si Google Calendar échoue
+                    System.err.println("Erreur Google Calendar (non bloquante): " + calendarEx.getMessage());
+                    calendarEx.printStackTrace();
+                }
+            }
+            
             reloadTagFilterChoices();
             refreshFeed();
-            new Alert(Alert.AlertType.INFORMATION, "Post publié.").showAndWait();
+            
+            // Hide form and clear fields on success
+            createPostForm.setVisible(false);
+            createPostForm.setManaged(false);
+            clearPostForm();
+            
+            showSuccess("✓ Votre publication a été créée avec succès.");
         } catch (ModerationRejectedException e) {
-            new Alert(Alert.AlertType.WARNING, e.getMessage()).showAndWait();
+            showWarning("⚠ Votre contenu enfreint les règles de la communauté (langage toxique / inapproprié). Veuillez le modifier avant de publier.");
         } catch (SQLException e) {
-            showError("Création du post", e);
+            // Check if it's a posting ban error
+            if (e.getMessage() != null && e.getMessage().contains("temporarily banned from posting")) {
+                createPostErrorLabel.setText(e.getMessage());
+                createPostErrorLabel.setVisible(true);
+                createPostErrorLabel.setManaged(true);
+            } else {
+                showError("Création du post", e);
+            }
         }
+    }
+    
+    private void clearPostForm() {
+        createPostTitleField.clear();
+        createPostContentArea.clear();
+        createPostStatusCombo.getSelectionModel().select("Publier maintenant");
+        createPostDatePicker.setValue(null);
+        createPostTimeField.clear();
+        createPostErrorLabel.setVisible(false);
+        createPostErrorLabel.setManaged(false);
+        
+        // Hide date/time fields
+        createPostDateLabel.setVisible(false);
+        createPostDateLabel.setManaged(false);
+        createPostDatePicker.setVisible(false);
+        createPostDatePicker.setManaged(false);
+        createPostTimeLabel.setVisible(false);
+        createPostTimeLabel.setManaged(false);
+        createPostTimeField.setVisible(false);
+        createPostTimeField.setManaged(false);
     }
 
     private void refreshFeed() {
@@ -520,6 +605,13 @@ public class PostsFeedController {
                 .orElse("?"));
         avatarSm.getStyleClass().add("comment-avatar-sm");
 
+        // Error label for comment submission
+        Label commentErrorLabel = new Label();
+        commentErrorLabel.setStyle("-fx-text-fill: #dc2626; -fx-font-weight: bold; -fx-font-size: 11px; -fx-padding: 6; -fx-background-color: #fef2f2; -fx-border-color: #fecaca; -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4;");
+        commentErrorLabel.setWrapText(true);
+        commentErrorLabel.setVisible(false);
+        commentErrorLabel.setManaged(false);
+
         TextField commentField = new TextField();
         commentField.setPromptText("Écrire un commentaire…");
         commentField.getStyleClass().add("comment-field");
@@ -527,7 +619,7 @@ public class PostsFeedController {
 
         Button sendComment = new Button("Commenter");
         sendComment.getStyleClass().add("btn-comment-send");
-        sendComment.setOnAction(e -> submitComment(post.getId(), commentField));
+        sendComment.setOnAction(e -> submitComment(post.getId(), commentField, commentErrorLabel));
 
         HBox commentRow = new HBox(10);
         commentRow.setAlignment(Pos.CENTER_LEFT);
@@ -594,7 +686,7 @@ public class PostsFeedController {
         if (!tagsFlow.getChildren().isEmpty()) {
             card.getChildren().add(tagsFlow);
         }
-        card.getChildren().addAll(titleLbl, bodyFlow, stats, sep, commentRow, commentsBlock);
+        card.getChildren().addAll(titleLbl, bodyFlow, stats, sep, commentErrorLabel, commentRow, commentsBlock);
 
         return card;
     }
@@ -670,7 +762,7 @@ public class PostsFeedController {
         VBox repliesContainer = new VBox(6);
         repliesContainer.getStyleClass().add("comment-replies");
         repliesContainer.setPadding(new Insets(8, 0, 0, 16));
-        repliesContainer.setStyle("-fx-border-left: 2 solid #ddd;");
+        repliesContainer.setStyle("-fx-border-color: #ddd; -fx-border-width: 0 0 0 2;");
         repliesContainer.setVisible(false);
         repliesContainer.setManaged(false);
         
@@ -768,15 +860,22 @@ public class PostsFeedController {
         return commentCard;
     }
 
-    private void submitComment(int postId, TextField field) {
+    private void submitComment(int postId, TextField field, Label errorLabel) {
         if (AppSession.getCurrentUser().isEmpty()) {
-            new Alert(Alert.AlertType.INFORMATION, "Connectez-vous pour commenter.").showAndWait();
+            errorLabel.setText("Connectez-vous pour commenter.");
+            errorLabel.setVisible(true);
+            errorLabel.setManaged(true);
             return;
         }
         String text = field.getText() != null ? field.getText().trim() : "";
         if (text.isEmpty()) {
             return;
         }
+        
+        // Hide previous errors
+        errorLabel.setVisible(false);
+        errorLabel.setManaged(false);
+        
         int uid = AppSession.getCurrentUser().get().getId();
         Comment c = new Comment();
         c.setContent(text);
@@ -789,9 +888,16 @@ public class PostsFeedController {
             field.clear();
             refreshFeed();
         } catch (ModerationRejectedException e) {
-            new Alert(Alert.AlertType.WARNING, e.getMessage()).showAndWait();
+            showWarning("⚠ Votre commentaire enfreint les règles de la communauté (langage toxique / inapproprié). Veuillez le modifier avant de publier.");
         } catch (SQLException e) {
-            showError("Commentaire", e);
+            // Check if it's a posting ban error
+            if (e.getMessage() != null && e.getMessage().contains("temporarily banned from posting")) {
+                errorLabel.setText(e.getMessage());
+                errorLabel.setVisible(true);
+                errorLabel.setManaged(true);
+            } else {
+                showError("Commentaire", e);
+            }
         }
     }
 
@@ -847,6 +953,48 @@ public class PostsFeedController {
 
     private static void showError(String ctx, SQLException e) {
         new Alert(Alert.AlertType.ERROR, ctx + " : " + e.getMessage()).showAndWait();
+    }
+    
+    /**
+     * Affiche un message de succès inline qui disparaît automatiquement après 4 secondes
+     */
+    private void showSuccess(String message) {
+        if (successAlert == null) {
+            return;
+        }
+        
+        successAlert.setText(message);
+        successAlert.setVisible(true);
+        successAlert.setManaged(true);
+        
+        // Auto-hide after 4 seconds
+        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(4));
+        pause.setOnFinished(e -> {
+            successAlert.setVisible(false);
+            successAlert.setManaged(false);
+        });
+        pause.play();
+    }
+    
+    /**
+     * Affiche un message d'avertissement inline qui disparaît automatiquement après 6 secondes
+     */
+    private void showWarning(String message) {
+        if (warningAlert == null) {
+            return;
+        }
+        
+        warningAlert.setText(message);
+        warningAlert.setVisible(true);
+        warningAlert.setManaged(true);
+        
+        // Auto-hide after 6 seconds (longer for warnings)
+        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(6));
+        pause.setOnFinished(e -> {
+            warningAlert.setVisible(false);
+            warningAlert.setManaged(false);
+        });
+        pause.play();
     }
 
     /**
@@ -928,9 +1076,9 @@ public class PostsFeedController {
         try {
             postService.update(post);
             refreshFeed();
-            new Alert(Alert.AlertType.INFORMATION, "Post mis à jour.").showAndWait();
+            showSuccess("✓ Votre publication a été modifiée avec succès.");
         } catch (ModerationRejectedException e) {
-            new Alert(Alert.AlertType.WARNING, e.getMessage()).showAndWait();
+            showWarning("⚠ Votre contenu enfreint les règles de la communauté (langage toxique / inapproprié). Veuillez le modifier avant de publier.");
         } catch (SQLException e) {
             showError("Mise à jour du post", e);
         }
@@ -953,7 +1101,7 @@ public class PostsFeedController {
                 post.setUpdatedAt(java.time.LocalDateTime.now());
                 postService.update(post);
                 refreshFeed();
-                new Alert(Alert.AlertType.INFORMATION, "Post supprimé.").showAndWait();
+                showSuccess("✓ Votre publication a été supprimée avec succès.");
             } catch (SQLException e) {
                 showError("Suppression du post", e);
             }

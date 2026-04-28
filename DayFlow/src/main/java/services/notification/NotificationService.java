@@ -15,7 +15,7 @@ public class NotificationService {
 
     private static final String SELECT_LATEST_BY_USER = """
             SELECT id, user_id, type, message, is_read, created_at
-            FROM notifications
+            FROM notification
             WHERE user_id = ?
             ORDER BY created_at DESC
             LIMIT ?
@@ -23,20 +23,25 @@ public class NotificationService {
 
     private static final String COUNT_UNREAD_BY_USER = """
             SELECT COUNT(*)::int
-            FROM notifications
+            FROM notification
             WHERE user_id = ? AND is_read = FALSE
             """;
 
     private static final String MARK_ONE_AS_READ = """
-            UPDATE notifications
+            UPDATE notification
             SET is_read = TRUE
             WHERE id = ? AND user_id = ?
             """;
 
     private static final String MARK_ALL_AS_READ = """
-            UPDATE notifications
+            UPDATE notification
             SET is_read = TRUE
             WHERE user_id = ? AND is_read = FALSE
+            """;
+
+    private static final String INSERT_NOTIFICATION = """
+            INSERT INTO notification (user_id, type, message, is_read, created_at)
+            VALUES (?, ?, ?, ?, ?)
             """;
 
     public List<Notification> findLatestByUser(int userId, int limit) throws SQLException {
@@ -86,6 +91,25 @@ public class NotificationService {
         try (PreparedStatement ps = c.prepareStatement(MARK_ALL_AS_READ)) {
             ps.setInt(1, userId);
             ps.executeUpdate();
+        }
+    }
+
+    public void createNotification(int userId, String type, String message) throws SQLException {
+        System.out.println("createNotification called - userId: " + userId + ", type: " + type + ", message: " + message);
+        Connection c = DbConnexion.getConnection();
+        System.out.println("Database connection obtained: " + (c != null));
+        try (PreparedStatement ps = c.prepareStatement(INSERT_NOTIFICATION)) {
+            ps.setInt(1, userId);
+            ps.setString(2, type);
+            ps.setString(3, message);
+            ps.setBoolean(4, false);
+            ps.setTimestamp(5, Timestamp.valueOf(java.time.LocalDateTime.now()));
+            int rowsAffected = ps.executeUpdate();
+            System.out.println("Notification inserted successfully. Rows affected: " + rowsAffected);
+        } catch (SQLException e) {
+            System.err.println("Error inserting notification: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
         }
     }
 }
