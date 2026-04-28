@@ -51,7 +51,8 @@ public final class AdminStatsService {
             Integer reviewCount,
             int coachSessionsCount,
             int coachRequestsCount,
-            int clientRoutinesCount
+            int clientRoutinesCount,
+            String status
     ) {}
 
     public OverviewStats loadOverview() throws SQLException {
@@ -198,7 +199,7 @@ public final class AdminStatsService {
         String e = emailPart == null ? "" : emailPart.trim();
         String sql = """
                 SELECT u.id, u.first_name, u.last_name, u.email, u.roles::text AS roles_txt,
-                       u.speciality, u.rating, u.review_count,
+                       u.speciality, u.rating, u.review_count, u.status,
                        (SELECT COUNT(*) FROM session s
                         INNER JOIN coaching_request cr ON cr.id = s.coaching_request_id
                         WHERE cr.coach_id = u.id) AS sess_cnt,
@@ -243,7 +244,8 @@ public final class AdminStatsService {
                             reviewCount,
                             rs.getInt("sess_cnt"),
                             rs.getInt("req_cnt"),
-                            rs.getInt("client_routines")
+                            rs.getInt("client_routines"),
+                            safe(rs.getString("status"))
                     ));
                 }
             }
@@ -256,7 +258,7 @@ public final class AdminStatsService {
         String t = query == null ? "" : query.trim();
         String sql = """
                 SELECT u.id, u.first_name, u.last_name, u.email, u.roles::text AS roles_txt,
-                       u.speciality, u.rating, u.review_count,
+                       u.speciality, u.rating, u.review_count, u.status,
                        (SELECT COUNT(*) FROM session s
                         INNER JOIN coaching_request cr ON cr.id = s.coaching_request_id
                         WHERE cr.coach_id = u.id) AS sess_cnt,
@@ -302,7 +304,8 @@ public final class AdminStatsService {
                             reviewCount,
                             rs.getInt("sess_cnt"),
                             rs.getInt("req_cnt"),
-                            rs.getInt("client_routines")
+                            rs.getInt("client_routines"),
+                            safe(rs.getString("status"))
                     ));
                 }
             }

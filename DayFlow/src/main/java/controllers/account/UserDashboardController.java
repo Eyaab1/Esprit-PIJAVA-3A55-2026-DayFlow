@@ -2,13 +2,18 @@ package controllers.account;
 
 import controllers.navigation.NavigationManager;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Bounds;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
+import javafx.stage.Popup;
 import model.user.User;
 import session.AppSession;
 import utils.DbConnexion;
 
 import java.io.IOException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -29,6 +34,8 @@ public class UserDashboardController {
     private Label statRoutinesLabel;
     @FXML
     private Label statAchievementsLabel;
+    @FXML
+    private javafx.scene.control.Button fabMotiButton;
 
     @FXML
     private void initialize() {
@@ -165,6 +172,52 @@ public class UserDashboardController {
     private void onQuickNewGoal(MouseEvent event) {
         toastSoon("Nouvel objectif");
     }
+
+    private javafx.stage.Popup chatbotPopup;
+
+    @FXML
+    private void onOpenChatbot() {
+        if (chatbotPopup != null && chatbotPopup.isShowing()) {
+            chatbotPopup.hide();
+            return;
+        }
+        try {
+            URL fxml = getClass().getResource("/user/account/ai_chatbot.fxml");
+            VBox chatPanel = FXMLLoader.load(fxml);
+
+            chatbotPopup = new Popup();
+            chatbotPopup.setAutoHide(true);
+            chatbotPopup.setAutoFix(false);
+            chatbotPopup.getContent().add(chatPanel);
+
+            chatbotPopup.show(fabMotiButton.getScene().getWindow());
+
+            double popupWidth = 340;
+            double popupHeight = 480;
+            double margin = 16;
+
+            Bounds btnBounds = fabMotiButton.localToScreen(fabMotiButton.getBoundsInLocal());
+            javafx.stage.Screen screen = javafx.stage.Screen.getPrimary();
+            double screenRight = screen.getVisualBounds().getMaxX();
+
+            // Align right edge of popup with right edge of button, clamp to screen
+            double x = btnBounds.getMaxX() - popupWidth - 60;
+            if (x + popupWidth + margin > screenRight) {
+                x = screenRight - popupWidth - margin;
+            }
+            if (x < margin) x = margin;
+
+            // Place above the button
+            double y = btnBounds.getMinY() - popupHeight - margin;
+            if (y < margin) y = btnBounds.getMaxY() + margin; // fallback: below if no space
+
+            chatbotPopup.setX(x);
+            chatbotPopup.setY(y);
+        } catch (IOException e) {
+            greetingLabel.setText("Impossible d'ouvrir le chatbot.");
+        }
+    }
+
 
     @FXML
     private void onMesReclamations() {

@@ -110,6 +110,7 @@
             </VBox>
          </content>
       </ScrollPane>
-      <Button focusTraversable="false" mnemonicParsing="false" onAction="#onMesReclamations" styleClass="fab-feedback" text="💬" AnchorPane.bottomAnchor="28.0" AnchorPane.rightAnchor="32.0" />
+      <Button focusTraversable="false" mnemonicParsing="false" onAction="#onMesReclamations" styleClass="fab-feedback" text="💬" AnchorPane.bottomAnchor="24.0" AnchorPane.rightAnchor="28.0" />
+      <Button fx:id="fabMotiButton" focusTraversable="false" mnemonicParsing="false" onAction="#onOpenChatbot" styleClass="fab-moti" text="✨" AnchorPane.bottomAnchor="102.0" AnchorPane.rightAnchor="28.0" stylesheets="@ai_chatbot.css" />
    </children>
 </AnchorPane>

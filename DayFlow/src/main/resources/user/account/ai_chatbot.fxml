@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
+
+<VBox styleClass="chatbot-root" stylesheets="@ai_chatbot.css"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.ai.AIChatbotController"
+      prefWidth="340" prefHeight="480" maxHeight="480" spacing="0">
+
+    <!-- Header -->
+    <HBox styleClass="chatbot-header" alignment="CENTER_LEFT" spacing="10">
+        <VBox.margin><Insets top="0"/></VBox.margin>
+        <javafx.scene.control.Label styleClass="chatbot-avatar-header" text="🤖"/>
+        <VBox spacing="1">
+            <javafx.scene.control.Label styleClass="chatbot-name" text="Moti"/>
+            <javafx.scene.control.Label styleClass="chatbot-status" text="● En ligne"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+    </HBox>
+
+    <!-- Messages -->
+    <ScrollPane fx:id="scrollPane" styleClass="chatbot-scroll" fitToWidth="true"
+                VBox.vgrow="ALWAYS" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+        <VBox fx:id="messagesBox" styleClass="chatbot-messages" spacing="10">
+            <padding><Insets top="14" right="12" bottom="14" left="12"/></padding>
+        </VBox>
+    </ScrollPane>
+
+    <!-- Suggestion chips -->
+    <HBox fx:id="suggestionsBar" styleClass="chatbot-suggestions" spacing="8" alignment="CENTER_LEFT">
+        <padding><Insets top="8" right="12" bottom="4" left="12"/></padding>
+    </HBox>
+
+    <!-- Input bar -->
+    <HBox styleClass="chatbot-input-bar" spacing="8" alignment="CENTER">
+        <padding><Insets top="10" right="12" bottom="12" left="12"/></padding>
+        <TextField fx:id="inputField" styleClass="chatbot-input"
+                   promptText="Écris ton message..." HBox.hgrow="ALWAYS"/>
+        <Button fx:id="sendButton" styleClass="chatbot-send-btn"
+                text="➤" onAction="#onSend"/>
+    </HBox>
+
+</VBox>

@@ -285,3 +285,76 @@
     -fx-background-color: #ede9fe;
     -fx-text-fill: #6d28d9;
 }
+
+/* ── User action buttons ── */
+.admin-action-btn-edit {
+    -fx-background-color: #ede9fe;
+    -fx-text-fill: #5b21b6;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-background-radius: 8;
+    -fx-padding: 5 10;
+    -fx-cursor: hand;
+    -fx-border-color: #ddd6fe;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+}
+.admin-action-btn-edit:hover {
+    -fx-background-color: #ddd6fe;
+}
+
+.admin-action-btn-block {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #991b1b;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-background-radius: 8;
+    -fx-padding: 5 10;
+    -fx-cursor: hand;
+    -fx-border-color: #fecaca;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+}
+.admin-action-btn-block:hover {
+    -fx-background-color: #fecaca;
+}
+
+.admin-action-btn-unblock {
+    -fx-background-color: #dcfce7;
+    -fx-text-fill: #166534;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-background-radius: 8;
+    -fx-padding: 5 10;
+    -fx-cursor: hand;
+    -fx-border-color: #bbf7d0;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+}
+.admin-action-btn-unblock:hover {
+    -fx-background-color: #bbf7d0;
+}
+
+/* ── Status badges ── */
+.badge-status-active {
+    -fx-background-color: #dcfce7;
+    -fx-text-fill: #166534;
+}
+.badge-status-banned {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #991b1b;
+}
+.badge-status-temp {
+    -fx-background-color: #fef3c7;
+    -fx-text-fill: #92400e;
+}
+
+/* ── Role badges ── */
+.badge-coach {
+    -fx-background-color: #ede9fe;
+    -fx-text-fill: #5b21b6;
+}
+.badge-user {
+    -fx-background-color: #e0f2fe;
+    -fx-text-fill: #0369a1;
+}
