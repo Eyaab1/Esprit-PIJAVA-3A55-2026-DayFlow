@@ -42,7 +42,15 @@ public class AdminPostDetailsController {
     @FXML
     private Label postTitleLabel;
     @FXML
-    private Label postMetaLabel;
+    private Label authorAvatar;
+    @FXML
+    private Label authorNameLabel;
+    @FXML
+    private Label authorEmailLabel;
+    @FXML
+    private Label publishDateLabel;
+    @FXML
+    private Label publishTimeLabel;
     @FXML
     private Label postStatusLabel;
     @FXML
@@ -71,6 +79,7 @@ public class AdminPostDetailsController {
     private Button backBtn;
 
     private List<Comment> loadedComments = new ArrayList<>();
+    private AdminPostDetailsRow currentPostDetails;
 
     @FXML
     private void initialize() {
@@ -111,27 +120,78 @@ public class AdminPostDetailsController {
                 return;
             }
 
+            currentPostDetails = details;
+
             pageTitle.setText("Détail du post #" + details.id());
             postTitleLabel.setText(details.title().isBlank() ? "Sans titre" : details.title());
-            String author = details.authorFullName().isBlank() ? "—" : details.authorFullName();
-            String date = details.createdAt() != null ? details.createdAt().format(DATE_FMT) : "—";
-            postMetaLabel.setText(author + " • " + date + " • " + (details.authorEmail().isBlank() ? "—" : details.authorEmail()));
+            
+            // Author info
+            String authorName = details.authorFullName().isBlank() ? "Utilisateur" : details.authorFullName();
+            String authorEmail = details.authorEmail().isBlank() ? "—" : details.authorEmail();
+            authorNameLabel.setText(authorName);
+            authorEmailLabel.setText(authorEmail);
+            
+            // Avatar initials
+            String initials = getInitials(authorName);
+            authorAvatar.setText(initials);
+            
+            // Date and time
+            if (details.createdAt() != null) {
+                publishDateLabel.setText(details.createdAt().format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.FRENCH)));
+                publishTimeLabel.setText(details.createdAt().format(DateTimeFormatter.ofPattern("HH:mm", Locale.FRENCH)));
+            } else {
+                publishDateLabel.setText("—");
+                publishTimeLabel.setText("");
+            }
+            
+            // Status badge
             postStatusLabel.setText(statusFr(PostStatus.fromValue(details.statusRaw()), details.statusRaw()));
-            postTagsLabel.setText(details.tagsSummary().isBlank() ? "—" : details.tagsSummary());
+            updateStatusBadgeStyle(PostStatus.fromValue(details.statusRaw()));
+            
+            // Tags
+            postTagsLabel.setText(details.tagsSummary().isBlank() ? "Aucun tag" : details.tagsSummary());
 
+            // Analytics
             viewsLabel.setText(Integer.toString(details.viewCount()));
             clicksLabel.setText(Integer.toString(details.clickCount()));
             likesLabel.setText(Integer.toString(details.likeCount()));
             commentsCountLabel.setText(Integer.toString(details.commentCount()));
             ctrLabel.setText(AdminPostService.ctrLabel(details.viewCount(), details.clickCount()));
             trendLabel.setText(AdminPostService.trendLabel(details.viewCount(), details.clickCount()));
+            
+            // Content
             postContentLabel.setText(HtmlPlainText.toPlain(details.content()));
+            
             updateAnalyticsChart(details.viewCount(), details.clickCount());
 
             loadedComments = new ArrayList<>(commentService.getCommentsByPost(details.id()));
             applyCommentsSort();
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Chargement détails post : " + e.getMessage()).showAndWait();
+        }
+    }
+
+    private String getInitials(String name) {
+        if (name == null || name.isBlank()) {
+            return "?";
+        }
+        String[] parts = name.trim().split("\\s+");
+        if (parts.length == 1) {
+            return parts[0].substring(0, Math.min(2, parts[0].length())).toUpperCase();
+        }
+        return (parts[0].substring(0, 1) + parts[parts.length - 1].substring(0, 1)).toUpperCase();
+    }
+
+    private void updateStatusBadgeStyle(PostStatus status) {
+        postStatusLabel.getStyleClass().removeAll("badge-published", "badge-draft-post", "badge-scheduled", "badge-hidden");
+        if (status == PostStatus.PUBLISHED) {
+            postStatusLabel.getStyleClass().add("badge-published");
+        } else if (status == PostStatus.DRAFT) {
+            postStatusLabel.getStyleClass().add("badge-draft-post");
+        } else if (status == PostStatus.SCHEDULED) {
+            postStatusLabel.getStyleClass().add("badge-scheduled");
+        } else if (status == PostStatus.HIDDEN) {
+            postStatusLabel.getStyleClass().add("badge-hidden");
         }
     }
 
@@ -168,8 +228,8 @@ public class AdminPostDetailsController {
     private void renderComments(List<Comment> comments) {
         commentsBox.getChildren().clear();
         if (comments == null || comments.isEmpty()) {
-            Label empty = new Label("Aucun commentaire.");
-            empty.getStyleClass().add("admin-page-sub");
+            Label empty = new Label("Aucun commentaire pour le moment.");
+            empty.getStyleClass().add("details-empty-state");
             commentsBox.getChildren().add(empty);
             return;
         }
@@ -192,15 +252,27 @@ public class AdminPostDetailsController {
         } catch (SQLException ignored) {
         }
 
-        VBox card = new VBox(6);
-        card.getStyleClass().add("admin-card");
-        Label meta = new Label(author + " • " + (comment.getCreatedAt() != null ? comment.getCreatedAt().format(DATE_FMT) : "—"));
-        meta.setStyle("-fx-text-fill:#64748b; -fx-font-size:12px;");
+        VBox card = new VBox(8);
+        card.getStyleClass().add("details-comment-item");
+        
+        String dateStr = comment.getCreatedAt() != null ? comment.getCreatedAt().format(DATE_FMT) : "—";
+        Label meta = new Label(author + " • " + dateStr);
+        meta.getStyleClass().add("details-comment-meta");
+        
         Label content = new Label(HtmlPlainText.toPlain(comment.getContent()));
         content.setWrapText(true);
-        content.setStyle("-fx-font-size:13px; -fx-text-fill:#1f2937;");
+        content.getStyleClass().add("details-comment-content");
+        
         card.getChildren().addAll(meta, content);
         return card;
+    }
+
+    @FXML
+    private void onDeletePost() {
+        if (currentPostDetails == null) {
+            return;
+        }
+        new Alert(Alert.AlertType.INFORMATION, "Fonctionnalité Supprimer : à implémenter").showAndWait();
     }
 
     private static String statusFr(PostStatus st, String raw) {

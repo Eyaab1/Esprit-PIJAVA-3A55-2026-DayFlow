@@ -285,3 +285,13 @@
     -fx-background-color: #ede9fe;
     -fx-text-fill: #6d28d9;
 }
+
+.badge-scheduled {
+    -fx-background-color: #fef3c7;
+    -fx-text-fill: #92400e;
+}
+
+.badge-hidden {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #475569;
+}
