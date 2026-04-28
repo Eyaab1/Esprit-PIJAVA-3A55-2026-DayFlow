@@ -74,7 +74,7 @@ app.db.password=admin123
 # Groq AI Configuration
 groq.api.key=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
 groq.api.url=https://api.groq.com/openai/v1/chat/completions
-groq.model=llama-3.1-70b-versatile
+groq.model=llama-3.3-70b-versatile
 groq.max.tokens=500
 groq.temperature=0.7
 ```

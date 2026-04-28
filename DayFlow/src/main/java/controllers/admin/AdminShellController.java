@@ -19,29 +19,40 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Coque administration : barre latérale, en-tête, zone centrale (dashboard, utilisateurs, …).
+ * Coque administration : barre latérale, en-tête, zone centrale
+ * (dashboard, utilisateurs, objectifs, posts, réclamations, etc.).
  */
 public class AdminShellController {
+
     private final AccountSecurityService accountSecurityService = new AccountSecurityService();
 
     @FXML
     private StackPane adminContentPane;
+
     @FXML
     private Button navDashboardBtn;
+
     @FXML
     private Button navUsersBtn;
+
     @FXML
     private Button navGoalsBtn;
+
     @FXML
     private Button navPostsBtn;
+
     @FXML
     private Button navModerationLogsBtn;
+
     @FXML
     private Button navCoachesBtn;
+
     @FXML
     private Button navCoachRequestsBtn;
+
     @FXML
     private Button navReclamationsBtn;
+
     @FXML
     private Label adminEmailLabel;
 
@@ -54,13 +65,12 @@ public class AdminShellController {
                 navUsersBtn,
                 navGoalsBtn,
                 navPostsBtn,
+                navModerationLogsBtn,
                 navCoachesBtn,
                 navCoachRequestsBtn,
                 navReclamationsBtn
-                navModerationLogsBtn,
-                navCoachesBtn,
-                navCoachRequestsBtn
         );
+
         if (!AppSession.isAdmin()) {
             try {
                 AuthNavigation.showLanding();
@@ -69,7 +79,10 @@ public class AdminShellController {
             }
             return;
         }
-        AppSession.getCurrentUser().ifPresent(u -> adminEmailLabel.setText(u.getEmail()));
+
+        AppSession.getCurrentUser()
+                .ifPresent(user -> adminEmailLabel.setText(user.getEmail()));
+
         try {
             loadDashboard();
         } catch (IOException e) {
@@ -98,6 +111,11 @@ public class AdminShellController {
     }
 
     @FXML
+    private void onNavModerationLogs() throws IOException {
+        loadModerationLogs();
+    }
+
+    @FXML
     private void onNavCoaches() throws IOException {
         loadCoaches();
     }
@@ -110,109 +128,149 @@ public class AdminShellController {
     @FXML
     private void onNavReclamations() throws IOException {
         loadReclamations();
-    private void onNavModerationLogs() throws IOException {
-        loadModerationLogs();
-    }
-
-    @FXML
-    private void onNavCoachRequests() throws IOException {
-        loadCoachRequests();
     }
 
     @FXML
     private void onNavPlaceholder() {
-        new Alert(Alert.AlertType.INFORMATION, "Cette section arrive bientôt.").showAndWait();
+        new Alert(
+                Alert.AlertType.INFORMATION,
+                "Cette section arrive bientôt."
+        ).showAndWait();
     }
 
     @FXML
     private void onLogout() {
         try {
-            AppSession.getCurrentUser().ifPresent(u -> {
+            AppSession.getCurrentUser().ifPresent(user -> {
                 try {
-                    if (u.getId() != null) {
-                        accountSecurityService.revokeCurrentSession(u.getId(), AppSession.getSessionToken().orElse(null));
+                    if (user.getId() != null) {
+                        accountSecurityService.revokeCurrentSession(
+                                user.getId(),
+                                AppSession.getSessionToken().orElse(null)
+                        );
                     }
                 } catch (Exception ignored) {
                 }
             });
+
             AppSession.clear();
             NavbarController.refreshFromSession();
             AuthNavigation.showLogin();
+
         } catch (IOException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
         }
     }
 
     public void loadDashboard() throws IOException {
-        FXMLLoader loader = loadCenter("/admin/admin_dashboard.fxml", navDashboardBtn);
-        AdminDashboardController c = loader.getController();
-        c.setShell(this);
+        FXMLLoader loader = loadCenter(
+                "/admin/admin_dashboard.fxml",
+                navDashboardBtn
+        );
+
+        AdminDashboardController controller = loader.getController();
+        controller.setShell(this);
     }
 
     public void loadUsers() throws IOException {
-        loadCenter("/admin/admin_users.fxml", navUsersBtn);
+        loadCenter(
+                "/admin/admin_users.fxml",
+                navUsersBtn
+        );
     }
 
     public void loadGoals() throws IOException {
-        loadCenter("/admin/admin_goals.fxml", navGoalsBtn);
+        loadCenter(
+                "/admin/admin_goals.fxml",
+                navGoalsBtn
+        );
     }
 
     public void loadPosts() throws IOException {
-        loadCenter("/admin/admin_posts.fxml", navPostsBtn);
-        FXMLLoader loader = loadCenter("/admin/admin_posts.fxml", navPostsBtn);
-        AdminPostsController c = loader.getController();
-        c.setShell(this);
+        FXMLLoader loader = loadCenter(
+                "/admin/admin_posts.fxml",
+                navPostsBtn
+        );
+
+        AdminPostsController controller = loader.getController();
+        controller.setShell(this);
     }
 
     public void loadPostDetails(int postId) throws IOException {
-        FXMLLoader loader = loadCenter("/admin/admin_post_details.fxml", navPostsBtn);
-        AdminPostDetailsController c = loader.getController();
-        c.setContext(this, postId);
+        FXMLLoader loader = loadCenter(
+                "/admin/admin_post_details.fxml",
+                navPostsBtn
+        );
+
+        AdminPostDetailsController controller = loader.getController();
+        controller.setContext(this, postId);
     }
 
     public void loadModerationLogs() throws IOException {
-        loadCenter("/admin/admin_moderation_logs.fxml", navModerationLogsBtn);
+        loadCenter(
+                "/admin/admin_moderation_logs.fxml",
+                navModerationLogsBtn
+        );
     }
 
     public void loadCoaches() throws IOException {
-        loadCenter("/admin/admin_coaches.fxml", navCoachesBtn);
+        loadCenter(
+                "/admin/admin_coaches.fxml",
+                navCoachesBtn
+        );
     }
 
     public void loadCoachRequests() throws IOException {
-        loadCenter("/admin/admin_coach_requests.fxml", navCoachRequestsBtn);
+        loadCenter(
+                "/admin/admin_coach_requests.fxml",
+                navCoachRequestsBtn
+        );
     }
 
     public void loadReclamations() throws IOException {
-        loadCenter("/admin/admin_reclamations.fxml", navReclamationsBtn);
+        loadCenter(
+                "/admin/admin_reclamations.fxml",
+                navReclamationsBtn
+        );
     }
 
     private FXMLLoader loadCenter(String resource, Button activeNav) throws IOException {
-        URL url = Objects.requireNonNull(getClass().getResource(resource), resource);
+        URL url = Objects.requireNonNull(
+                getClass().getResource(resource),
+                resource
+        );
+
         FXMLLoader loader = new FXMLLoader(url);
         Parent root = loader.load();
+
         stretchToParent(root);
         adminContentPane.getChildren().setAll(root);
         setNavActive(activeNav);
+
         return loader;
     }
 
     private static void stretchToParent(Parent root) {
-        if (root instanceof Region r) {
-            r.setMaxWidth(Double.MAX_VALUE);
-            r.setMaxHeight(Double.MAX_VALUE);
+        if (root instanceof Region region) {
+            region.setMaxWidth(Double.MAX_VALUE);
+            region.setMaxHeight(Double.MAX_VALUE);
         }
     }
 
     private void setNavActive(Button active) {
         if (mainNavButtons != null) {
-            for (Button b : mainNavButtons) {
-                if (b != null) {
-                    b.getStyleClass().remove("admin-nav-btn-active");
+            for (Button button : mainNavButtons) {
+                if (button != null) {
+                    button.getStyleClass()
+                            .remove("admin-nav-btn-active");
                 }
             }
         }
-        if (active != null && !active.getStyleClass().contains("admin-nav-btn-active")) {
-            active.getStyleClass().add("admin-nav-btn-active");
+
+        if (active != null &&
+                !active.getStyleClass().contains("admin-nav-btn-active")) {
+            active.getStyleClass()
+                    .add("admin-nav-btn-active");
         }
     }
 }

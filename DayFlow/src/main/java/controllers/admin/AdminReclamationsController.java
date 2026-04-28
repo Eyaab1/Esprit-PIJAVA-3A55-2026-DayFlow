@@ -13,9 +13,12 @@ import javafx.scene.layout.VBox;
 import model.reclamation.Reclamation;
 import model.reclamation.Response;
 import services.ai.GroqAIService;
-import services.reclamation_services.ReclamationService;
+import services.ai.LibreTranslateService;
+import services.reclamation.ReclamationEmailService;
+import services.reclamation.ReclamationService;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -33,6 +36,8 @@ public class AdminReclamationsController {
 
     private final ReclamationService reclamationService = new ReclamationService();
     private final GroqAIService groqAIService = new GroqAIService();
+    private final LibreTranslateService translateService = new LibreTranslateService();
+    private final ReclamationEmailService emailService = new ReclamationEmailService();
 
     @FXML
     private TextField searchField;
@@ -130,6 +135,38 @@ public class AdminReclamationsController {
         }
     }
 
+    /**
+     * Récupère les informations utilisateur pour affichage.
+     */
+    private String getUserDisplayName(Integer userId) {
+        if (userId == null) {
+            return "Utilisateur inconnu";
+        }
+        try {
+            String sql = "SELECT first_name, last_name, email FROM \"user\" WHERE id = ?";
+            Connection c = utils.DbConnexion.getConnection();
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
+                ps.setInt(1, userId);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String firstName = rs.getString("first_name");
+                        String lastName = rs.getString("last_name");
+                        String email = rs.getString("email");
+                        
+                        if (firstName != null && lastName != null) {
+                            return firstName + " " + lastName + " (" + email + ")";
+                        } else if (email != null) {
+                            return email;
+                        }
+                    }
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            System.err.println("Error fetching user info: " + e.getMessage());
+        }
+        return "Utilisateur #" + userId;
+    }
+
     private HBox buildReclamationRow(Reclamation r) {
         VBox left = new VBox(6);
 
@@ -138,7 +175,7 @@ public class AdminReclamationsController {
         title.setStyle("-fx-font-weight:bold;-fx-font-size:14px;-fx-text-fill:#1e1b4b;");
 
         // User info (if available)
-        String userInfo = r.getUserId() != null ? "Utilisateur ID: " + r.getUserId() : "Utilisateur inconnu";
+        String userInfo = getUserDisplayName(r.getUserId());
         Label user = new Label("👤 " + userInfo);
         user.setStyle("-fx-text-fill:#64748b;-fx-font-size:12px;");
 
@@ -201,7 +238,7 @@ public class AdminReclamationsController {
         try {
             Optional<Reclamation> opt = reclamationService.findByIdWithResponses(reclamationId);
             if (opt.isEmpty()) {
-                new Alert(Alert.AlertType.WARNING, "Réclamation introuvable.").showAndWait();
+                System.err.println("Reclamation not found: " + reclamationId);
                 return;
             }
             Reclamation rec = opt.get();
@@ -211,7 +248,7 @@ public class AdminReclamationsController {
             sb.append("ID: ").append(rec.getId()).append("\n");
             sb.append("Type: ").append(typeLabelFr(rec.getType())).append("\n");
             sb.append("Statut: ").append(statusLabelFr(rec.getStatus())).append("\n");
-            sb.append("Utilisateur ID: ").append(rec.getUserId() != null ? rec.getUserId() : "—").append("\n");
+            sb.append("Utilisateur: ").append(getUserDisplayName(rec.getUserId())).append("\n");
             sb.append("Date: ").append(rec.getCreatedAt() != null ? rec.getCreatedAt().format(DATE_FMT) : "—").append("\n");
             
             // Show photo path if exists
@@ -221,7 +258,8 @@ public class AdminReclamationsController {
             sb.append("\n");
 
             sb.append("═══ CONTENU ═══\n\n");
-            sb.append(stripHtmlForDisplay(rec.getContent())).append("\n\n");
+            String originalContent = stripHtmlForDisplay(rec.getContent());
+            sb.append(originalContent).append("\n\n");
 
             sb.append("═══ RÉPONSES (").append(rec.getResponses().size()).append(") ═══\n\n");
             List<Response> responses = rec.getResponses();
@@ -244,13 +282,84 @@ public class AdminReclamationsController {
             
             VBox content = new VBox(10);
             
+            // Translation button for reclamation content
+            Button translateBtn = new Button("🌐 Traduire le contenu en français");
+            translateBtn.setStyle("-fx-background-color:#0ea5e9;-fx-text-fill:white;-fx-font-weight:bold;" +
+                    "-fx-padding:8 16;-fx-background-radius:8px;-fx-cursor:hand;");
+            
+            Label translateStatus = new Label("");
+            translateStatus.setStyle("-fx-text-fill:#64748b;-fx-font-size:12px;-fx-font-style:italic;");
+            
             TextArea area = new TextArea(sb.toString());
             area.setEditable(false);
             area.setWrapText(true);
             area.setPrefRowCount(18);
             area.setMaxWidth(Double.MAX_VALUE);
             
-            content.getChildren().add(area);
+            translateBtn.setOnAction(e -> {
+                translateBtn.setDisable(true);
+                translateStatus.setText("⏳ Traduction en cours...");
+                translateStatus.setStyle("-fx-text-fill:#0ea5e9;-fx-font-size:12px;-fx-font-style:italic;");
+                
+                new Thread(() -> {
+                    try {
+                        String translatedContent = translateService.translateToFrench(originalContent);
+                        
+                        // Rebuild the text with translated content
+                        StringBuilder translatedSb = new StringBuilder();
+                        translatedSb.append("═══ INFORMATIONS ═══\n\n");
+                        translatedSb.append("ID: ").append(rec.getId()).append("\n");
+                        translatedSb.append("Type: ").append(typeLabelFr(rec.getType())).append("\n");
+                        translatedSb.append("Statut: ").append(statusLabelFr(rec.getStatus())).append("\n");
+                        translatedSb.append("Utilisateur: ").append(getUserDisplayName(rec.getUserId())).append("\n");
+                        translatedSb.append("Date: ").append(rec.getCreatedAt() != null ? rec.getCreatedAt().format(DATE_FMT) : "—").append("\n");
+                        
+                        if (rec.getPhotoPath() != null && !rec.getPhotoPath().isBlank()) {
+                            translatedSb.append("Preuve jointe: ").append(rec.getPhotoPath()).append("\n");
+                        }
+                        translatedSb.append("\n");
+                        
+                        translatedSb.append("═══ CONTENU (TRADUIT) ═══\n\n");
+                        translatedSb.append(translatedContent).append("\n\n");
+                        
+                        translatedSb.append("═══ CONTENU ORIGINAL ═══\n\n");
+                        translatedSb.append(originalContent).append("\n\n");
+                        
+                        translatedSb.append("═══ RÉPONSES (").append(rec.getResponses().size()).append(") ═══\n\n");
+                        if (responses.isEmpty()) {
+                            translatedSb.append("(Aucune réponse pour l'instant.)\n");
+                        } else {
+                            int i = 1;
+                            for (Response resp : responses) {
+                                translatedSb.append("─── Réponse ").append(i++).append(" ───\n");
+                                if (resp.getCreatedAt() != null) {
+                                    translatedSb.append("Date: ").append(resp.getCreatedAt().format(DATE_FMT)).append("\n");
+                                }
+                                translatedSb.append(stripHtmlForDisplay(resp.getContent())).append("\n\n");
+                            }
+                        }
+                        
+                        javafx.application.Platform.runLater(() -> {
+                            area.setText(translatedSb.toString());
+                            translateStatus.setText("✅ Contenu traduit en français ! (Original affiché ci-dessous)");
+                            translateStatus.setStyle("-fx-text-fill:#16a34a;-fx-font-size:12px;-fx-font-style:italic;");
+                            translateBtn.setDisable(false);
+                            translateBtn.setText("🔄 Retraduire");
+                        });
+                    } catch (IOException | InterruptedException ex) {
+                        javafx.application.Platform.runLater(() -> {
+                            translateStatus.setText("❌ Erreur de traduction : " + ex.getMessage());
+                            translateStatus.setStyle("-fx-text-fill:#dc2626;-fx-font-size:12px;-fx-font-style:italic;");
+                            translateBtn.setDisable(false);
+                        });
+                    }
+                }).start();
+            });
+            
+            HBox translateBox = new HBox(10, translateBtn, translateStatus);
+            translateBox.setAlignment(Pos.CENTER_LEFT);
+            
+            content.getChildren().addAll(translateBox, area);
             
             // Show image if exists
             if (rec.getPhotoPath() != null && !rec.getPhotoPath().isBlank()) {
@@ -279,7 +388,7 @@ public class AdminReclamationsController {
             alert.getDialogPane().setPrefWidth(650);
             alert.showAndWait();
         } catch (SQLException e) {
-            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+            System.err.println("Error loading reclamation details: " + e.getMessage());
         }
     }
 
@@ -287,7 +396,7 @@ public class AdminReclamationsController {
         try {
             Optional<Reclamation> opt = reclamationService.findById(reclamationId);
             if (opt.isEmpty()) {
-                new Alert(Alert.AlertType.WARNING, "Réclamation introuvable.").showAndWait();
+                System.err.println("Reclamation not found: " + reclamationId);
                 return;
             }
             Reclamation reclamation = opt.get();
@@ -305,6 +414,16 @@ public class AdminReclamationsController {
             // AI Suggestion Button
             Button aiSuggestBtn = new Button("✨ Suggérer une réponse (IA)");
             aiSuggestBtn.setStyle("-fx-background-color:#7c3aed;-fx-text-fill:white;-fx-font-weight:bold;" +
+                    "-fx-padding:8 16;-fx-background-radius:8px;-fx-cursor:hand;");
+            
+            // Translate to English Button
+            Button translateToEnBtn = new Button("🌐 Traduire → EN");
+            translateToEnBtn.setStyle("-fx-background-color:#0ea5e9;-fx-text-fill:white;-fx-font-weight:bold;" +
+                    "-fx-padding:8 16;-fx-background-radius:8px;-fx-cursor:hand;");
+            
+            // Translate to French Button
+            Button translateToFrBtn = new Button("🌐 Traduire → FR");
+            translateToFrBtn.setStyle("-fx-background-color:#0ea5e9;-fx-text-fill:white;-fx-font-weight:bold;" +
                     "-fx-padding:8 16;-fx-background-radius:8px;-fx-cursor:hand;");
             
             Label aiStatusLabel = new Label("");
@@ -336,6 +455,68 @@ public class AdminReclamationsController {
                 }).start();
             });
 
+            translateToEnBtn.setOnAction(e -> {
+                String currentText = replyArea.getText();
+                if (currentText == null || currentText.isBlank()) {
+                    aiStatusLabel.setText("⚠️ Aucun texte à traduire");
+                    aiStatusLabel.setStyle("-fx-text-fill:#f59e0b;-fx-font-size:12px;-fx-font-style:italic;");
+                    return;
+                }
+                
+                translateToEnBtn.setDisable(true);
+                aiStatusLabel.setText("⏳ Traduction vers l'anglais...");
+                aiStatusLabel.setStyle("-fx-text-fill:#0ea5e9;-fx-font-size:12px;-fx-font-style:italic;");
+                
+                new Thread(() -> {
+                    try {
+                        String translated = translateService.translateToEnglish(currentText);
+                        javafx.application.Platform.runLater(() -> {
+                            replyArea.setText(translated);
+                            aiStatusLabel.setText("✅ Traduit en anglais !");
+                            aiStatusLabel.setStyle("-fx-text-fill:#16a34a;-fx-font-size:12px;-fx-font-style:italic;");
+                            translateToEnBtn.setDisable(false);
+                        });
+                    } catch (IOException | InterruptedException ex) {
+                        javafx.application.Platform.runLater(() -> {
+                            aiStatusLabel.setText("❌ Erreur de traduction : " + ex.getMessage());
+                            aiStatusLabel.setStyle("-fx-text-fill:#dc2626;-fx-font-size:12px;-fx-font-style:italic;");
+                            translateToEnBtn.setDisable(false);
+                        });
+                    }
+                }).start();
+            });
+
+            translateToFrBtn.setOnAction(e -> {
+                String currentText = replyArea.getText();
+                if (currentText == null || currentText.isBlank()) {
+                    aiStatusLabel.setText("⚠️ Aucun texte à traduire");
+                    aiStatusLabel.setStyle("-fx-text-fill:#f59e0b;-fx-font-size:12px;-fx-font-style:italic;");
+                    return;
+                }
+                
+                translateToFrBtn.setDisable(true);
+                aiStatusLabel.setText("⏳ Traduction vers le français...");
+                aiStatusLabel.setStyle("-fx-text-fill:#0ea5e9;-fx-font-size:12px;-fx-font-style:italic;");
+                
+                new Thread(() -> {
+                    try {
+                        String translated = translateService.translateToFrench(currentText);
+                        javafx.application.Platform.runLater(() -> {
+                            replyArea.setText(translated);
+                            aiStatusLabel.setText("✅ Traduit en français !");
+                            aiStatusLabel.setStyle("-fx-text-fill:#16a34a;-fx-font-size:12px;-fx-font-style:italic;");
+                            translateToFrBtn.setDisable(false);
+                        });
+                    } catch (IOException | InterruptedException ex) {
+                        javafx.application.Platform.runLater(() -> {
+                            aiStatusLabel.setText("❌ Erreur de traduction : " + ex.getMessage());
+                            aiStatusLabel.setStyle("-fx-text-fill:#dc2626;-fx-font-size:12px;-fx-font-style:italic;");
+                            translateToFrBtn.setDisable(false);
+                        });
+                    }
+                }).start();
+            });
+
             // Clear button
             Button clearBtn = new Button("🗑 Effacer");
             clearBtn.setStyle("-fx-background-color:#e9d5ff;-fx-text-fill:#5b21b6;-fx-font-weight:bold;" +
@@ -345,7 +526,7 @@ public class AdminReclamationsController {
                 aiStatusLabel.setText("");
             });
 
-            HBox aiButtonsBox = new HBox(10, aiSuggestBtn, clearBtn);
+            HBox aiButtonsBox = new HBox(10, aiSuggestBtn, translateToEnBtn, translateToFrBtn, clearBtn);
             aiButtonsBox.setAlignment(Pos.CENTER_LEFT);
 
             VBox content = new VBox(10);
@@ -367,16 +548,28 @@ public class AdminReclamationsController {
 
             String replyContent = replyArea.getText() != null ? replyArea.getText().trim() : "";
             if (replyContent.length() < 5) {
-                new Alert(Alert.AlertType.WARNING, "La réponse doit contenir au moins 5 caractères.").showAndWait();
+                // Validation error - reopen dialog with error message
+                aiStatusLabel.setText("⚠️ La réponse doit contenir au moins 5 caractères.");
+                aiStatusLabel.setStyle("-fx-text-fill:#dc2626;-fx-font-size:12px;-fx-font-style:italic;");
+                showReplyDialog(reclamationId); // Reopen dialog
                 return;
             }
 
             reclamationService.addAdminReply(reclamationId, replyContent, null);
-            new Alert(Alert.AlertType.INFORMATION, "Réponse envoyée avec succès.").showAndWait();
+            
+            // Send email notification to user (in background, don't block UI)
+            new Thread(() -> {
+                try {
+                    emailService.sendResponseNotification(reclamation, replyContent);
+                } catch (Exception e) {
+                    System.err.println("Error sending email notification: " + e.getMessage());
+                }
+            }).start();
+            
             onFilter(); // Refresh list
 
         } catch (SQLException e) {
-            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+            System.err.println("Error: " + e.getMessage());
         }
     }
 

@@ -63,7 +63,7 @@ app.db.password=your_password
 # Groq AI
 groq.api.key=gsk_your_key_here
 groq.api.url=https://api.groq.com/openai/v1/chat/completions
-groq.model=llama-3.1-70b-versatile
+groq.model=llama-3.3-70b-versatile
 groq.max.tokens=500
 groq.temperature=0.7
 

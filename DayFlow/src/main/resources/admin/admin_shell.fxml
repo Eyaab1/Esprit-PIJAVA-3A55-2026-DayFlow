@@ -10,88 +10,206 @@
 <?import javafx.scene.layout.VBox?>
 <?import java.lang.String?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controllers.admin.AdminShellController"
-            styleClass="admin-root" stylesheets="@admin.css">
+            styleClass="admin-root"
+            stylesheets="@admin.css">
+
     <left>
         <VBox styleClass="admin-sidebar" spacing="4">
+
             <HBox styleClass="admin-brand-row" alignment="CENTER_LEFT">
-                <Label styleClass="admin-logo" text="DF" minWidth="40" minHeight="40" alignment="CENTER"/>
-                <Label styleClass="admin-brand-text" text="DayFlow"/>
+                <Label
+                        styleClass="admin-logo"
+                        text="DF"
+                        minWidth="40"
+                        minHeight="40"
+                        alignment="CENTER"/>
+
+                <Label
+                        styleClass="admin-brand-text"
+                        text="DayFlow"/>
             </HBox>
-            <Button fx:id="navDashboardBtn" text="Dashboard"
-                    onAction="#onNavDashboard" maxWidth="Infinity" alignment="CENTER_LEFT">
+
+            <!-- Dashboard -->
+            <Button fx:id="navDashboardBtn"
+                    text="Dashboard"
+                    onAction="#onNavDashboard"
+                    maxWidth="Infinity"
+                    alignment="CENTER_LEFT">
                 <styleClass>
                     <String fx:value="admin-nav-btn"/>
                     <String fx:value="admin-nav-btn-active"/>
                 </styleClass>
             </Button>
-            <Label styleClass="admin-nav-section" text="PAGES"/>
-            <Button fx:id="navUsersBtn" text="Utilisateurs"
-                    onAction="#onNavUsers" maxWidth="Infinity" alignment="CENTER_LEFT">
+
+            <Label
+                    styleClass="admin-nav-section"
+                    text="PAGES"/>
+
+            <!-- Users -->
+            <Button fx:id="navUsersBtn"
+                    text="Utilisateurs"
+                    onAction="#onNavUsers"
+                    maxWidth="Infinity"
+                    alignment="CENTER_LEFT">
                 <styleClass>
                     <String fx:value="admin-nav-btn"/>
                 </styleClass>
             </Button>
-            <Button styleClass="admin-nav-btn" text="Routines" onAction="#onNavPlaceholder" maxWidth="Infinity" alignment="CENTER_LEFT"/>
-            <Button fx:id="navGoalsBtn" text="Objectifs"
-                    onAction="#onNavGoals" maxWidth="Infinity" alignment="CENTER_LEFT">
+
+            <!-- Routine placeholder -->
+            <Button
+                    styleClass="admin-nav-btn"
+                    text="Routines"
+                    onAction="#onNavPlaceholder"
+                    maxWidth="Infinity"
+                    alignment="CENTER_LEFT"/>
+
+            <!-- Goals -->
+            <Button fx:id="navGoalsBtn"
+                    text="Objectifs"
+                    onAction="#onNavGoals"
+                    maxWidth="Infinity"
+                    alignment="CENTER_LEFT">
                 <styleClass>
                     <String fx:value="admin-nav-btn"/>
                 </styleClass>
             </Button>
-            <Button fx:id="navPostsBtn" text="Publications"
-                    onAction="#onNavPosts" maxWidth="Infinity" alignment="CENTER_LEFT">
+
+            <!-- Posts -->
+            <Button fx:id="navPostsBtn"
+                    text="Publications"
+                    onAction="#onNavPosts"
+                    maxWidth="Infinity"
+                    alignment="CENTER_LEFT">
                 <styleClass>
                     <String fx:value="admin-nav-btn"/>
                 </styleClass>
             </Button>
-            <Button fx:id="navReclamationsBtn" text="Réclamations"
-                    onAction="#onNavReclamations" maxWidth="Infinity" alignment="CENTER_LEFT">
-            <Button styleClass="admin-nav-btn" text="Réclamations" onAction="#onNavPlaceholder" maxWidth="Infinity" alignment="CENTER_LEFT"/>
-            <Button fx:id="navModerationLogsBtn" text="Logs de modération"
-                    onAction="#onNavModerationLogs" maxWidth="Infinity" alignment="CENTER_LEFT">
+
+            <!-- Reclamations -->
+            <Button fx:id="navReclamationsBtn"
+                    text="Réclamations"
+                    onAction="#onNavReclamations"
+                    maxWidth="Infinity"
+                    alignment="CENTER_LEFT">
                 <styleClass>
                     <String fx:value="admin-nav-btn"/>
                 </styleClass>
             </Button>
-            <Button styleClass="admin-nav-btn" text="Logs de modération" onAction="#onNavPlaceholder" maxWidth="Infinity" alignment="CENTER_LEFT"/>
-            <Label styleClass="admin-nav-section" text="COACHING"/>
-            <Button fx:id="navCoachesBtn" text="Coachs"
-                    onAction="#onNavCoaches" maxWidth="Infinity" alignment="CENTER_LEFT">
+
+            <!-- Moderation logs -->
+            <Button fx:id="navModerationLogsBtn"
+                    text="Logs de modération"
+                    onAction="#onNavModerationLogs"
+                    maxWidth="Infinity"
+                    alignment="CENTER_LEFT">
+                <styleClass>
+                    <String fx:value="admin-nav-btn"/>
+                </styleClass>
+            </Button>
+
+            <Label
+                    styleClass="admin-nav-section"
+                    text="COACHING"/>
+
+            <!-- Coaches -->
+            <Button fx:id="navCoachesBtn"
+                    text="Coachs"
+                    onAction="#onNavCoaches"
+                    maxWidth="Infinity"
+                    alignment="CENTER_LEFT">
                 <styleClass>
                     <String fx:value="admin-nav-btn"/>
                     <String fx:value="admin-nav-sub"/>
                 </styleClass>
             </Button>
-            <Button fx:id="navCoachRequestsBtn" text="Demandes"
-                    onAction="#onNavCoachRequests" maxWidth="Infinity" alignment="CENTER_LEFT">
+
+            <!-- Coach requests -->
+            <Button fx:id="navCoachRequestsBtn"
+                    text="Demandes"
+                    onAction="#onNavCoachRequests"
+                    maxWidth="Infinity"
+                    alignment="CENTER_LEFT">
                 <styleClass>
                     <String fx:value="admin-nav-btn"/>
                     <String fx:value="admin-nav-sub"/>
                 </styleClass>
             </Button>
-            <Button styleClass="admin-nav-btn admin-nav-sub" text="Sessions" onAction="#onNavPlaceholder" maxWidth="Infinity" alignment="CENTER_LEFT"/>
-            <Label styleClass="admin-nav-section" text="STATISTIQUES"/>
-            <Button styleClass="admin-nav-btn" text="Statistiques &amp; suivi" onAction="#onNavPlaceholder" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+
+            <!-- Sessions placeholder -->
+            <Button
+                    styleClass="admin-nav-btn admin-nav-sub"
+                    text="Sessions"
+                    onAction="#onNavPlaceholder"
+                    maxWidth="Infinity"
+                    alignment="CENTER_LEFT"/>
+
+            <Label
+                    styleClass="admin-nav-section"
+                    text="STATISTIQUES"/>
+
+            <!-- Statistics placeholder -->
+            <Button
+                    styleClass="admin-nav-btn"
+                    text="Statistiques &amp; suivi"
+                    onAction="#onNavPlaceholder"
+                    maxWidth="Infinity"
+                    alignment="CENTER_LEFT"/>
+
             <VBox VBox.vgrow="ALWAYS"/>
+
             <Separator/>
-            <Button styleClass="admin-nav-btn" text="Quitter l'admin" onAction="#onLogout" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+
+            <!-- Logout -->
+            <Button
+                    styleClass="admin-nav-btn"
+                    text="Quitter l'admin"
+                    onAction="#onLogout"
+                    maxWidth="Infinity"
+                    alignment="CENTER_LEFT"/>
+
         </VBox>
     </left>
+
     <center>
         <BorderPane>
+
             <top>
-                <HBox styleClass="admin-topbar" alignment="CENTER_LEFT" spacing="16">
-                    <TextField promptText="Rechercher…" styleClass="admin-search" HBox.hgrow="SOMETIMES" maxWidth="400"/>
+                <HBox
+                        styleClass="admin-topbar"
+                        alignment="CENTER_LEFT"
+                        spacing="16">
+
+                    <TextField
+                            promptText="Rechercher…"
+                            styleClass="admin-search"
+                            HBox.hgrow="SOMETIMES"
+                            maxWidth="400"/>
+
                     <HBox HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="adminEmailLabel" style="-fx-text-fill:#64748b;-fx-font-size:12px;"/>
-                    <Button text="Déconnexion" onAction="#onLogout" style="-fx-background-color:transparent;-fx-text-fill:#7c3aed;-fx-cursor:hand;"/>
+
+                    <Label
+                            fx:id="adminEmailLabel"
+                            style="-fx-text-fill:#64748b; -fx-font-size:12px;"/>
+
+                    <Button
+                            text="Déconnexion"
+                            onAction="#onLogout"
+                            style="-fx-background-color:transparent; -fx-text-fill:#7c3aed; -fx-cursor:hand;"/>
+
                 </HBox>
             </top>
+
             <center>
-                <StackPane fx:id="adminContentPane" BorderPane.alignment="CENTER"/>
+                <StackPane
+                        fx:id="adminContentPane"
+                        BorderPane.alignment="CENTER"/>
             </center>
+
         </BorderPane>
     </center>
+
 </BorderPane>

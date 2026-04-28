@@ -190,6 +190,14 @@ public class MesReclamationsController {
             contentArea.setPrefRowCount(6);
             contentArea.setWrapText(true);
 
+            // Validation message label
+            Label validationLabel = new Label("");
+            validationLabel.setWrapText(true);
+            validationLabel.setMaxWidth(Double.MAX_VALUE);
+            validationLabel.setVisible(false);
+            validationLabel.setStyle("-fx-background-color:#fee2e2;-fx-text-fill:#dc2626;-fx-padding:10;" +
+                    "-fx-background-radius:8px;-fx-border-color:#dc2626;-fx-border-width:1;-fx-border-radius:8px;");
+
             // Image upload section
             final File[] selectedImageFile = {null};
             ImageView imagePreview = new ImageView();
@@ -219,7 +227,8 @@ public class MesReclamationsController {
                 if (file != null) {
                     // Check file size (max 5MB)
                     if (file.length() > 5 * 1024 * 1024) {
-                        new Alert(Alert.AlertType.WARNING, "L'image est trop grande (max 5 MB).").showAndWait();
+                        validationLabel.setText("⚠️ L'image est trop grande (max 5 MB).");
+                        validationLabel.setVisible(true);
                         return;
                     }
                     selectedImageFile[0] = file;
@@ -232,8 +241,10 @@ public class MesReclamationsController {
                         imagePreview.setImage(image);
                         imagePreview.setVisible(true);
                         removeImageBtn.setVisible(true);
+                        validationLabel.setVisible(false);
                     } catch (Exception ex) {
-                        new Alert(Alert.AlertType.WARNING, "Impossible de charger l'image.").showAndWait();
+                        validationLabel.setText("⚠️ Impossible de charger l'image.");
+                        validationLabel.setVisible(true);
                     }
                 }
             });
@@ -256,21 +267,30 @@ public class MesReclamationsController {
             grid.setHgap(10);
             grid.setVgap(12);
             grid.setPadding(new Insets(10));
-            grid.add(new Label("Type :"), 0, 0);
-            grid.add(typeCombo, 1, 0);
-            grid.add(new Label("Message :"), 0, 1);
-            grid.add(contentArea, 1, 1);
-            grid.add(new Label("Preuve :"), 0, 2);
-            grid.add(imageBox, 1, 2);
+            grid.add(validationLabel, 0, 0, 2, 1);
+            grid.add(new Label("Type :"), 0, 1);
+            grid.add(typeCombo, 1, 1);
+            grid.add(new Label("Message :"), 0, 2);
+            grid.add(contentArea, 1, 2);
+            grid.add(new Label("Preuve :"), 0, 3);
+            grid.add(imageBox, 1, 3);
             dialog.getDialogPane().setContent(grid);
             dialog.getDialogPane().setPrefWidth(600);
 
-            Optional<ButtonType> result = dialog.showAndWait();
-            if (result.isEmpty() || result.get() != ButtonType.OK) {
-                return;
-            }
-            try {
+            // Disable OK button initially
+            Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+            
+            // Add event filter to validate before closing
+            okButton.addEventFilter(javafx.event.ActionEvent.ACTION, event -> {
                 String content = contentArea.getText() != null ? contentArea.getText().trim() : "";
+                
+                // Validate content length
+                if (content.length() < 10) {
+                    validationLabel.setText("⚠️ Le message doit contenir au moins 10 caractères.");
+                    validationLabel.setVisible(true);
+                    event.consume(); // Prevent dialog from closing
+                    return;
+                }
                 
                 // Content moderation check
                 if (moderationService.isConfigured()) {
@@ -279,29 +299,16 @@ public class MesReclamationsController {
                                 moderationService.analyzeText(content);
                         
                         if (moderationResult.isHarmful()) {
-                            Alert warningAlert = new Alert(Alert.AlertType.WARNING);
-                            warningAlert.setTitle("Contenu inapproprié détecté");
-                            warningAlert.setHeaderText("Votre message contient du contenu potentiellement inapproprié");
-                            warningAlert.setContentText(
-                                    moderationResult.getReason() + "\n\n" +
+                            // Show toxic content warning inline
+                            validationLabel.setText(
+                                    "⚠️ CONTENU INAPPROPRIÉ DÉTECTÉ\n\n" +
+                                    moderationResult.getReason() + "\n" +
                                     "Score de toxicité : " + String.format("%.0f%%", moderationResult.getMaxScore() * 100) + "\n\n" +
                                     "Veuillez reformuler votre message de manière respectueuse."
                             );
-                            
-                            ButtonType editButton = new ButtonType("Modifier", ButtonBar.ButtonData.OK_DONE);
-                            ButtonType submitAnywayButton = new ButtonType("Soumettre quand même", ButtonBar.ButtonData.OTHER);
-                            ButtonType cancelButton = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
-                            
-                            warningAlert.getButtonTypes().setAll(editButton, submitAnywayButton, cancelButton);
-                            
-                            Optional<ButtonType> moderationChoice = warningAlert.showAndWait();
-                            if (moderationChoice.isEmpty() || moderationChoice.get() == cancelButton) {
-                                return; // Cancel submission
-                            }
-                            if (moderationChoice.get() == editButton) {
-                                return; // Go back to edit
-                            }
-                            // If "Submit anyway", continue with submission
+                            validationLabel.setVisible(true);
+                            event.consume(); // Prevent dialog from closing
+                            return;
                         }
                     } catch (Exception e) {
                         System.err.println("Moderation check failed: " + e.getMessage());
@@ -309,26 +316,46 @@ public class MesReclamationsController {
                     }
                 }
                 
-                Reclamation r = new Reclamation();
-                r.setContent(content);
-                r.setType(typeCombo.getValue());
-                r.setUserId(uid);
-                
-                // Handle image upload
-                if (selectedImageFile[0] != null) {
-                    String savedPath = saveReclamationImage(selectedImageFile[0]);
-                    r.setPhotoPath(savedPath);
+                // If validation passes, submit
+                try {
+                    Reclamation r = new Reclamation();
+                    r.setContent(content);
+                    r.setType(typeCombo.getValue());
+                    r.setUserId(uid);
+                    
+                    // Handle image upload
+                    if (selectedImageFile[0] != null) {
+                        String savedPath = saveReclamationImage(selectedImageFile[0]);
+                        r.setPhotoPath(savedPath);
+                    }
+                    
+                    reclamationService.createForUserWithAutoAck(r, null);
+                    refreshList();
+                    
+                    // Show success message inline before closing
+                    validationLabel.setText("✅ Réclamation enregistrée avec succès.");
+                    validationLabel.setStyle("-fx-background-color:#d1fae5;-fx-text-fill:#065f46;-fx-padding:10;" +
+                            "-fx-background-radius:8px;-fx-border-color:#10b981;-fx-border-width:1;-fx-border-radius:8px;");
+                    validationLabel.setVisible(true);
+                    
+                } catch (IllegalArgumentException ex) {
+                    validationLabel.setText("⚠️ " + ex.getMessage());
+                    validationLabel.setStyle("-fx-background-color:#fee2e2;-fx-text-fill:#dc2626;-fx-padding:10;" +
+                            "-fx-background-radius:8px;-fx-border-color:#dc2626;-fx-border-width:1;-fx-border-radius:8px;");
+                    validationLabel.setVisible(true);
+                    event.consume(); // Prevent dialog from closing
+                } catch (SQLException | IOException ex) {
+                    validationLabel.setText("❌ Erreur : " + ex.getMessage());
+                    validationLabel.setVisible(true);
+                    event.consume(); // Prevent dialog from closing
                 }
-                
-                reclamationService.createForUserWithAutoAck(r, null);
-                refreshList();
-                new Alert(Alert.AlertType.INFORMATION, "Réclamation enregistrée avec succès.").showAndWait();
-            } catch (IllegalArgumentException ex) {
-                new Alert(Alert.AlertType.WARNING, ex.getMessage()).showAndWait();
-            } catch (SQLException | IOException ex) {
-                new Alert(Alert.AlertType.ERROR, "Erreur : " + ex.getMessage()).showAndWait();
-            }
-        }, () -> new Alert(Alert.AlertType.WARNING, "Session expirée.").showAndWait());
+            });
+
+            dialog.showAndWait();
+        }, () -> {
+            // Session expired - show inline message would require access to UI, so keep this alert
+            new Alert(Alert.AlertType.WARNING, "Session expirée.").showAndWait();
+        });
     }
 
     /**

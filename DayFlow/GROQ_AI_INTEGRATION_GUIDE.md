@@ -39,7 +39,7 @@ The AI is instructed to:
 2. **`application.properties`**
    - Configuration file with API settings
    - API key storage
-   - Model selection (llama-3.1-70b-versatile)
+   - Model selection (llama-3.3-70b-versatile)
    - Temperature and token limits
 
 ### Files Modified:
@@ -59,14 +59,14 @@ The AI is instructed to:
 ```properties
 groq.api.key=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
 groq.api.url=https://api.groq.com/openai/v1/chat/completions
-groq.model=llama-3.1-70b-versatile
+groq.model=llama-3.3-70b-versatile
 groq.max.tokens=500
 groq.temperature=0.7
 ```
 
 ### Available Models:
 You can change the model in `application.properties`:
-- `llama-3.1-70b-versatile` (current - best quality)
+- `llama-3.3-70b-versatile` (current - best quality, recommended)
 - `llama-3.1-8b-instant` (faster, less accurate)
 - `mixtral-8x7b-32768` (good balance)
 - `gemma2-9b-it` (lightweight)
@@ -229,7 +229,7 @@ Génère une réponse professionnelle, empathique et utile en français...
 ### API Request Format:
 ```json
 {
-  "model": "llama-3.1-70b-versatile",
+  "model": "llama-3.3-70b-versatile",
   "messages": [
     {
       "role": "user",

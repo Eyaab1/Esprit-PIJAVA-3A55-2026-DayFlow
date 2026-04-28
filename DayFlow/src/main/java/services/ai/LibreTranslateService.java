@@ -28,7 +28,9 @@ public class LibreTranslateService {
 
     public LibreTranslateService() {
         Properties props = loadProperties();
-        this.apiUrl = props.getProperty("libretranslate.api.url", "https://libretranslate.com/translate");
+        // Try alternative instances if main one fails
+        String configuredUrl = props.getProperty("libretranslate.api.url", "https://libretranslate.com/translate");
+        this.apiUrl = configuredUrl;
         this.apiKey = props.getProperty("libretranslate.api.key", ""); // Optional, can be empty for public instance
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(TIMEOUT)
@@ -44,7 +46,8 @@ public class LibreTranslateService {
      * @throws IOException If translation fails
      */
     public String translateToFrench(String text) throws IOException, InterruptedException {
-        return translate(text, "en", "fr");
+        // Use auto-detect for source language
+        return translate(text, "auto", "fr");
     }
 
     /**
@@ -55,7 +58,8 @@ public class LibreTranslateService {
      * @throws IOException If translation fails
      */
     public String translateToEnglish(String text) throws IOException, InterruptedException {
-        return translate(text, "fr", "en");
+        // Use auto-detect for source language
+        return translate(text, "auto", "en");
     }
 
     /**
@@ -71,6 +75,11 @@ public class LibreTranslateService {
             throws IOException, InterruptedException {
         
         if (text == null || text.isBlank()) {
+            return text;
+        }
+
+        // If source and target are the same, return original text
+        if (sourceLang.equals(targetLang)) {
             return text;
         }
 
@@ -91,10 +100,28 @@ public class LibreTranslateService {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200) {
-            throw new IOException("LibreTranslate API error (code " + response.statusCode() + "): " + response.body());
+            String errorBody = response.body();
+            // Try to extract error message
+            try {
+                com.fasterxml.jackson.databind.JsonNode errorNode = objectMapper.readTree(errorBody);
+                String errorMsg = errorNode.path("error").asText();
+                if (errorMsg != null && !errorMsg.isBlank()) {
+                    throw new IOException("LibreTranslate API error: " + errorMsg);
+                }
+            } catch (Exception e) {
+                // Ignore JSON parsing error
+            }
+            throw new IOException("LibreTranslate API error (code " + response.statusCode() + "): " + errorBody);
         }
 
-        return parseResponse(response.body());
+        String translatedText = parseResponse(response.body());
+        
+        // If translation is null or empty, return original text
+        if (translatedText == null || translatedText.isBlank()) {
+            return text;
+        }
+        
+        return translatedText;
     }
 
     /**
@@ -118,12 +145,15 @@ public class LibreTranslateService {
         try {
             JsonNode root = objectMapper.readTree(responseBody);
             String translatedText = root.path("translatedText").asText();
-            if (translatedText == null || translatedText.isBlank()) {
+            
+            // Check if translatedText is null or empty
+            if (translatedText == null || translatedText.isBlank() || translatedText.equals("null")) {
                 throw new IOException("No translation found in response");
             }
+            
             return translatedText;
         } catch (Exception e) {
-            throw new IOException("Error parsing translation response: " + e.getMessage(), e);
+            throw new IOException("Error parsing translation response: " + e.getMessage() + " - Response: " + responseBody, e);
         }
     }
 

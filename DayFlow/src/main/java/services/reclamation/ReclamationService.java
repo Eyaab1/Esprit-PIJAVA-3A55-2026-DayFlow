@@ -278,7 +278,12 @@ public class ReclamationService implements CRUD<Reclamation, Integer> {
         Connection c = DbConnexion.getConnection();
         try (PreparedStatement ps = c.prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
-                ps.setString(i + 1, (String) params.get(i));
+                Object v = params.get(i);
+                if (v instanceof Integer intVal) {
+                    ps.setInt(i + 1, intVal);
+                } else {
+                    ps.setString(i + 1, (String) v);
+                }
             }
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

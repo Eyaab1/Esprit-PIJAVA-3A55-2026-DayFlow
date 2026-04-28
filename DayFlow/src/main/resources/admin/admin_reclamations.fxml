@@ -22,17 +22,29 @@
             <!-- Filters Bar -->
             <VBox spacing="12" styleClass="admin-card">
                 <Label text="Filtres de recherche" style="-fx-font-weight:bold;-fx-font-size:14px;-fx-text-fill:#5b21b6;"/>
-                <HBox spacing="12" alignment="CENTER_LEFT">
-                    <TextField fx:id="searchField" promptText="Rechercher par contenu, nom ou email..." 
-                               styleClass="admin-filter-field" prefWidth="320"/>
-                    <ComboBox fx:id="statusFilter" styleClass="admin-filter-field" prefWidth="180"/>
-                    <ComboBox fx:id="typeFilter" styleClass="admin-filter-field" prefWidth="180"/>
-                    <Button text="🔍 Filtrer" styleClass="admin-filter-btn" onAction="#onFilter"/>
-                    <Button text="✖ Effacer" onAction="#onClearFilters"
-                            style="-fx-background-color:#e9d5ff;-fx-text-fill:#5b21b6;-fx-font-weight:bold;-fx-padding:10 20;-fx-background-radius:10px;-fx-cursor:hand;"/>
+                
+                <!-- Search Field -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Recherche :" style="-fx-text-fill:#64748b;-fx-font-size:13px;-fx-min-width:80px;"/>
+                    <TextField fx:id="searchField" promptText="Contenu, nom d'utilisateur ou email..." 
+                               styleClass="admin-filter-field" prefWidth="400" HBox.hgrow="ALWAYS"
+                               onAction="#onFilter"/>
                 </HBox>
+                
+                <!-- Filters Row -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Filtres :" style="-fx-text-fill:#64748b;-fx-font-size:13px;-fx-min-width:80px;"/>
+                    <ComboBox fx:id="statusFilter" styleClass="admin-filter-field" prefWidth="180"
+                              onAction="#onFilter"/>
+                    <ComboBox fx:id="typeFilter" styleClass="admin-filter-field" prefWidth="180"
+                              onAction="#onFilter"/>
+                    <Button text="✖ Réinitialiser" onAction="#onClearFilters"
+                            style="-fx-background-color:#e9d5ff;-fx-text-fill:#5b21b6;-fx-font-weight:bold;-fx-padding:8 16;-fx-background-radius:8px;-fx-cursor:hand;"/>
+                </HBox>
+                
+                <!-- Results Count -->
                 <HBox spacing="8" alignment="CENTER_LEFT">
-                    <Label text="Total :" style="-fx-text-fill:#64748b;-fx-font-size:13px;"/>
+                    <Label text="Résultats :" style="-fx-text-fill:#64748b;-fx-font-size:13px;-fx-min-width:80px;"/>
                     <Label fx:id="totalCountLabel" text="0 réclamations" 
                            style="-fx-text-fill:#7c3aed;-fx-font-weight:bold;-fx-font-size:13px;"/>
                 </HBox>
