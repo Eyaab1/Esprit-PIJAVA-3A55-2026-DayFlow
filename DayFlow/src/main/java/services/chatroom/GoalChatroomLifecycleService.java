@@ -23,26 +23,35 @@ public class GoalChatroomLifecycleService {
     }
 
     public void ensureChatroomAndOwner(int goalId, int creatorUserId) throws SQLException {
-        if (chatroomService.findByGoalId(goalId).isPresent()) {
-            if (participationService.findByUserAndGoal(creatorUserId, goalId).isEmpty()) {
-                GoalParticipation gp = new GoalParticipation();
-                gp.setUserId(creatorUserId);
-                gp.setGoalId(goalId);
-                gp.setRole(GoalParticipation.ROLE_OWNER);
-                gp.setStatus(GoalParticipation.STATUS_APPROVED);
-                participationService.insert(gp);
-            }
-            return;
+        // First, check if participation already exists (prevent duplicates)
+        var existingParticipation = participationService.findByUserAndGoal(creatorUserId, goalId);
+        
+        // Ensure chatroom exists
+        if (chatroomService.findByGoalId(goalId).isEmpty()) {
+            Chatroom c = new Chatroom(goalId, "active");
+            chatroomService.insert(c);
         }
-        Chatroom c = new Chatroom(goalId, "active");
-        chatroomService.insert(c);
-
-        GoalParticipation gp = new GoalParticipation();
-        gp.setUserId(creatorUserId);
-        gp.setGoalId(goalId);
-        gp.setRole(GoalParticipation.ROLE_OWNER);
-        gp.setStatus(GoalParticipation.STATUS_APPROVED);
-        participationService.insert(gp);
+        
+        // Create participation if it doesn't exist
+        if (existingParticipation.isEmpty()) {
+            GoalParticipation gp = new GoalParticipation();
+            gp.setUserId(creatorUserId);
+            gp.setGoalId(goalId);
+            gp.setRole(GoalParticipation.ROLE_OWNER);
+            gp.setStatus(GoalParticipation.STATUS_APPROVED);
+            
+            try {
+                participationService.insert(gp);
+            } catch (SQLException e) {
+                // Handle UNIQUE constraint violation gracefully
+                // This can happen if participation was created concurrently
+                if (e.getMessage() != null && e.getMessage().contains("uq_goal_participation")) {
+                    System.out.println("Participation already exists for user " + creatorUserId + " in goal " + goalId);
+                } else {
+                    throw e;
+                }
+            }
+        }
     }
 
     /**

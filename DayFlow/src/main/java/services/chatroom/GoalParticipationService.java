@@ -121,8 +121,8 @@ public class GoalParticipationService implements CRUD<GoalParticipation, Integer
     public boolean isOwnerOrAdmin(int userId, int goalId) throws SQLException {
         String sql = """
                 SELECT 1 FROM goal_participation
-                WHERE user_id = ? AND goal_id = ? AND status = 'APPROVED'
-                  AND (role = 'OWNER' OR role = 'ADMIN')
+                WHERE user_id = ? AND goal_id = ? AND status = 'accepted'
+                  AND (role = 'owner' OR role = 'admin')
                 """;
 
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
@@ -137,7 +137,7 @@ public class GoalParticipationService implements CRUD<GoalParticipation, Integer
 
     /** Nombre de demandes PENDING pour un goal — pour le badge. */
     public int countPendingByGoal(int goalId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM goal_participation WHERE goal_id = ? AND status = 'PENDING'";
+        String sql = "SELECT COUNT(*) FROM goal_participation WHERE goal_id = ? AND status = 'pending'";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, goalId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -158,19 +158,19 @@ public class GoalParticipationService implements CRUD<GoalParticipation, Integer
 
     /** Promouvoir un membre en admin. */
     public void promoteToAdmin(int participationId) throws SQLException {
-        updateRoleAndStatus(participationId, GoalParticipation.ROLE_ADMIN, GoalParticipation.STATUS_APPROVED);
+        updateRoleAndStatus(participationId, GoalParticipation.ROLE_ADMIN, "accepted");
     }
 
     /** Rétrograder un admin en membre. */
     public void demoteToMember(int participationId) throws SQLException {
-        updateRoleAndStatus(participationId, GoalParticipation.ROLE_MEMBER, GoalParticipation.STATUS_APPROVED);
+        updateRoleAndStatus(participationId, GoalParticipation.ROLE_MEMBER, "accepted");
     }
 
     public List<GoalParticipation> findPendingByGoal(int goalId) throws SQLException {
         String sql = """
                 SELECT id, user_id, goal_id, created_at, role, status
                 FROM goal_participation
-                WHERE goal_id = ? AND status = 'PENDING'
+                WHERE goal_id = ? AND status = 'pending'
                 ORDER BY created_at ASC
                 """;
 
@@ -191,7 +191,7 @@ public class GoalParticipationService implements CRUD<GoalParticipation, Integer
         String sql = """
                 SELECT id, user_id, goal_id, created_at, role, status
                 FROM goal_participation
-                WHERE goal_id = ? AND status = 'APPROVED'
+                WHERE goal_id = ? AND status = 'accepted'
                 ORDER BY role ASC, created_at ASC
                 """;
 
@@ -199,7 +199,7 @@ public class GoalParticipationService implements CRUD<GoalParticipation, Integer
     }
 
     public int countApprovedByGoal(int goalId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM goal_participation WHERE goal_id = ? AND status = 'APPROVED'";
+        String sql = "SELECT COUNT(*) FROM goal_participation WHERE goal_id = ? AND status = 'accepted'";
 
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, goalId);
@@ -214,7 +214,7 @@ public class GoalParticipationService implements CRUD<GoalParticipation, Integer
     }
 
     public List<Integer> listGoalIdsForUserApproved(int userId) throws SQLException {
-        String sql = "SELECT goal_id FROM goal_participation WHERE user_id = ? AND status = 'APPROVED'";
+        String sql = "SELECT goal_id FROM goal_participation WHERE user_id = ? AND status = 'accepted'";
         List<Integer> out = new ArrayList<>();
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, userId);
@@ -236,7 +236,7 @@ public class GoalParticipationService implements CRUD<GoalParticipation, Integer
                 LEFT JOIN chatroom c ON c.goal_id = gp.goal_id
                 LEFT JOIN message m ON m.chatroom_id = c.id AND m.author_id = gp.user_id
                     AND (m.is_spam = false OR m.is_spam IS NULL)
-                WHERE gp.goal_id = ? AND gp.status = 'APPROVED'
+                WHERE gp.goal_id = ? AND gp.status = 'accepted'
                 GROUP BY gp.user_id
                 ORDER BY msg_count DESC
                 """;
@@ -257,7 +257,7 @@ public class GoalParticipationService implements CRUD<GoalParticipation, Integer
      * Utilisé pour restreindre l'accès au chat.
      */
     public boolean isApprovedMember(int userId, int goalId) throws SQLException {
-        String sql = "SELECT 1 FROM goal_participation WHERE user_id = ? AND goal_id = ? AND status = 'APPROVED'";
+        String sql = "SELECT 1 FROM goal_participation WHERE user_id = ? AND goal_id = ? AND status = 'accepted'";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, userId);
             ps.setInt(2, goalId);

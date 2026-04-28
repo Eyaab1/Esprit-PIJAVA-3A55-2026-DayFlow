@@ -168,7 +168,7 @@ public class ChatroomService implements CRUD<Chatroom, Integer> {
             "FROM chatroom c " +
             "INNER JOIN goal g ON g.id = c.goal_id " +
             "INNER JOIN goal_participation gp ON gp.goal_id = g.id " +
-            "WHERE gp.user_id = ? AND gp.status = 'APPROVED' " +
+            "WHERE gp.user_id = ? AND gp.status = 'accepted' " +
             "ORDER BY g.id DESC";
 
         List<ChatroomListItem> list = new ArrayList<>();

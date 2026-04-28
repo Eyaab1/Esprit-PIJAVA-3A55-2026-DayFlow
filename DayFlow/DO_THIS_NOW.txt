@@ -1,0 +1,65 @@
+================================================================================
+                         FIX NOT APPLIED - DO THIS NOW
+================================================================================
+
+The code changes were made, but the DATABASE CLEANUP was NOT executed.
+
+The old data in your database still has UPPERCASE role values.
+The constraint expects LOWERCASE role values.
+
+This is why goal creation still fails.
+
+================================================================================
+                            STEP 1: CLEAN DATABASE
+================================================================================
+
+Copy and paste this SQL into your database tool (pgAdmin, DBeaver, or psql):
+
+UPDATE goal_participation SET role = 'owner' WHERE role = 'OWNER';
+UPDATE goal_participation SET role = 'admin' WHERE role = 'ADMIN';
+UPDATE goal_participation SET role = 'member' WHERE role = 'MEMBER';
+UPDATE goal_participation SET status = 'accepted' WHERE status = 'APPROVED';
+UPDATE goal_participation SET status = 'pending' WHERE status = 'PENDING';
+UPDATE goal_participation SET status = 'rejected' WHERE status = 'REJECTED';
+
+THAT'S IT. Just run these 6 UPDATE statements.
+
+================================================================================
+                            STEP 2: VERIFY
+================================================================================
+
+Run this to verify the fix:
+
+SELECT DISTINCT role FROM goal_participation;
+
+You should see:
+  owner
+  admin
+  member
+
+(All lowercase, no uppercase)
+
+================================================================================
+                            STEP 3: TEST
+================================================================================
+
+1. Restart the application:
+   mvn javafx:run
+
+2. Create a new goal
+
+3. It should work without errors ✅
+
+================================================================================
+                              THAT'S ALL
+================================================================================
+
+The code is already fixed. You just need to run the SQL cleanup.
+
+If you still get an error after running the SQL:
+1. Check that the SQL actually ran (look for "UPDATE X" message)
+2. Verify the data was changed (run the SELECT query above)
+3. Restart the app
+4. Try again
+
+================================================================================

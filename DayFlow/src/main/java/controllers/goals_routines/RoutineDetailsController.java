@@ -275,7 +275,9 @@ public class RoutineDetailsController {
                 visibilityChoice.setValue(routine.getVisibility());
                 priorityChoice.setValue(routine.getPriority());
                 statusChoice.setValue(routine.getStatus());
-                deadlinePicker.setValue(routine.getDeadline());
+                if (routine.getDeadline() != null) {
+                    deadlinePicker.setValue(routine.getDeadline().toLocalDate());
+                }
                 Label formTitle = (Label) formRoot.lookup(".form-title");
                 if (formTitle != null) formTitle.setText("Modifier la Routine");
             } else {
@@ -302,7 +304,9 @@ public class RoutineDetailsController {
                     routineToSave.setVisibility(visibilityChoice.getValue());
                     routineToSave.setPriority(priorityChoice.getValue());
                     routineToSave.setStatus(statusChoice.getValue());
-                    routineToSave.setDeadline(deadlinePicker.getValue());
+                    if (deadlinePicker.getValue() != null) {
+                        routineToSave.setDeadline(deadlinePicker.getValue().atStartOfDay());
+                    }
                     routineToSave.setGoal(currentGoal);
                     
                     if (routine == null) {

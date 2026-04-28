@@ -52,7 +52,7 @@ public class ActivityService implements CRUD<Activity, Integer> {
             ps.setBoolean(6, a.isHasReminder());
             ps.setTimestamp(7, a.getReminderAt() != null ? Timestamp.valueOf(a.getReminderAt()) : null);
 
-            ps.setDate(8, a.getDeadline() != null ? Date.valueOf(a.getDeadline()) : null);
+            ps.setTimestamp(8, a.getDeadline() != null ? Timestamp.valueOf(a.getDeadline()) : null);
             ps.setBoolean(9, a.isFavorite());
 
             ps.setTimestamp(10, a.getCompletedAt() != null ? Timestamp.valueOf(a.getCompletedAt()) : null);
@@ -125,9 +125,9 @@ public class ActivityService implements CRUD<Activity, Integer> {
             a.setReminderAt(rem.toLocalDateTime());
         }
         a.setHasReminder(rs.getBoolean("has_reminder"));
-        Date dl = rs.getDate("deadline");
+        Timestamp dl = rs.getTimestamp("deadline");
         if (dl != null) {
-            a.setDeadline(dl.toLocalDate());
+            a.setDeadline(dl.toLocalDateTime());
         }
         a.setFavorite(rs.getBoolean("is_favorite"));
         Timestamp comp = rs.getTimestamp("completed_at");
@@ -177,7 +177,7 @@ public class ActivityService implements CRUD<Activity, Integer> {
             ps.setBoolean(6, a.isHasReminder());
             ps.setTimestamp(7, a.getReminderAt() != null ? Timestamp.valueOf(a.getReminderAt()) : null);
 
-            ps.setDate(8, a.getDeadline() != null ? Date.valueOf(a.getDeadline()) : null);
+            ps.setTimestamp(8, a.getDeadline() != null ? Timestamp.valueOf(a.getDeadline()) : null);
             ps.setBoolean(9, a.isFavorite());
 
             ps.setTimestamp(10, a.getCompletedAt() != null ? Timestamp.valueOf(a.getCompletedAt()) : null);

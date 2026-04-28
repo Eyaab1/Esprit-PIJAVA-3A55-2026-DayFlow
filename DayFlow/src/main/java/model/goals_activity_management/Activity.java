@@ -23,7 +23,7 @@ public class Activity {
     private boolean hasReminder = false;
     private LocalDateTime reminderAt;           // Required if hasReminder is true
 
-    private LocalDate deadline;                 // Optional
+    private LocalDateTime deadline;             // Optional
     private boolean isFavorite = false;
 
     private LocalDateTime completedAt;          // Optional
@@ -140,7 +140,7 @@ public class Activity {
         validateReminder(this.hasReminder, reminderAt);
     }
 
-    public void setDeadline(LocalDate deadline)                     { this.deadline               = deadline; }
+    public void setDeadline(LocalDateTime deadline)                     { this.deadline               = deadline; }
     public void setFavorite(boolean isFavorite)                     { this.isFavorite             = isFavorite; }
     public void setCompletedAt(LocalDateTime completedAt)           { this.completedAt            = completedAt; }
     public void setActualDurationMinutes(Integer minutes)           { this.actualDurationMinutes  = minutes; }
@@ -175,7 +175,7 @@ public class Activity {
     public String         getPriority()                { return priority; }
     public boolean        isHasReminder()              { return hasReminder; }
     public LocalDateTime  getReminderAt()              { return reminderAt; }
-    public LocalDate      getDeadline()                { return deadline; }
+    public LocalDateTime  getDeadline()                { return deadline; }
     public boolean        isFavorite()                 { return isFavorite; }
     public LocalDateTime  getCompletedAt()             { return completedAt; }
     public Integer        getActualDurationMinutes()   { return actualDurationMinutes; }
@@ -212,7 +212,7 @@ public class Activity {
 
     public boolean isDeadlineNear() {
         if (deadline == null) return false;
-        long days = ChronoUnit.DAYS.between(LocalDate.now(), deadline);
+        long days = ChronoUnit.DAYS.between(LocalDateTime.now(), deadline);
         return days >= 0 && days <= 7;
     }
 
@@ -224,8 +224,8 @@ public class Activity {
         else if ("low".equals(priority))    score += 10;
 
         if (deadline != null) {
-            long days    = ChronoUnit.DAYS.between(LocalDate.now(), deadline);
-            boolean past = LocalDate.now().isAfter(deadline);
+            long days    = ChronoUnit.DAYS.between(LocalDateTime.now(), deadline);
+            boolean past = LocalDateTime.now().isAfter(deadline);
 
             if      (past)       score += 70;
             else if (days <= 1)  score += 60;

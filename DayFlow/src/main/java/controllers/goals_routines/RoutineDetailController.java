@@ -465,7 +465,7 @@ public class RoutineDetailController {
             prio.getSelectionModel().select(r.getPriority());
         }
 
-        DatePicker deadline = new DatePicker(r.getDeadline());
+        DatePicker deadline = new DatePicker(r.getDeadline() != null ? r.getDeadline().toLocalDate() : null);
 
         GridPane grid = new GridPane();
         grid.setHgap(12);
@@ -504,7 +504,9 @@ public class RoutineDetailController {
             } else {
                 r.setPriority(null);
             }
-            r.setDeadline(deadline.getValue());
+            if (deadline.getValue() != null) {
+                r.setDeadline(deadline.getValue().atStartOfDay());
+            }
             r.validate();
             routineService.update(r);
             reload();
@@ -691,7 +693,7 @@ public class RoutineDetailController {
             }
             prioCombo.getSelectionModel().select(priorityFrFromDb(existing.getPriority()));
             if (existing.getDeadline() != null) {
-                deadlinePicker.setValue(existing.getDeadline());
+                deadlinePicker.setValue(existing.getDeadline().toLocalDate());
             }
         }
 
@@ -748,7 +750,7 @@ public class RoutineDetailController {
                     existing.setPriority(null);
                 }
                 if (deadlinePicker.getValue() != null) {
-                    existing.setDeadline(deadlinePicker.getValue());
+                    existing.setDeadline(deadlinePicker.getValue().atStartOfDay());
                 } else {
                     existing.setDeadline(null);
                 }
@@ -772,7 +774,7 @@ public class RoutineDetailController {
                     a.setPriority(prioDb);
                 }
                 if (deadlinePicker.getValue() != null) {
-                    a.setDeadline(deadlinePicker.getValue());
+                    a.setDeadline(deadlinePicker.getValue().atStartOfDay());
                 }
 
                 a.setReminderAt(null);

@@ -19,7 +19,7 @@ public class Routine {
     private String status;          // draft | active | paused | completed | skipped
     private String priority;        // low | medium | high (nullable)
 
-    private LocalDate deadline;     // Optional
+    private LocalDateTime deadline; // Optional
     private boolean isFavorite = false;
 
     private LocalDateTime createdAt;
@@ -114,7 +114,7 @@ public class Routine {
         this.priority = priority;
     }
 
-    public void setDeadline(LocalDate deadline)     { this.deadline   = deadline; }
+    public void setDeadline(LocalDateTime deadline)     { this.deadline   = deadline; }
     public void setFavorite(boolean isFavorite)     { this.isFavorite = isFavorite; }
     public void setGoal(Goal goal) {
         if (this.goal == goal) {
@@ -144,7 +144,7 @@ public class Routine {
     public String           getVisibility()  { return visibility; }
     public String           getStatus()      { return status; }
     public String           getPriority()    { return priority; }
-    public LocalDate        getDeadline()    { return deadline; }
+    public LocalDateTime        getDeadline()    { return deadline; }
     public boolean          isFavorite()     { return isFavorite; }
     public Goal             getGoal()        { return goal; }
     public List<Activity>   getActivities()  { return activities; }
@@ -204,7 +204,7 @@ public class Routine {
 
     public boolean isDeadlineNear() {
         if (deadline == null) return false;
-        long days = ChronoUnit.DAYS.between(LocalDate.now(), deadline);
+        long days = ChronoUnit.DAYS.between(LocalDateTime.now(), deadline);
         return days >= 0 && days <= 7;
     }
 
@@ -216,8 +216,8 @@ public class Routine {
         else if ("low".equals(priority))    score += 10;
 
         if (deadline != null) {
-            long days   = ChronoUnit.DAYS.between(LocalDate.now(), deadline);
-            boolean past = LocalDate.now().isAfter(deadline);
+            long days   = ChronoUnit.DAYS.between(LocalDateTime.now(), deadline);
+            boolean past = LocalDateTime.now().isAfter(deadline);
 
             if      (past)       score += 70;
             else if (days <= 1)  score += 60;

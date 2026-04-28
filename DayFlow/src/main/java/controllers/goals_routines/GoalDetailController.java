@@ -425,7 +425,9 @@ public class GoalDetailController {
             if (pr != null && !pr.isBlank()) {
                 routine.setPriority(pr);
             }
-            routine.setDeadline(deadline.getValue());
+            if (deadline.getValue() != null) {
+                routine.setDeadline(deadline.getValue().atStartOfDay());
+            }
             routine.setStatus("active");
             Goal stub = new Goal();
             stub.setId(goalId);

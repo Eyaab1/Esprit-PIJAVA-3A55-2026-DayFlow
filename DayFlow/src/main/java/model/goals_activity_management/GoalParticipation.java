@@ -6,13 +6,13 @@ import java.time.LocalDateTime;
 
 public class GoalParticipation {
 
-    public static final String ROLE_MEMBER = "MEMBER";
-    public static final String ROLE_ADMIN = "ADMIN";
-    public static final String ROLE_OWNER = "OWNER";
+    public static final String ROLE_MEMBER = "member";
+    public static final String ROLE_ADMIN = "admin";
+    public static final String ROLE_OWNER = "owner";
 
-    public static final String STATUS_PENDING = "PENDING";
-    public static final String STATUS_APPROVED = "APPROVED";
-    public static final String STATUS_REJECTED = "REJECTED";
+    public static final String STATUS_PENDING = "pending";
+    public static final String STATUS_APPROVED = "accepted";
+    public static final String STATUS_REJECTED = "rejected";
 
     private int id;
     private int userId;

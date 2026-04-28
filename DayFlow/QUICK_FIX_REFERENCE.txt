@@ -1,0 +1,59 @@
+╔═══════════════════════════════════════════════════════════════════════╗
+║                    MIGRATION V9 - QUICK FIX                           ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+🔍 THE PROBLEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Syntax error in V9 migration: Used DO $ instead of DO $$
+  PostgreSQL couldn't parse the PL/pgSQL blocks
+  Result: Tables created but constraints failed to add
+
+✅ THE FIX
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Changed all DO $ to DO $$ (double dollar signs)
+  File: src/main/resources/db/migration/V9__create_goal_tables.sql
+  Status: ✅ FIXED
+
+🚀 HOW TO APPLY (3 steps)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  STEP 1: Clean up database (run in pgAdmin/psql)
+  ────────────────────────────────────────────────────────────────────
+  DELETE FROM flyway_schema_history WHERE version = '9' AND success = false;
+  DROP TABLE IF EXISTS activity CASCADE;
+  DROP TABLE IF EXISTS routine CASCADE;
+  DROP TABLE IF EXISTS goal_participation CASCADE;
+  DROP TABLE IF EXISTS goal CASCADE;
+
+  STEP 2: Recompile project
+  ────────────────────────────────────────────────────────────────────
+  mvn clean compile
+
+  STEP 3: Run application
+  ────────────────────────────────────────────────────────────────────
+  mvn javafx:run
+
+📋 ALTERNATIVE: Use cleanup script
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  psql -U your_user -d your_database -f CLEANUP_AND_FIX.sql
+  mvn clean compile
+  mvn javafx:run
+
+✅ VERIFICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Check Flyway history:
+  SELECT version, success FROM flyway_schema_history WHERE version = '9';
+  
+  Expected: version = 9, success = t (true)
+
+📚 DETAILED EXPLANATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  See: MIGRATION_FIX_EXPLANATION.md
+
+╔═══════════════════════════════════════════════════════════════════════╗
+║  Files Created:                                                       ║
+║  • V9__create_goal_tables.sql (FIXED)                                ║
+║  • CLEANUP_AND_FIX.sql (cleanup script)                              ║
+║  • MIGRATION_FIX_EXPLANATION.md (detailed explanation)               ║
+║  • QUICK_FIX_REFERENCE.txt (this file)                               ║
+╚═══════════════════════════════════════════════════════════════════════╝

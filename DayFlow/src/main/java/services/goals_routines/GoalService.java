@@ -60,7 +60,7 @@ public class GoalService implements CRUD<Goal, Integer> {
             ps.setString(i++, goal.getDescription());
             ps.setDate(i++, goal.getStartDate() != null ? Date.valueOf(goal.getStartDate()) : null);
             ps.setDate(i++, goal.getEndDate() != null ? Date.valueOf(goal.getEndDate()) : null);
-            ps.setDate(i++, goal.getDeadline() != null ? Date.valueOf(goal.getDeadline()) : null);
+            ps.setTimestamp(i++, goal.getDeadline() != null ? Timestamp.valueOf(goal.getDeadline()) : null);
             ps.setString(i++, goal.getStatus());
             if (goal.getPriority() == null) {
                 ps.setNull(i++, Types.VARCHAR);
@@ -107,7 +107,7 @@ public class GoalService implements CRUD<Goal, Integer> {
             ps.setString(i++, goal.getDescription());
             ps.setDate(i++, goal.getStartDate() != null ? Date.valueOf(goal.getStartDate()) : null);
             ps.setDate(i++, goal.getEndDate() != null ? Date.valueOf(goal.getEndDate()) : null);
-            ps.setDate(i++, goal.getDeadline() != null ? Date.valueOf(goal.getDeadline()) : null);
+            ps.setTimestamp(i++, goal.getDeadline() != null ? Timestamp.valueOf(goal.getDeadline()) : null);
             ps.setString(i++, goal.getStatus());
             if (goal.getPriority() == null) {
                 ps.setNull(i++, Types.VARCHAR);
@@ -198,13 +198,13 @@ public class GoalService implements CRUD<Goal, Integer> {
                        c.id AS chatroom_id,
                        COALESCE(pc.cnt, 0) AS participant_count
                 FROM goal g
-                LEFT JOIN goal_participation owner_gp ON owner_gp.goal_id = g.id AND owner_gp.role = 'OWNER'
+                LEFT JOIN goal_participation owner_gp ON owner_gp.goal_id = g.id AND owner_gp.role = 'owner'
                 LEFT JOIN "user" u ON u.id = owner_gp.user_id
                 LEFT JOIN chatroom c ON c.goal_id = g.id
                 LEFT JOIN (
                     SELECT goal_id, COUNT(*)::int AS cnt
                     FROM goal_participation
-                    WHERE status = 'APPROVED'
+                    WHERE status = 'accepted'
                     GROUP BY goal_id
                 ) pc ON pc.goal_id = g.id
                 ORDER BY g.created_at DESC
@@ -234,8 +234,8 @@ public class GoalService implements CRUD<Goal, Integer> {
         g.setStartDate(sd != null ? sd.toLocalDate() : null);
         Date ed = rs.getDate("end_date");
         g.setEndDate(ed != null ? ed.toLocalDate() : null);
-        Date dl = rs.getDate("deadline");
-        g.setDeadline(dl != null ? dl.toLocalDate() : null);
+        Timestamp dl = rs.getTimestamp("deadline");
+        g.setDeadline(dl != null ? dl.toLocalDateTime() : null);
         g.setStatus(rs.getString("status"));
         g.setPriority(rs.getString("priority"));
         g.setFavorite(rs.getBoolean("is_favorite"));
@@ -296,13 +296,13 @@ public class GoalService implements CRUD<Goal, Integer> {
                        gp_me.role AS my_role,
                        gp_me.id AS my_gp_id
                 FROM goal g
-                LEFT JOIN goal_participation owner_gp ON owner_gp.goal_id = g.id AND owner_gp.role = 'OWNER'
+                LEFT JOIN goal_participation owner_gp ON owner_gp.goal_id = g.id AND owner_gp.role = 'owner'
                 LEFT JOIN "user" u ON u.id = owner_gp.user_id
                 LEFT JOIN chatroom c ON c.goal_id = g.id
                 LEFT JOIN (
                     SELECT goal_id, COUNT(*)::int AS cnt
                     FROM goal_participation
-                    WHERE status = 'APPROVED'
+                    WHERE status = 'accepted'
                     GROUP BY goal_id
                 ) pc ON pc.goal_id = g.id
                 LEFT JOIN goal_participation gp_me ON gp_me.goal_id = g.id AND gp_me.user_id = ?

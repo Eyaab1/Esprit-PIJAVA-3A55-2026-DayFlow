@@ -74,7 +74,7 @@ public final class AdminGoalService {
                        COALESCE(uo.email, ud.email) AS oemail,
                        (SELECT COUNT(*)::int FROM routine r WHERE r.goal_id = g.id) AS rcnt
                 FROM goal g
-                LEFT JOIN goal_participation gp ON gp.goal_id = g.id AND gp.role = 'OWNER'
+                LEFT JOIN goal_participation gp ON gp.goal_id = g.id AND gp.role = 'owner'
                 LEFT JOIN "user" uo ON uo.id = gp.user_id
                 LEFT JOIN "user" ud ON ud.id = g.user_id
                 WHERE (? = '' OR COALESCE(uo.first_name, ud.first_name) ILIKE '%' || ? || '%'
