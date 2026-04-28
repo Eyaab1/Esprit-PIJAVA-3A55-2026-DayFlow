@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.admin.AdminReclamationsController" styleClass="admin-root" stylesheets="@admin.css">
+    <content>
+        <VBox styleClass="admin-content" spacing="20">
+            <!-- Page Header -->
+            <VBox spacing="6">
+                <Label styleClass="admin-page-title" text="Réclamations"/>
+                <Label styleClass="admin-page-sub" text="Gérer les réclamations utilisateurs avec recherche et filtres"/>
+            </VBox>
+
+            <!-- Filters Bar -->
+            <VBox spacing="12" styleClass="admin-card">
+                <Label text="Filtres de recherche" style="-fx-font-weight:bold;-fx-font-size:14px;-fx-text-fill:#5b21b6;"/>
+                
+                <!-- Search Field -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Recherche :" style="-fx-text-fill:#64748b;-fx-font-size:13px;-fx-min-width:80px;"/>
+                    <TextField fx:id="searchField" promptText="Contenu, nom d'utilisateur ou email..." 
+                               styleClass="admin-filter-field" prefWidth="400" HBox.hgrow="ALWAYS"
+                               onAction="#onFilter"/>
+                </HBox>
+                
+                <!-- Filters Row -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Filtres :" style="-fx-text-fill:#64748b;-fx-font-size:13px;-fx-min-width:80px;"/>
+                    <ComboBox fx:id="statusFilter" styleClass="admin-filter-field" prefWidth="180"
+                              onAction="#onFilter"/>
+                    <ComboBox fx:id="typeFilter" styleClass="admin-filter-field" prefWidth="180"
+                              onAction="#onFilter"/>
+                    <Button text="✖ Réinitialiser" onAction="#onClearFilters"
+                            style="-fx-background-color:#e9d5ff;-fx-text-fill:#5b21b6;-fx-font-weight:bold;-fx-padding:8 16;-fx-background-radius:8px;-fx-cursor:hand;"/>
+                </HBox>
+                
+                <!-- Results Count -->
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <Label text="Résultats :" style="-fx-text-fill:#64748b;-fx-font-size:13px;-fx-min-width:80px;"/>
+                    <Label fx:id="totalCountLabel" text="0 réclamations" 
+                           style="-fx-text-fill:#7c3aed;-fx-font-weight:bold;-fx-font-size:13px;"/>
+                </HBox>
+            </VBox>
+
+            <!-- Reclamations List -->
+            <VBox styleClass="admin-card" spacing="0" VBox.vgrow="ALWAYS">
+                <Label text="Liste des réclamations" 
+                       style="-fx-font-weight:bold;-fx-font-size:14px;-fx-text-fill:#5b21b6;-fx-padding:0 0 12 0;"/>
+                <ScrollPane fitToWidth="true" style="-fx-background-color:transparent;" VBox.vgrow="ALWAYS">
+                    <VBox fx:id="reclamationsListPane" spacing="0"/>
+                </ScrollPane>
+            </VBox>
+        </VBox>
+    </content>
+</ScrollPane>

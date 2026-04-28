@@ -3,10 +3,7 @@ package model.reclamation;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-/**
- * Réponse admin / support liée à une {@link Reclamation}.
- * Équivalent de l'entité Symfony {@code Response}.
- */
+
 public class Response {
 
     private Integer id;
@@ -63,7 +60,7 @@ public class Response {
         this.reclamation = reclamation;
     }
 
-    /** Pour JDBC sans charger l'objet parent (optionnel). */
+    
     public Integer getReclamationId() {
         return reclamation != null && reclamation.getId() != null ? reclamation.getId() : null;
     }

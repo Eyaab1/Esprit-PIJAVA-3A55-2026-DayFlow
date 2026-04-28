@@ -21,7 +21,7 @@
                      <children>
                         <StackPane styleClass="reclam-header-icon-wrap">
                            <children>
-                              <Label styleClass="reclam-header-emoji" text="💬" />
+                              <Label styleClass="reclam-header-emoji" text="" />
                            </children>
                         </StackPane>
                         <Label styleClass="reclam-title" text="Mes Réclamations" />

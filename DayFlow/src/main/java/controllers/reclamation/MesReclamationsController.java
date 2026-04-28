@@ -6,30 +6,41 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import model.reclamation.Reclamation;
 import model.reclamation.Response;
+import services.ai.PerspectiveAPIService;
+
 import services.reclamation.ReclamationService;
 import session.AppSession;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
 
-/**
- * Liste des réclamations de l'utilisateur connecté.
- */
+
 public class MesReclamationsController {
 
     private static final DateTimeFormatter DATE_FMT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy 'à' HH:mm", Locale.FRENCH);
 
     private final ReclamationService reclamationService = new ReclamationService();
+    private final PerspectiveAPIService moderationService = new PerspectiveAPIService();
 
     @FXML
     private VBox listContainer;
@@ -179,34 +190,204 @@ public class MesReclamationsController {
             contentArea.setPrefRowCount(6);
             contentArea.setWrapText(true);
 
+            // Validation message label
+            Label validationLabel = new Label("");
+            validationLabel.setWrapText(true);
+            validationLabel.setMaxWidth(Double.MAX_VALUE);
+            validationLabel.setVisible(false);
+            validationLabel.setStyle("-fx-background-color:#fee2e2;-fx-text-fill:#dc2626;-fx-padding:10;" +
+                    "-fx-background-radius:8px;-fx-border-color:#dc2626;-fx-border-width:1;-fx-border-radius:8px;");
+
+            // Image upload section
+            final File[] selectedImageFile = {null};
+            ImageView imagePreview = new ImageView();
+            imagePreview.setFitWidth(150);
+            imagePreview.setFitHeight(150);
+            imagePreview.setPreserveRatio(true);
+            imagePreview.setVisible(false);
+
+            Button chooseImageBtn = new Button("📎 Joindre une preuve (image)");
+            chooseImageBtn.setStyle("-fx-background-color:#7c3aed;-fx-text-fill:white;-fx-padding:8 16;-fx-background-radius:8px;-fx-cursor:hand;");
+            
+            Label imageLabel = new Label("Aucune image sélectionnée");
+            imageLabel.setStyle("-fx-text-fill:#64748b;-fx-font-size:12px;");
+
+            Button removeImageBtn = new Button("✖ Supprimer");
+            removeImageBtn.setStyle("-fx-background-color:#dc2626;-fx-text-fill:white;-fx-padding:6 12;-fx-background-radius:6px;-fx-cursor:hand;");
+            removeImageBtn.setVisible(false);
+
+            chooseImageBtn.setOnAction(e -> {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Choisir une image");
+                fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp"),
+                    new FileChooser.ExtensionFilter("Tous les fichiers", "*.*")
+                );
+                File file = fileChooser.showOpenDialog(dialog.getOwner());
+                if (file != null) {
+                    // Check file size (max 5MB)
+                    if (file.length() > 5 * 1024 * 1024) {
+                        validationLabel.setText("⚠️ L'image est trop grande (max 5 MB).");
+                        validationLabel.setVisible(true);
+                        return;
+                    }
+                    selectedImageFile[0] = file;
+                    imageLabel.setText(file.getName() + " (" + formatFileSize(file.length()) + ")");
+                    imageLabel.setStyle("-fx-text-fill:#16a34a;-fx-font-size:12px;-fx-font-weight:bold;");
+                    
+                    // Show preview
+                    try {
+                        Image image = new Image(file.toURI().toString());
+                        imagePreview.setImage(image);
+                        imagePreview.setVisible(true);
+                        removeImageBtn.setVisible(true);
+                        validationLabel.setVisible(false);
+                    } catch (Exception ex) {
+                        validationLabel.setText("⚠️ Impossible de charger l'image.");
+                        validationLabel.setVisible(true);
+                    }
+                }
+            });
+
+            removeImageBtn.setOnAction(e -> {
+                selectedImageFile[0] = null;
+                imageLabel.setText("Aucune image sélectionnée");
+                imageLabel.setStyle("-fx-text-fill:#64748b;-fx-font-size:12px;");
+                imagePreview.setVisible(false);
+                removeImageBtn.setVisible(false);
+            });
+
+            HBox imageButtonsBox = new HBox(10, chooseImageBtn, removeImageBtn);
+            imageButtonsBox.setAlignment(Pos.CENTER_LEFT);
+
+            VBox imageBox = new VBox(8, imageButtonsBox, imageLabel, imagePreview);
+            imageBox.setAlignment(Pos.CENTER_LEFT);
+
             javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
             grid.setHgap(10);
             grid.setVgap(12);
             grid.setPadding(new Insets(10));
-            grid.add(new Label("Type :"), 0, 0);
-            grid.add(typeCombo, 1, 0);
-            grid.add(new Label("Message :"), 0, 1);
-            grid.add(contentArea, 1, 1);
+            grid.add(validationLabel, 0, 0, 2, 1);
+            grid.add(new Label("Type :"), 0, 1);
+            grid.add(typeCombo, 1, 1);
+            grid.add(new Label("Message :"), 0, 2);
+            grid.add(contentArea, 1, 2);
+            grid.add(new Label("Preuve :"), 0, 3);
+            grid.add(imageBox, 1, 3);
             dialog.getDialogPane().setContent(grid);
+            dialog.getDialogPane().setPrefWidth(600);
 
-            Optional<ButtonType> result = dialog.showAndWait();
-            if (result.isEmpty() || result.get() != ButtonType.OK) {
-                return;
-            }
-            try {
-                Reclamation r = new Reclamation();
-                r.setContent(contentArea.getText() != null ? contentArea.getText().trim() : "");
-                r.setType(typeCombo.getValue());
-                r.setUserId(uid);
-                reclamationService.createForUserWithAutoAck(r, null);
-                refreshList();
-                new Alert(Alert.AlertType.INFORMATION, "Réclamation enregistrée.").showAndWait();
-            } catch (IllegalArgumentException ex) {
-                new Alert(Alert.AlertType.WARNING, ex.getMessage()).showAndWait();
-            } catch (SQLException ex) {
-                new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
-            }
-        }, () -> new Alert(Alert.AlertType.WARNING, "Session expirée.").showAndWait());
+            // Disable OK button initially
+            Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+            
+            // Add event filter to validate before closing
+            okButton.addEventFilter(javafx.event.ActionEvent.ACTION, event -> {
+                String content = contentArea.getText() != null ? contentArea.getText().trim() : "";
+                
+                // Validate content length
+                if (content.length() < 10) {
+                    validationLabel.setText("⚠️ Le message doit contenir au moins 10 caractères.");
+                    validationLabel.setVisible(true);
+                    event.consume(); // Prevent dialog from closing
+                    return;
+                }
+                
+                // Content moderation check
+                if (moderationService.isConfigured()) {
+                    try {
+                        PerspectiveAPIService.ModerationResult moderationResult = 
+                                moderationService.analyzeText(content);
+                        
+                        if (moderationResult.isHarmful()) {
+                            // Show toxic content warning inline
+                            validationLabel.setText(
+                                    "⚠️ CONTENU INAPPROPRIÉ DÉTECTÉ\n\n" +
+                                    moderationResult.getReason() + "\n" +
+                                    "Score de toxicité : " + String.format("%.0f%%", moderationResult.getMaxScore() * 100) + "\n\n" +
+                                    "Veuillez reformuler votre message de manière respectueuse."
+                            );
+                            validationLabel.setVisible(true);
+                            event.consume(); // Prevent dialog from closing
+                            return;
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Moderation check failed: " + e.getMessage());
+                        // Continue with submission if moderation fails
+                    }
+                }
+                
+                // If validation passes, submit
+                try {
+                    Reclamation r = new Reclamation();
+                    r.setContent(content);
+                    r.setType(typeCombo.getValue());
+                    r.setUserId(uid);
+                    
+                    // Handle image upload
+                    if (selectedImageFile[0] != null) {
+                        String savedPath = saveReclamationImage(selectedImageFile[0]);
+                        r.setPhotoPath(savedPath);
+                    }
+                    
+                    reclamationService.createForUserWithAutoAck(r, null);
+                    refreshList();
+                    
+                    // Show success message inline before closing
+                    validationLabel.setText("✅ Réclamation enregistrée avec succès.");
+                    validationLabel.setStyle("-fx-background-color:#d1fae5;-fx-text-fill:#065f46;-fx-padding:10;" +
+                            "-fx-background-radius:8px;-fx-border-color:#10b981;-fx-border-width:1;-fx-border-radius:8px;");
+                    validationLabel.setVisible(true);
+                    
+                } catch (IllegalArgumentException ex) {
+                    validationLabel.setText("⚠️ " + ex.getMessage());
+                    validationLabel.setStyle("-fx-background-color:#fee2e2;-fx-text-fill:#dc2626;-fx-padding:10;" +
+                            "-fx-background-radius:8px;-fx-border-color:#dc2626;-fx-border-width:1;-fx-border-radius:8px;");
+                    validationLabel.setVisible(true);
+                    event.consume(); // Prevent dialog from closing
+                } catch (SQLException | IOException ex) {
+                    validationLabel.setText("❌ Erreur : " + ex.getMessage());
+                    validationLabel.setVisible(true);
+                    event.consume(); // Prevent dialog from closing
+                }
+            });
+
+            dialog.showAndWait();
+        }, () -> {
+            // Session expired - show inline message would require access to UI, so keep this alert
+            new Alert(Alert.AlertType.WARNING, "Session expirée.").showAndWait();
+        });
+    }
+
+    /**
+     * Saves the uploaded image to the uploads directory and returns the relative path.
+     */
+    private String saveReclamationImage(File imageFile) throws IOException {
+        // Create uploads directory if it doesn't exist
+        Path uploadsDir = Paths.get("uploads", "reclamations");
+        Files.createDirectories(uploadsDir);
+        
+        // Generate unique filename
+        String extension = getFileExtension(imageFile.getName());
+        String uniqueFileName = "reclamation_" + UUID.randomUUID().toString() + extension;
+        Path targetPath = uploadsDir.resolve(uniqueFileName);
+        
+        // Copy file to uploads directory
+        Files.copy(imageFile.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+        
+        // Return relative path for database storage
+        return "uploads/reclamations/" + uniqueFileName;
+    }
+
+    private String getFileExtension(String fileName) {
+        int lastDot = fileName.lastIndexOf('.');
+        return lastDot > 0 ? fileName.substring(lastDot) : "";
+    }
+
+    private String formatFileSize(long bytes) {
+        if (bytes < 1024) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(1024));
+        String pre = "KMGTPE".charAt(exp - 1) + "";
+        return String.format("%.1f %sB", bytes / Math.pow(1024, exp), pre);
     }
 
     private static String statusLabelFr(ReclamationStatus s) {

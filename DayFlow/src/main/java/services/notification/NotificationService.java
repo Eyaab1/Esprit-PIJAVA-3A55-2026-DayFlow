@@ -16,6 +16,10 @@ import java.util.Optional;
 public class NotificationService implements CRUD<Notification, Integer> {
 
     private final Connection cnx;
+    private static final String INSERT_NOTIFICATION_LEGACY = """
+            INSERT INTO notifications (user_id, type, message, is_read, created_at)
+            VALUES (?, ?, ?, FALSE, NOW())
+            """;
 
     public NotificationService() {
         cnx = DbConnexion.getConnection();
@@ -294,5 +298,25 @@ public class NotificationService implements CRUD<Notification, Integer> {
 
     public int countUnreadByUser(int userId) throws SQLException {
         return getUnreadCount(userId);
+    }
+
+    public void createNotification(int userId, String type, String message) throws SQLException {
+        String modernSql = """
+                INSERT INTO notification (user_id, type, message, is_read, created_at)
+                VALUES (?, ?, ?, FALSE, NOW())
+                """;
+        try (PreparedStatement ps = cnx.prepareStatement(modernSql)) {
+            ps.setInt(1, userId);
+            ps.setString(2, type);
+            ps.setString(3, message);
+            ps.executeUpdate();
+        } catch (SQLException primaryEx) {
+            try (PreparedStatement ps = cnx.prepareStatement(INSERT_NOTIFICATION_LEGACY)) {
+                ps.setInt(1, userId);
+                ps.setString(2, type);
+                ps.setString(3, message);
+                ps.executeUpdate();
+            }
+        }
     }
 }

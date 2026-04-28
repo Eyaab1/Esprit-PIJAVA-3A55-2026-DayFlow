@@ -1,9 +1,6 @@
 package enums;
 
-/**
- * Aligné sur {@code App\Enum\ReclamationTypeEnum} (Symfony) — les {@link #value}
- * correspondent aux chaînes persistées en base.
- */
+
 public enum ReclamationType {
     ACCOUNT("ACCOUNT"),
     BUG("Bug"),
