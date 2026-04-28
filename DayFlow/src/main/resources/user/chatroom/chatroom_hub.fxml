@@ -67,6 +67,12 @@
                 </StackPane>
                 <Region prefWidth="8" />
                 <Button onAction="#onToggleSearch" text="🔍" styleClass="icon-btn" focusTraversable="false"/>
+                <Button onAction="#onStartAudioCall" text="🎤" focusTraversable="false"
+                        style="-fx-background-color:transparent; -fx-font-size:16px;
+                               -fx-cursor:hand; -fx-opacity:0.7; -fx-padding:4 8;"/>
+                <Button onAction="#onStartVideoCall" text="🎥" focusTraversable="false"
+                        style="-fx-background-color:transparent; -fx-font-size:16px;
+                               -fx-cursor:hand; -fx-opacity:0.7; -fx-padding:4 8;"/>
                 <!-- Boutons admin (cachés par défaut) -->
                 <Button fx:id="pendingBtn" managed="false" onAction="#onPendingRequests" styleClass="btn-pending" text="⏳ Demandes" visible="false" />
                 <Button fx:id="lockBtn" managed="false" onAction="#onLock" styleClass="btn-admin btn-lock" text="🔒" visible="false" />

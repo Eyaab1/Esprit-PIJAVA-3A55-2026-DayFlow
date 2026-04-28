@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.web.WebView?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.chatroom.VideoCallController"
+            prefWidth="900" prefHeight="650"
+            style="-fx-background-color:#1a1a2e;">
+
+    <!-- Header -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="12"
+              style="-fx-background-color:#16213e; -fx-padding:12 20;">
+            <Label fx:id="callTitleLabel" text="🎥 Visioconférence"
+                   style="-fx-font-size:16px; -fx-font-weight:bold; -fx-text-fill:white;"/>
+            <Label fx:id="callStatusLabel" text="Connexion..."
+                   style="-fx-font-size:12px; -fx-text-fill:#9ca3af;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="callDurationLabel" text="00:00"
+                   style="-fx-font-size:14px; -fx-text-fill:#6c63ff; -fx-font-weight:bold;"/>
+        </HBox>
+    </top>
+
+    <!-- Zone vidéo principale (Jitsi via WebView) -->
+    <center>
+        <WebView fx:id="webView" BorderPane.alignment="CENTER"/>
+    </center>
+
+    <!-- Barre de contrôles -->
+    <bottom>
+        <HBox alignment="CENTER" spacing="20"
+              style="-fx-background-color:#16213e; -fx-padding:16;">
+
+            <!-- Micro -->
+            <VBox alignment="CENTER" spacing="4">
+                <Button fx:id="micBtn" text="🎤" onAction="#onToggleMic"
+                        style="-fx-background-color:#2d3748; -fx-text-fill:white;
+                               -fx-font-size:20px; -fx-background-radius:50%;
+                               -fx-min-width:56; -fx-min-height:56;
+                               -fx-max-width:56; -fx-max-height:56; -fx-cursor:hand;"/>
+                <Label text="Micro" style="-fx-font-size:10px; -fx-text-fill:#9ca3af;"/>
+            </VBox>
+
+            <!-- Caméra -->
+            <VBox alignment="CENTER" spacing="4">
+                <Button fx:id="camBtn" text="📷" onAction="#onToggleCamera"
+                        style="-fx-background-color:#2d3748; -fx-text-fill:white;
+                               -fx-font-size:20px; -fx-background-radius:50%;
+                               -fx-min-width:56; -fx-min-height:56;
+                               -fx-max-width:56; -fx-max-height:56; -fx-cursor:hand;"/>
+                <Label text="Caméra" style="-fx-font-size:10px; -fx-text-fill:#9ca3af;"/>
+            </VBox>
+
+            <!-- Partage écran -->
+            <VBox alignment="CENTER" spacing="4">
+                <Button text="🖥" onAction="#onShareScreen"
+                        style="-fx-background-color:#2d3748; -fx-text-fill:white;
+                               -fx-font-size:20px; -fx-background-radius:50%;
+                               -fx-min-width:56; -fx-min-height:56;
+                               -fx-max-width:56; -fx-max-height:56; -fx-cursor:hand;"/>
+                <Label text="Partager" style="-fx-font-size:10px; -fx-text-fill:#9ca3af;"/>
+            </VBox>
+
+            <!-- Raccrocher -->
+            <VBox alignment="CENTER" spacing="4">
+                <Button text="📵" onAction="#onHangUp"
+                        style="-fx-background-color:#ef4444; -fx-text-fill:white;
+                               -fx-font-size:20px; -fx-background-radius:50%;
+                               -fx-min-width:64; -fx-min-height:64;
+                               -fx-max-width:64; -fx-max-height:64; -fx-cursor:hand;
+                               -fx-effect:dropshadow(gaussian,rgba(239,68,68,0.5),10,0,0,3);"/>
+                <Label text="Raccrocher" style="-fx-font-size:10px; -fx-text-fill:#ef4444;"/>
+            </VBox>
+
+        </HBox>
+    </bottom>
+
+</BorderPane>

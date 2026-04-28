@@ -74,6 +74,12 @@ public class SignupController {
             // Connexion automatique + redirection dashboard
             session.AppSession.setCurrentUser(created);
             controllers.components.NavbarController.refreshFromSession();
+
+            // Email de bienvenue (asynchrone)
+            if (created.getEmail() != null) {
+                services.EmailService.sendWelcome(created.getEmail(),
+                        created.getFirstName() != null ? created.getFirstName() : "");
+            }
             try {
                 if (session.AppSession.isCoach()) {
                     controllers.navigation.NavigationManager.show(

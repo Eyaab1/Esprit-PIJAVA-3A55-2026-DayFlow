@@ -1157,6 +1157,104 @@ public class ChatroomHubController {
     // ══════════════════════════════════════════════════════════════════════
 
     // ══════════════════════════════════════════════════════════════════════
+    // VISIOCONFÉRENCE
+    // ══════════════════════════════════════════════════════════════════════
+
+    @FXML
+    private void onStartVideoCall() {
+        startCall(false);
+    }
+
+    @FXML
+    private void onStartAudioCall() {
+        startCall(true);
+    }
+
+    private void startCall(boolean audioOnly) {
+        if (current == null) {
+            showNotification("Sélectionnez un salon d'abord.");
+            return;
+        }
+        String userName = AppSession.getCurrentUser()
+                .map(u -> u.getFirstName() + " " + u.getLastName())
+                .orElse("Utilisateur");
+
+        // Nom du salon basé sur le chatroom
+        String roomName = "DayFlow-" + current.goalTitle()
+                .replaceAll("[^a-zA-Z0-9]", "-")
+                .replaceAll("-+", "-")
+                .toLowerCase() + "-" + current.chatroomId();
+
+        // URL Jitsi Meet
+        String url = "https://meet.jit.si/" + roomName +
+                "#config.startWithVideoMuted=" + audioOnly +
+                "&config.startWithAudioMuted=false" +
+                "&config.prejoinPageEnabled=false" +
+                "&userInfo.displayName=" +
+                java.net.URLEncoder.encode(userName, java.nio.charset.StandardCharsets.UTF_8);
+
+        // Ouvrir dans le navigateur système (WebRTC supporté)
+        try {
+            java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
+            showNotification(audioOnly
+                ? "🎤 Appel audio ouvert dans le navigateur"
+                : "🎥 Visioconférence ouverte dans le navigateur");
+
+            // Afficher une info dans le chat
+            showCallInfoInChat(audioOnly, url, userName);
+
+        } catch (Exception e) {
+            // Fallback : copier le lien dans le presse-papier
+            javafx.scene.input.Clipboard cb = javafx.scene.input.Clipboard.getSystemClipboard();
+            javafx.scene.input.ClipboardContent cc = new javafx.scene.input.ClipboardContent();
+            cc.putString(url);
+            cb.setContent(cc);
+            showNotification("🔗 Lien copié — collez-le dans votre navigateur");
+        }
+    }
+
+    /** Affiche un message dans le chat avec le lien d'appel */
+    private void showCallInfoInChat(boolean audioOnly, String url, String userName) {
+        String icon = audioOnly ? "🎤" : "🎥";
+        String type = audioOnly ? "Appel audio" : "Visioconférence";
+
+        // Créer une bulle d'info dans le chat
+        Label icon1 = new Label(icon);
+        icon1.setStyle("-fx-font-size:24px;");
+
+        Label title = new Label(icon + "  " + type + " lancé(e)");
+        title.setStyle("-fx-font-size:13px; -fx-font-weight:bold; -fx-text-fill:#6c63ff;");
+
+        Label info = new Label("Rejoignez via votre navigateur :");
+        info.setStyle("-fx-font-size:11px; -fx-text-fill:#9ca3af;");
+
+        Label link = new Label(url.length() > 60 ? url.substring(0, 60) + "…" : url);
+        link.setStyle("-fx-font-size:11px; -fx-text-fill:#6c63ff; -fx-underline:true; -fx-cursor:hand;");
+        link.setOnMouseClicked(e -> {
+            try { java.awt.Desktop.getDesktop().browse(new java.net.URI(url)); }
+            catch (Exception ignored) {}
+        });
+
+        Label byLabel = new Label("Par " + userName);
+        byLabel.setStyle("-fx-font-size:10px; -fx-text-fill:#9ca3af;");
+
+        VBox callCard = new VBox(6, title, info, link, byLabel);
+        callCard.setStyle(
+            "-fx-background-color:white; -fx-background-radius:14;" +
+            "-fx-padding:12 16; -fx-border-color:#ede9fe;" +
+            "-fx-border-radius:14; -fx-border-width:1;" +
+            "-fx-effect:dropshadow(gaussian,rgba(108,99,255,0.15),8,0,0,2);");
+        callCard.setMaxWidth(360);
+
+        HBox row = new HBox(10, icon1, callCard);
+        row.setAlignment(Pos.CENTER_LEFT);
+        VBox.setMargin(row, new Insets(4, 0, 4, 0));
+
+        messagesBox.getChildren().add(row);
+        scrollToBottom();
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
     // EMOJI PICKER
     // ══════════════════════════════════════════════════════════════════════
 
