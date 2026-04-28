@@ -6,6 +6,7 @@ import services.CRUD;
 import utils.DbConnexion;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -125,6 +126,75 @@ public class RoutineService implements CRUD<Routine, Integer> {
             }
         }
         return null;
+    }
+
+    public Integer findGoalIdByRoutineId(int routineId) throws SQLException {
+        String sql = "SELECT goal_id FROM routine WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, routineId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("goal_id");
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Recalculates routine progress based on completed activities and keeps routine status aligned.
+     * Formula: (completed / total) * 100.
+     */
+    public int recalculateRoutineProgress(int routineId) throws SQLException {
+        String statsSql = """
+                SELECT
+                    COUNT(*)::int AS total_count,
+                    COALESCE(SUM(CASE WHEN LOWER(TRIM(status)) = 'completed' THEN 1 ELSE 0 END), 0)::int AS completed_count
+                FROM activity
+                WHERE routine_id = ?
+                """;
+
+        int total = 0;
+        int completed = 0;
+        try (PreparedStatement ps = cnx.prepareStatement(statsSql)) {
+            ps.setInt(1, routineId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    total = rs.getInt("total_count");
+                    completed = rs.getInt("completed_count");
+                }
+            }
+        }
+
+        int progress = total == 0 ? 0 : Math.round((completed * 100.0f) / total);
+
+        String currentStatus = null;
+        String statusSql = "SELECT status FROM routine WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(statusSql)) {
+            ps.setInt(1, routineId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    currentStatus = rs.getString("status");
+                }
+            }
+        }
+
+        String newStatus = currentStatus;
+        if (progress == 100) {
+            newStatus = "completed";
+        } else if ("completed".equalsIgnoreCase(currentStatus)) {
+            newStatus = "active";
+        }
+
+        String updateSql = "UPDATE routine SET status = ?, updated_at = ? WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(updateSql)) {
+            ps.setString(1, newStatus);
+            ps.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setInt(3, routineId);
+            ps.executeUpdate();
+        }
+
+        return progress;
     }
 
     private static Routine mapRoutine(ResultSet rs) throws SQLException {

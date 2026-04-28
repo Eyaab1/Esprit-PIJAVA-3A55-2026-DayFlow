@@ -68,6 +68,24 @@
       </VBox>
       
       <CheckBox fx:id="hasReminderCheck" text="Activer un rappel" />
+
+      <HBox spacing="15.0">
+         <children>
+            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label styleClass="form-label" text="Date du rappel" />
+                  <DatePicker fx:id="reminderDatePicker" styleClass="form-field" />
+               </children>
+            </VBox>
+
+            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label styleClass="form-label" text="Heure du rappel" />
+                  <TextField fx:id="reminderTimeField" promptText="HH:mm" styleClass="form-field" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
       
       <HBox spacing="10.0" alignment="CENTER_RIGHT">
          <padding>

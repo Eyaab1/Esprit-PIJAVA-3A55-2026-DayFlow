@@ -11,6 +11,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import services.deadline.DeadlineScheduler;
+import services.analytics.AnalyticsScheduler;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -32,6 +33,9 @@ public class GuiApp extends Application {
             
             // Start the deadline scheduler
             DeadlineScheduler.getInstance().start();
+            
+            // Start the analytics scheduler
+            AnalyticsScheduler.getInstance().start();
             
             FXMLLoader shellLoader = new FXMLLoader(GuiApp.class.getResource("/user/account/app_root.fxml"));
             Parent shellRoot = shellLoader.load();

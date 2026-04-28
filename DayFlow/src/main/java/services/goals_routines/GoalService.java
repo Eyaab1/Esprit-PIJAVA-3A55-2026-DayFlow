@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDateTime;
 
 public class GoalService implements CRUD<Goal, Integer> {
 
@@ -381,5 +382,71 @@ public class GoalService implements CRUD<Goal, Integer> {
             }
         }
         return goals;
+    }
+
+    /**
+     * Recalculates goal progress from all activities of linked routines and updates status accordingly.
+     * Formula: (completed activities / total activities) * 100.
+     */
+    public int recalculateGoalProgress(int goalId) throws SQLException {
+        String statsSql = """
+                SELECT
+                    COUNT(a.id)::int AS total_count,
+                    COALESCE(SUM(CASE WHEN LOWER(TRIM(a.status)) = 'completed' THEN 1 ELSE 0 END), 0)::int AS completed_count
+                FROM routine r
+                LEFT JOIN activity a ON a.routine_id = r.id
+                WHERE r.goal_id = ?
+                """;
+
+        int total = 0;
+        int completed = 0;
+        try (PreparedStatement ps = cnx.prepareStatement(statsSql)) {
+            ps.setInt(1, goalId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    total = rs.getInt("total_count");
+                    completed = rs.getInt("completed_count");
+                }
+            }
+        }
+
+        int progress = total == 0 ? 0 : Math.round((completed * 100.0f) / total);
+
+        LocalDateTime deadline = null;
+        String currentStatus = null;
+        String metaSql = "SELECT deadline, status FROM goal WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(metaSql)) {
+            ps.setInt(1, goalId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Timestamp dl = rs.getTimestamp("deadline");
+                    deadline = dl != null ? dl.toLocalDateTime() : null;
+                    currentStatus = rs.getString("status");
+                }
+            }
+        }
+
+        String newStatus = currentStatus;
+        boolean isOverdue = deadline != null && LocalDateTime.now().isAfter(deadline) && progress < 100;
+        if (progress >= 100) {
+            newStatus = "completed";
+        } else if (isOverdue) {
+            newStatus = "failed";
+        } else if (progress > 0) {
+            newStatus = "active";
+        } else {
+            newStatus = "draft";
+        }
+
+        String updateSql = "UPDATE goal SET progress = ?, status = ?, updated_at = ? WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(updateSql)) {
+            ps.setInt(1, progress);
+            ps.setString(2, newStatus);
+            ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setInt(4, goalId);
+            ps.executeUpdate();
+        }
+
+        return progress;
     }
 }

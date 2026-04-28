@@ -249,12 +249,30 @@ public class ActivityDetailsController {
             ChoiceBox<String> statusChoice = (ChoiceBox<String>) formRoot.lookup("#statusChoice");
             DatePicker deadlinePicker = (DatePicker) formRoot.lookup("#deadlinePicker");
             CheckBox hasReminderCheck = (CheckBox) formRoot.lookup("#hasReminderCheck");
+            DatePicker reminderDatePicker = (DatePicker) formRoot.lookup("#reminderDatePicker");
+            TextField reminderTimeField = (TextField) formRoot.lookup("#reminderTimeField");
             Button saveButton = (Button) formRoot.lookup("#saveButton");
             Button cancelButton = (Button) formRoot.lookup("#cancelButton");
             
             // Setup choice boxes
             priorityChoice.getItems().addAll("low", "medium", "high");
             statusChoice.getItems().addAll("pending", "in_progress", "completed", "skipped", "cancelled");
+
+            if (reminderDatePicker != null && reminderTimeField != null) {
+                reminderDatePicker.setDisable(true);
+                reminderTimeField.setDisable(true);
+                reminderTimeField.setText("08:00");
+                hasReminderCheck.selectedProperty().addListener((obs, oldVal, selected) -> {
+                    reminderDatePicker.setDisable(!selected);
+                    reminderTimeField.setDisable(!selected);
+                    if (!selected) {
+                        reminderDatePicker.setValue(null);
+                        reminderTimeField.setText("08:00");
+                    } else if (reminderDatePicker.getValue() == null) {
+                        reminderDatePicker.setValue(LocalDateTime.now().toLocalDate());
+                    }
+                });
+            }
             
             // Validation en temps réel
             titleField.textProperty().addListener((obs, old, newVal) -> {
@@ -289,6 +307,10 @@ public class ActivityDetailsController {
                     deadlinePicker.setValue(activity.getDeadline().toLocalDate());
                 }
                 hasReminderCheck.setSelected(activity.isHasReminder());
+                if (activity.isHasReminder() && activity.getReminderAt() != null && reminderDatePicker != null && reminderTimeField != null) {
+                    reminderDatePicker.setValue(activity.getReminderAt().toLocalDate());
+                    reminderTimeField.setText(activity.getReminderAt().format(DateTimeFormatter.ofPattern("HH:mm")));
+                }
                 Label formTitle = (Label) formRoot.lookup(".form-title");
                 if (formTitle != null) formTitle.setText("Modifier l'Activité");
             } else {
@@ -328,8 +350,28 @@ public class ActivityDetailsController {
                     activityToSave.setStatus(statusChoice.getValue());
                     if (deadlinePicker.getValue() != null) {
                         activityToSave.setDeadline(deadlinePicker.getValue().atStartOfDay());
+                    } else {
+                        activityToSave.setDeadline(null);
                     }
-                    activityToSave.setHasReminder(hasReminderCheck.isSelected());
+
+                    boolean reminderEnabled = hasReminderCheck.isSelected();
+                    activityToSave.setHasReminder(reminderEnabled);
+                    if (reminderEnabled) {
+                        if (reminderDatePicker == null || reminderDatePicker.getValue() == null) {
+                            throw new IllegalArgumentException("Si un rappel est activé, la date de rappel est obligatoire.");
+                        }
+                        String reminderRaw = reminderTimeField != null ? reminderTimeField.getText() : "";
+                        if (reminderRaw == null || !reminderRaw.matches("^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$")) {
+                            throw new IllegalArgumentException("Si un rappel est activé, l'heure de rappel doit respecter le format HH:mm.");
+                        }
+                        String[] reminderParts = reminderRaw.split(":");
+                        activityToSave.setReminderAt(reminderDatePicker.getValue().atTime(
+                                Integer.parseInt(reminderParts[0]),
+                                Integer.parseInt(reminderParts[1])
+                        ));
+                    } else {
+                        activityToSave.setReminderAt(null);
+                    }
                     activityToSave.setRoutine(currentRoutine);
                     
                     if (activity == null) {

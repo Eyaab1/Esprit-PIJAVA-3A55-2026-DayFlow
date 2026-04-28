@@ -130,14 +130,15 @@ public class Activity {
     }
 
     public void setHasReminder(boolean hasReminder) {
-        validateReminder(hasReminder, this.reminderAt);
         this.hasReminder = hasReminder;
+        if (!hasReminder) {
+            // Keep object/database state consistent when reminder is disabled.
+            this.reminderAt = null;
+        }
     }
 
     public void setReminderAt(LocalDateTime reminderAt) {
         this.reminderAt = reminderAt;
-        // Re-check reminder consistency
-        validateReminder(this.hasReminder, reminderAt);
     }
 
     public void setDeadline(LocalDateTime deadline)                     { this.deadline               = deadline; }

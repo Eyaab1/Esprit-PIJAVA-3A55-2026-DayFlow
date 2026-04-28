@@ -6,6 +6,7 @@ import services.CRUD;
 import utils.DbConnexion;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,8 @@ public class ActivityService implements CRUD<Activity, Integer> {
     }
 
     private Connection cnx;
+    private final RoutineService routineService = new RoutineService();
+    private final GoalService goalService = new GoalService();
 
     public ActivityService() {
         cnx = DbConnexion.getInstance().getCnx();
@@ -27,6 +30,8 @@ public class ActivityService implements CRUD<Activity, Integer> {
 
     @Override
     public void insert(Activity a) throws SQLException {
+        normalizeAndValidateForPersistence(a);
+        alignCompletionTimestamp(a);
 
         String sql = """
                 INSERT INTO activity (
@@ -70,6 +75,10 @@ public class ActivityService implements CRUD<Activity, Integer> {
                     a.setId(keys.getInt(1));
                 }
             }
+        }
+
+        if (a.getRoutine() != null) {
+            handleProgressRecalculation(a.getRoutine().getId());
         }
     }
 
@@ -158,7 +167,9 @@ public class ActivityService implements CRUD<Activity, Integer> {
 
     @Override
     public void update(Activity a) throws SQLException {
-
+        Integer previousRoutineId = findRoutineIdByActivityId(a.getId());
+        normalizeAndValidateForPersistence(a);
+        alignCompletionTimestamp(a);
         a.onUpdate();
 
         String sql = "UPDATE activity SET title=?, start_time=?, duration=?, status=?, priority=?, has_reminder=?, reminder_at=?, deadline=?, is_favorite=?, completed_at=?, actual_duration_minutes=?, planned_duration_minutes=?, updated_at=?, routine_id=? WHERE id=?";
@@ -191,14 +202,131 @@ public class ActivityService implements CRUD<Activity, Integer> {
 
             ps.executeUpdate();
         }
+
+        if (previousRoutineId != null) {
+            handleProgressRecalculation(previousRoutineId);
+        }
+        if (a.getRoutine() != null && (previousRoutineId == null || previousRoutineId != a.getRoutine().getId())) {
+            handleProgressRecalculation(a.getRoutine().getId());
+        }
     }
 
     @Override
     public void delete(Integer id) throws SQLException {
+        Integer routineId = findRoutineIdByActivityId(id);
         String sql = "DELETE FROM activity WHERE id=?";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
+        }
+        if (routineId != null) {
+            handleProgressRecalculation(routineId);
+        }
+    }
+
+    public Activity findById(int id) throws SQLException {
+        String sql = """
+                SELECT id, title, start_time, duration, status, priority,
+                       has_reminder, reminder_at, deadline, is_favorite,
+                       completed_at, actual_duration_minutes, planned_duration_minutes,
+                       created_at, updated_at, routine_id
+                FROM activity
+                WHERE id = ?
+                """;
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapActivity(rs);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Updates only activity status with transactional progress recalculation.
+     */
+    public void updateActivityStatus(int activityId, String newStatus) throws SQLException {
+        if (newStatus == null || newStatus.isBlank()) {
+            throw new IllegalArgumentException("Le statut de l'activité est obligatoire.");
+        }
+        String normalizedStatus = newStatus.trim().toLowerCase();
+        Activity.validateStatus(normalizedStatus);
+
+        boolean previousAutoCommit = cnx.getAutoCommit();
+        try {
+            cnx.setAutoCommit(false);
+
+            Integer routineId = findRoutineIdByActivityId(activityId);
+            if (routineId == null) {
+                throw new IllegalArgumentException("Activité introuvable: " + activityId);
+            }
+
+            Timestamp completedAt = "completed".equals(normalizedStatus) ? Timestamp.valueOf(LocalDateTime.now()) : null;
+
+            String sql = "UPDATE activity SET status = ?, completed_at = ?, updated_at = ? WHERE id = ?";
+            try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+                ps.setString(1, normalizedStatus);
+                ps.setTimestamp(2, completedAt);
+                ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+                ps.setInt(4, activityId);
+                ps.executeUpdate();
+            }
+
+            routineService.recalculateRoutineProgress(routineId);
+            Integer goalId = routineService.findGoalIdByRoutineId(routineId);
+            if (goalId != null) {
+                goalService.recalculateGoalProgress(goalId);
+            }
+
+            cnx.commit();
+        } catch (Exception e) {
+            cnx.rollback();
+            if (e instanceof SQLException sqlException) {
+                throw sqlException;
+            }
+            throw new SQLException("Erreur lors de la mise à jour du statut de l'activité.", e);
+        } finally {
+            cnx.setAutoCommit(previousAutoCommit);
+        }
+    }
+
+    private Integer findRoutineIdByActivityId(int activityId) throws SQLException {
+        String sql = "SELECT routine_id FROM activity WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, activityId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("routine_id");
+                }
+            }
+        }
+        return null;
+    }
+
+    private void normalizeAndValidateForPersistence(Activity activity) {
+        if (!activity.isHasReminder()) {
+            activity.setReminderAt(null);
+        }
+        activity.validate();
+    }
+
+    private void alignCompletionTimestamp(Activity activity) {
+        if ("completed".equalsIgnoreCase(activity.getStatus())) {
+            if (activity.getCompletedAt() == null) {
+                activity.setCompletedAt(LocalDateTime.now());
+            }
+        } else {
+            activity.setCompletedAt(null);
+        }
+    }
+
+    private void handleProgressRecalculation(int routineId) throws SQLException {
+        routineService.recalculateRoutineProgress(routineId);
+        Integer goalId = routineService.findGoalIdByRoutineId(routineId);
+        if (goalId != null) {
+            goalService.recalculateGoalProgress(goalId);
         }
     }
 
