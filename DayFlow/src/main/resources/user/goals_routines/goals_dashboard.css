@@ -224,3 +224,45 @@
 .btn-open-detail:hover {
     -fx-background-color: #4f46e5;
 }
+
+.btn-icon-edit {
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-padding: 6 10;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-border-radius: 6;
+}
+
+.btn-icon-edit:hover {
+    -fx-background-color: #2563eb;
+}
+
+.btn-icon-duplicate {
+    -fx-background-color: #8b5cf6;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-padding: 6 10;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-border-radius: 6;
+}
+
+.btn-icon-duplicate:hover {
+    -fx-background-color: #7c3aed;
+}
+
+.btn-icon-delete {
+    -fx-background-color: #ef4444;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-padding: 6 10;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-border-radius: 6;
+}
+
+.btn-icon-delete:hover {
+    -fx-background-color: #dc2626;
+}

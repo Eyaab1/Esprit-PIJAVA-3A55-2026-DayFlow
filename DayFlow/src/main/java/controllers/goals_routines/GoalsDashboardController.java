@@ -166,7 +166,29 @@ public class GoalsDashboardController {
         dLbl.getStyleClass().add("goal-row-desc");
         textCol.getChildren().addAll(title, dLbl);
         HBox.setHgrow(textCol, Priority.ALWAYS);
-        head.getChildren().addAll(icon, textCol);
+        
+        // Add edit and delete icons
+        int goalId = g.getId();
+        HBox actionIcons = new HBox(8);
+        actionIcons.setAlignment(Pos.CENTER_RIGHT);
+        
+        Button editBtn = new Button("✏️");
+        editBtn.getStyleClass().add("btn-icon-edit");
+        editBtn.setStyle("-fx-font-size: 16px; -fx-padding: 4px 8px;");
+        editBtn.setOnAction(e -> onEditGoal(goalId));
+        
+        Button duplicateBtn = new Button("📋");
+        duplicateBtn.getStyleClass().add("btn-icon-duplicate");
+        duplicateBtn.setStyle("-fx-font-size: 16px; -fx-padding: 4px 8px;");
+        duplicateBtn.setOnAction(e -> onDuplicateGoal(goalId));
+        
+        Button deleteBtn = new Button("🗑️");
+        deleteBtn.getStyleClass().add("btn-icon-delete");
+        deleteBtn.setStyle("-fx-font-size: 16px; -fx-padding: 4px 8px;");
+        deleteBtn.setOnAction(e -> onDeleteGoal(goalId));
+        
+        actionIcons.getChildren().addAll(editBtn, duplicateBtn, deleteBtn);
+        head.getChildren().addAll(icon, textCol, actionIcons);
 
         HBox badges = new HBox(8);
         badges.getStyleClass().add("goal-row-meta");
@@ -186,7 +208,6 @@ public class GoalsDashboardController {
         bar.setMaxWidth(Double.MAX_VALUE);
         bar.getStyleClass().add("goal-progress-bar");
 
-        int goalId = g.getId();
         Button join = new Button("Rejoindre");
         join.getStyleClass().add("btn-join");
         join.setOnAction(e -> onJoin(goalId));
@@ -322,5 +343,136 @@ public class GoalsDashboardController {
 
     private static void alert(Alert.AlertType t, String m) {
         new Alert(t, m).showAndWait();
+    }
+
+    private void onEditGoal(int goalId) {
+        try {
+            Optional<GoalListRow> goalOpt = goalService.findAllForDashboard().stream()
+                    .filter(row -> row.goal().getId() == goalId)
+                    .findFirst();
+            
+            if (goalOpt.isEmpty()) {
+                alert(Alert.AlertType.ERROR, "Objectif non trouvé.");
+                return;
+            }
+            
+            Goal g = goalOpt.get().goal();
+            
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Modifier l'objectif");
+            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+            TextField titleF = new TextField(g.getTitle());
+            TextArea descF = new TextArea(g.getDescription() != null ? g.getDescription() : "");
+            descF.setPrefRowCount(4);
+            descF.setWrapText(true);
+            DatePicker start = new DatePicker(g.getStartDate());
+            DatePicker end = new DatePicker(g.getEndDate());
+            ComboBox<String> status = new ComboBox<>();
+            status.getItems().addAll("active", "draft", "paused", "completed", "failed", "archived");
+            status.getSelectionModel().select(g.getStatus());
+
+            javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(10));
+            int r = 0;
+            grid.add(new Label("Titre *"), 0, r);
+            grid.add(titleF, 1, r++);
+            grid.add(new Label("Description"), 0, r);
+            grid.add(descF, 1, r++);
+            grid.add(new Label("Début *"), 0, r);
+            grid.add(start, 1, r++);
+            grid.add(new Label("Fin *"), 0, r);
+            grid.add(end, 1, r++);
+            grid.add(new Label("Statut"), 0, r);
+            grid.add(status, 1, r);
+            dialog.getDialogPane().setContent(grid);
+
+            Optional<ButtonType> res = dialog.showAndWait();
+            if (res.isEmpty() || res.get() != ButtonType.OK) {
+                return;
+            }
+            
+            g.setTitle(titleF.getText() != null ? titleF.getText().trim() : "");
+            g.setDescription(descF.getText() != null ? descF.getText().trim() : null);
+            g.setStartDate(start.getValue());
+            g.setEndDate(end.getValue());
+            g.setStatus(status.getValue());
+            g.onUpdate();
+            g.validate();
+            goalService.update(g);
+            alert(Alert.AlertType.INFORMATION, "Objectif modifié avec succès.");
+            refreshAll();
+        } catch (Exception ex) {
+            alert(Alert.AlertType.ERROR, "Erreur: " + ex.getMessage());
+        }
+    }
+
+    private void onDeleteGoal(int goalId) {
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmDialog.setTitle("Supprimer l'objectif");
+        confirmDialog.setHeaderText("Êtes-vous sûr?");
+        confirmDialog.setContentText("Cette action est irréversible. Tous les données associées seront supprimées.");
+        
+        Optional<ButtonType> result = confirmDialog.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                goalService.delete(goalId);
+                alert(Alert.AlertType.INFORMATION, "Objectif supprimé avec succès.");
+                refreshAll();
+            } catch (Exception ex) {
+                alert(Alert.AlertType.ERROR, "Erreur: " + ex.getMessage());
+            }
+        }
+    }
+
+    private void onDuplicateGoal(int goalId) {
+        try {
+            Optional<GoalListRow> goalOpt = goalService.findAllForDashboard().stream()
+                    .filter(row -> row.goal().getId() == goalId)
+                    .findFirst();
+            
+            if (goalOpt.isEmpty()) {
+                alert(Alert.AlertType.ERROR, "Objectif non trouvé.");
+                return;
+            }
+            
+            Goal originalGoal = goalOpt.get().goal();
+            Optional<Integer> uid = AppSession.getCurrentUser().map(u -> u.getId());
+            
+            if (uid.isEmpty()) {
+                alert(Alert.AlertType.WARNING, "Connectez-vous pour dupliquer un objectif.");
+                return;
+            }
+            
+            // Create a new goal with the same data
+            Goal newGoal = new Goal();
+            newGoal.setTitle(originalGoal.getTitle() + " (Copie)");
+            newGoal.setDescription(originalGoal.getDescription());
+            newGoal.setStartDate(originalGoal.getStartDate());
+            newGoal.setEndDate(originalGoal.getEndDate());
+            newGoal.setStatus("draft"); // New goals start as draft
+            newGoal.setPriority(originalGoal.getPriority());
+            newGoal.setProgress(0); // Reset progress
+            newGoal.setRequiredTasks(originalGoal.getRequiredTasks());
+            
+            User owner = new User();
+            owner.setId(uid.get());
+            newGoal.setUser(owner);
+            newGoal.onUpdate();
+            newGoal.validate();
+            
+            // Insert the new goal
+            goalService.insert(newGoal);
+            
+            // Create chatroom and participation for the new goal
+            lifecycle.ensureChatroomAndOwner(newGoal.getId(), uid.get());
+            
+            alert(Alert.AlertType.INFORMATION, "Objectif dupliqué avec succès. La copie a été créée en tant que brouillon.");
+            refreshAll();
+        } catch (Exception ex) {
+            alert(Alert.AlertType.ERROR, "Erreur: " + ex.getMessage());
+        }
     }
 }
