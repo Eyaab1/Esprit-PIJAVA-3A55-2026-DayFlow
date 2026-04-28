@@ -35,8 +35,8 @@ public class NotificationService implements CRUD<Notification, Integer> {
 
         try (PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, notification.getUserId());
-            ps.setString(2, notification.getType().name());
-            ps.setString(3, notification.getEntityType().name().toLowerCase());
+            ps.setString(2, notification.getType());
+            ps.setString(3, notification.getEntityType());
             ps.setInt(4, notification.getEntityId());
             ps.setString(5, notification.getTitle());
             ps.setString(6, notification.getMessage());
@@ -63,8 +63,8 @@ public class NotificationService implements CRUD<Notification, Integer> {
                 """;
 
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            ps.setString(1, notification.getType().name());
-            ps.setString(2, notification.getEntityType().name().toLowerCase());
+            ps.setString(1, notification.getType());
+            ps.setString(2, notification.getEntityType());
             ps.setInt(3, notification.getEntityId());
             ps.setString(4, notification.getTitle());
             ps.setString(5, notification.getMessage());
