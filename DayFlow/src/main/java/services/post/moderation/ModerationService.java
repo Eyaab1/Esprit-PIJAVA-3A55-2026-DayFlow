@@ -14,6 +14,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,10 @@ import java.util.Optional;
 import java.util.Properties;
 
 public class ModerationService {
+import java.util.logging.Logger;
+
+public class ModerationService {
+    private static final Logger LOG = Logger.getLogger(ModerationService.class.getName());
 
     private static final String API_URL = "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze";
     private static final List<String> REQUEST_ATTRIBUTES = List.of(
@@ -41,6 +46,7 @@ public class ModerationService {
     private final ModerationLogService logService;
     private final String apiKey;
     private final double toxicityThreshold;
+    private final boolean failOpen;
 
     public ModerationService() {
         this(new UserService(), new ModerationLogService());
@@ -53,6 +59,7 @@ public class ModerationService {
         Properties properties = loadApplicationProperties();
         this.apiKey = readRequiredProperty(properties, "PERSPECTIVE_API_KEY");
         this.toxicityThreshold = readThreshold(properties);
+        this.failOpen = readFailOpen(properties);
     }
 
     public double getToxicityThreshold() {
@@ -60,6 +67,7 @@ public class ModerationService {
     }
 
     public void validatePostContent(Integer userId, String entityType, String title, String content) throws SQLException {
+        User user = ensureUserCanInteract(userId);
         ModerationResult titleResult = analyzeText(title, "post_title");
         ModerationResult contentResult = analyzeText(content, "post_content");
         ModerationResult mergedResult = ModerationResult.merge("post", toxicityThreshold, titleResult, contentResult);
@@ -67,6 +75,8 @@ public class ModerationService {
         if (mergedResult.isRejected()) {
             User user = findUser(userId);
             logService.logRejectedAttempt(user, entityType, previewPost(title, content), mergedResult);
+            String exact = "Titre: " + normalizeForPreview(title) + "\nContenu: " + normalizeForPreview(content);
+            logService.logRejectedAttempt(user, entityType, exact, previewPost(title, content), mergedResult);
             throw new ModerationRejectedException(mergedResult.getUserMessage(), mergedResult);
         }
     }
@@ -76,6 +86,10 @@ public class ModerationService {
         if (result.isRejected()) {
             User user = findUser(userId);
             logService.logRejectedAttempt(user, entityType, preview(content), result);
+        User user = ensureUserCanInteract(userId);
+        ModerationResult result = analyzeText(content, "comment");
+        if (result.isRejected()) {
+            logService.logRejectedAttempt(user, entityType, normalizeForPreview(content), preview(content), result);
             throw new ModerationRejectedException(result.getUserMessage(), result);
         }
     }
@@ -98,6 +112,19 @@ public class ModerationService {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new SQLException("La vérification de modération a été interrompue.", e);
+                String providerMessage = extractApiErrorMessage(response.body());
+                String reason = "Le service de modération a refusé la requête (HTTP " + response.statusCode() + ").";
+                if (!providerMessage.isBlank()) {
+                    reason += " Détail: " + providerMessage;
+                }
+                return handleProviderFailure(source, reason, null);
+            }
+            return parseResponse(source, response.body());
+        } catch (IOException e) {
+            return handleProviderFailure(source, "Le service de modération est indisponible pour le moment.", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return handleProviderFailure(source, "La vérification de modération a été interrompue.", e);
         }
     }
 
@@ -166,6 +193,39 @@ public class ModerationService {
         }
     }
 
+    private User ensureUserCanInteract(Integer userId) throws SQLException {
+        User user = findUser(userId);
+        if (user == null) {
+            return null;
+        }
+        String status = user.getStatus() == null ? "" : user.getStatus().trim().toLowerCase();
+        LocalDateTime now = LocalDateTime.now();
+
+        if ("temp_banned".equals(status)) {
+            LocalDateTime bannedUntil = user.getBannedUntil();
+            if (bannedUntil == null || now.isBefore(bannedUntil)) {
+                String untilText = bannedUntil != null ? (" jusqu'au " + bannedUntil) : "";
+                throw new ModerationRejectedException(
+                        "Votre compte est temporairement suspendu" + untilText + ".",
+                        ModerationResult.fromScores("ban_status", toxicityThreshold, Map.of())
+                );
+            }
+            userService.updateModerationStatus(user.getId(), "active", null, null);
+            user.setStatus("active");
+            user.setBannedUntil(null);
+            user.setBanReason(null);
+            return user;
+        }
+
+        if ("banned".equals(status) || "permanent_banned".equals(status)) {
+            throw new ModerationRejectedException(
+                    "Votre compte est banni définitivement.",
+                    ModerationResult.fromScores("ban_status", toxicityThreshold, Map.of())
+            );
+        }
+        return user;
+    }
+
     private static Properties loadApplicationProperties() {
         Properties properties = new Properties();
         try (InputStream inputStream = ModerationService.class.getClassLoader().getResourceAsStream("application.properties")) {
@@ -197,6 +257,39 @@ public class ModerationService {
             return threshold;
         } catch (NumberFormatException e) {
             throw new IllegalStateException("PERSPECTIVE_TOXICITY_THRESHOLD invalide: " + value, e);
+        }
+    }
+
+    private static boolean readFailOpen(Properties properties) {
+        String value = properties.getProperty("PERSPECTIVE_FAIL_OPEN", "true");
+        return Boolean.parseBoolean(value.trim());
+    }
+
+    private ModerationResult handleProviderFailure(String source, String message, Exception cause) throws SQLException {
+        if (!failOpen) {
+            if (cause == null) {
+                throw new SQLException(message);
+            }
+            throw new SQLException(message, cause);
+        }
+        if (cause == null) {
+            LOG.warning("[Moderation] " + message + " -> fail-open active, message allowed.");
+        } else {
+            LOG.warning("[Moderation] " + message + " -> fail-open active, message allowed. cause=" + cause.getMessage());
+        }
+        return ModerationResult.fromScores(source, toxicityThreshold, Map.of());
+    }
+
+    private static String extractApiErrorMessage(String responseBody) {
+        try {
+            JsonNode root = JSON.readTree(responseBody);
+            JsonNode msgNode = root.path("error").path("message");
+            if (msgNode.isTextual()) {
+                return msgNode.asText("").trim();
+            }
+            return "";
+        } catch (Exception ignored) {
+            return "";
         }
     }
 

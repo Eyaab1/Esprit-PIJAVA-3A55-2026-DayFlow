@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane fx:controller="controllers.account.LoginController" prefHeight="520.0" prefWidth="900.0" stylesheets="@../../styles/auth.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <VBox alignment="CENTER" spacing="14.0" styleClass="auth-card" AnchorPane.bottomAnchor="60.0" AnchorPane.leftAnchor="250.0" AnchorPane.rightAnchor="250.0" AnchorPane.topAnchor="60.0">
+         <padding>
+            <Insets bottom="35.0" left="35.0" right="35.0" top="35.0" />
+         </padding>
+         <children>
+            <Label styleClass="auth-title" text="Welcome Back" />
+            <Label styleClass="auth-subtitle" text="Sign in to continue to DayFlow" />
+            <TextField fx:id="emailField" promptText="Email address" prefHeight="38.0" prefWidth="360.0" />
+            <PasswordField fx:id="passwordField" promptText="Password" prefHeight="38.0" prefWidth="360.0" />
+            <Label fx:id="formMessageLabel" text="" visible="false" managed="false" wrapText="true" maxWidth="360.0" styleClass="auth-error-msg" />
+            <Button fx:id="loginButton" mnemonicParsing="false" prefHeight="40.0" prefWidth="360.0" styleClass="primary-button" text="Login" />
+            <Button fx:id="googleLoginButton" mnemonicParsing="false" prefHeight="38.0" prefWidth="360.0" styleClass="secondary-button" text="Continue with Google" />
+            <Hyperlink fx:id="forgotPasswordLink" text="Forgot password?" />
+            <Hyperlink fx:id="resetWithTokenLink" text="Already have a reset token?" />
+            <Label text="Don't have an account yet?" />
+            <Button fx:id="goToSignupButton" mnemonicParsing="false" prefHeight="38.0" prefWidth="360.0" styleClass="secondary-button" text="Create account" />
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

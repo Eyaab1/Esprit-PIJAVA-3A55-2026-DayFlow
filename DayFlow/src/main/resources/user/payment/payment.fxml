@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox styleClass="payment-root" stylesheets="@payment.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.payment.PaymentController">
+   <children>
+      <!-- En-tête -->
+      <VBox styleClass="payment-header">
+         <children>
+            <Label styleClass="payment-title" text="💳 Paiement de la séance" />
+            <Label styleClass="payment-subtitle" text="Confirmez votre présence en réglant la séance" />
+         </children>
+      </VBox>
+
+      <Separator />
+
+      <!-- Informations de la demande -->
+      <VBox styleClass="section-box">
+         <children>
+            <Label styleClass="section-title" text="📋 Informations de la séance" />
+            
+            <HBox styleClass="info-row">
+               <children>
+                  <Label styleClass="info-label" text="Demande :" />
+                  <Label fx:id="requestIdLabel" styleClass="info-value" text="Demande #0" />
+               </children>
+            </HBox>
+
+            <HBox styleClass="info-row">
+               <children>
+                  <Label styleClass="info-label" text="Coach :" />
+                  <Label fx:id="coachNameLabel" styleClass="info-value" text="Nom du coach" />
+               </children>
+            </HBox>
+
+            <HBox styleClass="info-row">
+               <children>
+                  <Label styleClass="info-label" text="Date de demande :" />
+                  <Label fx:id="sessionDateLabel" styleClass="info-value" text="01/01/2024" />
+               </children>
+            </HBox>
+
+            <HBox styleClass="info-row">
+               <children>
+                  <Label styleClass="info-label" text="Type de coaching :" />
+                  <Label fx:id="sessionTypeLabel" styleClass="info-value" text="Type" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+
+      <Separator />
+
+      <!-- Informations du paiement -->
+      <VBox fx:id="paymentInfoBox" styleClass="section-box payment-info-box">
+         <children>
+            <Label styleClass="section-title" text="💰 Détails du paiement" />
+            
+            <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="amount-box">
+               <children>
+                  <Label styleClass="amount-label" text="Montant :" />
+                  <Label fx:id="amountLabel" styleClass="amount-value" text="50.00" />
+                  <Label fx:id="currencyLabel" styleClass="currency-label" text="EUR" />
+               </children>
+            </HBox>
+
+            <HBox styleClass="info-row">
+               <children>
+                  <Label styleClass="info-label" text="Statut :" />
+                  <Label fx:id="statusLabel" styleClass="info-value status-pending" text="En attente" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+
+      <!-- Message de statut -->
+      <Label fx:id="messageLabel" managed="false" styleClass="message-info" text="" visible="false" wrapText="true">
+         <VBox.margin>
+            <Insets bottom="12.0" left="20.0" right="20.0" top="12.0" />
+         </VBox.margin>
+      </Label>
+
+      <!-- Progress indicator -->
+      <ProgressIndicator fx:id="progressIndicator" maxHeight="40.0" maxWidth="40.0" visible="false">
+         <VBox.margin>
+            <Insets bottom="12.0" top="12.0" />
+         </VBox.margin>
+      </ProgressIndicator>
+
+      <Separator />
+
+      <!-- Boutons d'action -->
+      <HBox alignment="CENTER" spacing="16.0" styleClass="button-bar">
+         <children>
+            <Button fx:id="payButton" styleClass="btn-primary" text="💳 Payer la séance" />
+            <Button fx:id="cancelButton" styleClass="btn-secondary" text="Annuler le paiement" />
+            <Button fx:id="closeButton" styleClass="btn-tertiary" text="Fermer" />
+         </children>
+      </HBox>
+
+      <!-- Note de sécurité -->
+      <VBox styleClass="security-note">
+         <children>
+            <Label styleClass="security-icon" text="🔒" />
+            <Label styleClass="security-text" text="Paiement sécurisé par Stripe" wrapText="true" />
+            <Label styleClass="security-subtext" text="Vos informations bancaires sont protégées et ne sont jamais stockées sur nos serveurs." wrapText="true" />
+         </children>
+      </VBox>
+   </children>
+   <padding>
+      <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+   </padding>
+</VBox>

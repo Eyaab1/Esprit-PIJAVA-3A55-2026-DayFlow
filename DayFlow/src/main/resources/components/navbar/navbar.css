@@ -1,92 +1,145 @@
-/* Navbar globale DayFlow — user & coach */
 .navbar-root {
     -fx-background-color: #ffffff;
-    -fx-border-color: #e5e7eb;
+    -fx-border-color: #e9ecef;
     -fx-border-width: 0 0 1 0;
-    -fx-padding: 12 28 12 28;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 6, 0, 0, 1);
+    -fx-padding: 10 20;
+    -fx-spacing: 8;
+    -fx-alignment: CENTER_LEFT;
 }
 
-.navbar-logo-box {
+.navbar-root .hyperlink {
+    -fx-underline: false;
+    -fx-text-fill: #495057;
+    -fx-font-size: 13px;
+}
+
+.navbar-root .hyperlink:hover {
+    -fx-text-fill: #6c5ce7;
+}
+
+.navbar-brand {
+    -fx-text-fill: #6c5ce7;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 8 0 0;
+}
+
+.navbar-brand-sep {
+    -fx-padding: 0 10 0 0;
+}
+
+.navbar-avatar {
+    -fx-background-color: #6c5ce7;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-min-width: 36px;
+    -fx-min-height: 36px;
+    -fx-alignment: center;
+    -fx-background-radius: 18px;
+    -fx-padding: 0;
+    -fx-underline: false;
+    -fx-border-width: 0;
+}
+
+.navbar-avatar:hover {
+    -fx-background-color: #5b4cdb;
+    -fx-text-fill: white;
+}
+
+.navbar-spacer {
+    -fx-min-width: 12px;
+}
+
+.navbar-notif-wrap {
     -fx-min-width: 36px;
     -fx-min-height: 36px;
     -fx-max-width: 36px;
     -fx-max-height: 36px;
-    -fx-background-color: linear-gradient(to bottom right, #a78bfa, #60a5fa);
-    -fx-background-radius: 8px;
     -fx-alignment: center;
 }
 
-.navbar-logo-text {
-    -fx-text-fill: white;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
+.navbar-bell-btn {
+    -fx-background-color: #f3f0ff;
+    -fx-text-fill: #5b4cdb;
+    -fx-font-size: 14px;
+    -fx-background-radius: 999;
+    -fx-min-width: 34px;
+    -fx-min-height: 34px;
+    -fx-max-width: 34px;
+    -fx-max-height: 34px;
+    -fx-cursor: hand;
 }
 
-.navbar-brand {
-    -fx-font-size: 18px;
+.navbar-bell-btn:hover {
+    -fx-background-color: #e9e2ff;
+}
+
+.navbar-notif-badge {
+    -fx-background-color: #ef4444;
+    -fx-text-fill: white;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+    -fx-min-width: 16px;
+    -fx-min-height: 16px;
+    -fx-padding: 1 4;
+    -fx-background-radius: 999;
+    -fx-translate-x: 10px;
+    -fx-translate-y: -10px;
+}
+
+.notif-panel {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: #e9ecef;
+    -fx-border-radius: 12;
+    -fx-padding: 10;
+    -fx-spacing: 8;
+}
+
+.notif-title {
+    -fx-font-size: 13px;
     -fx-font-weight: bold;
     -fx-text-fill: #111827;
 }
 
-.nav-link {
-    -fx-text-fill: #6b7280;
-    -fx-font-size: 14px;
-    -fx-underline: false;
-    -fx-border-color: transparent;
-    -fx-background-color: transparent;
-    -fx-padding: 6 10;
-    -fx-cursor: hand;
-}
-
-.nav-link:hover {
-    -fx-text-fill: #7c3aed;
-}
-
-.nav-icon-btn {
-    -fx-background-color: transparent;
-    -fx-text-fill: #4b5563;
-    -fx-font-size: 18px;
-    -fx-padding: 6 8;
-    -fx-cursor: hand;
-}
-
-.nav-icon-btn:hover {
-    -fx-text-fill: #7c3aed;
-}
-
-.notif-badge {
-    -fx-background-color: #ef4444;
-    -fx-background-radius: 8px;
-    -fx-min-width: 8px;
-    -fx-min-height: 8px;
-    -fx-max-width: 8px;
-    -fx-max-height: 8px;
-}
-
-.navbar-avatar {
-    -fx-min-width: 36px;
-    -fx-min-height: 36px;
-    -fx-max-width: 36px;
-    -fx-max-height: 36px;
-    -fx-background-radius: 18px;
-    -fx-background-color: #ea580c;
+.notif-mark-all-btn {
+    -fx-background-color: #6c5ce7;
     -fx-text-fill: white;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-    -fx-alignment: center;
-}
-
-.btn-logout {
-    -fx-background-color: #ef4444;
-    -fx-text-fill: white;
-    -fx-background-radius: 8px;
-    -fx-padding: 8 16;
-    -fx-font-size: 13px;
+    -fx-font-size: 11px;
     -fx-font-weight: 600;
+    -fx-background-radius: 8;
+    -fx-padding: 4 8;
     -fx-cursor: hand;
 }
 
-.btn-logout:hover {
-    -fx-background-color: #dc2626;
+.notif-item {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 8;
+    -fx-padding: 8;
+}
+
+.notif-item-unread {
+    -fx-background-color: #eef2ff;
+    -fx-border-color: #c7d2fe;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+}
+
+.notif-type {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6d28d9;
+}
+
+.notif-message {
+    -fx-font-size: 12px;
+    -fx-text-fill: #1f2937;
+    -fx-wrap-text: true;
+}
+
+.notif-meta {
+    -fx-font-size: 10px;
+    -fx-text-fill: #6b7280;
 }

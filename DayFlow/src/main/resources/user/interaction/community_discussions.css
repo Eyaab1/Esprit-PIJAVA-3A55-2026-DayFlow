@@ -1,0 +1,190 @@
+.comm-disc-root {
+    -fx-font-family: "Segoe UI", "Inter", "Arial", sans-serif;
+    -fx-background-color: linear-gradient(to bottom, #ede9fe 0%, #e0e7ff 40%, #f8fafc 100%);
+    -fx-spacing: 16;
+}
+
+.comm-disc-header {
+    -fx-padding: 0 0 4 0;
+}
+
+.comm-disc-emoji {
+    -fx-font-size: 32px;
+}
+
+.comm-disc-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e1b4b;
+}
+
+.comm-disc-sub {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+}
+
+.btn-comm-back {
+    -fx-background-color: white;
+    -fx-text-fill: #4f46e5;
+    -fx-font-weight: 700;
+    -fx-padding: 10 18;
+    -fx-background-radius: 10;
+    -fx-border-color: #c7d2fe;
+    -fx-border-radius: 10;
+    -fx-cursor: hand;
+}
+
+.btn-comm-back:hover {
+    -fx-background-color: #eef2ff;
+}
+
+.comm-disc-toolbar {
+    -fx-padding: 0 0 8 0;
+}
+
+.filter-label-comm {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #64748b;
+}
+
+.comm-disc-search {
+    -fx-max-width: Infinity;
+    -fx-background-radius: 10;
+    -fx-padding: 8 12;
+}
+
+.comm-disc-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.comm-disc-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.comm-disc-flow {
+    -fx-padding: 4 4 24 4;
+}
+
+.disc-card {
+    -fx-spacing: 10;
+    -fx-padding: 18 18 16 18;
+    -fx-pref-width: 320;
+    -fx-max-width: 340;
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(79, 70, 229, 0.12), 18, 0, 0, 3);
+}
+
+.disc-card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+    -fx-wrap-text: true;
+}
+
+.disc-owner-line {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748b;
+}
+
+.disc-desc {
+    -fx-font-size: 12px;
+    -fx-text-fill: #475569;
+    -fx-wrap-text: true;
+    -fx-max-height: 72;
+}
+
+.disc-meta-box {
+    -fx-spacing: 6;
+    -fx-padding: 10 12;
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 10;
+}
+
+.disc-meta-line {
+    -fx-font-size: 11px;
+    -fx-text-fill: #64748b;
+}
+
+.disc-actions {
+    -fx-spacing: 8;
+    -fx-padding: 6 0 0 0;
+}
+
+.btn-disc-join {
+    -fx-background-color: #22c55e;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-padding: 8 12;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.btn-disc-leave {
+    -fx-background-color: #ef4444;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-padding: 8 12;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.btn-disc-chat {
+    -fx-background-color: #6366f1;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-padding: 8 12;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.btn-disc-chat-wait {
+    -fx-background-color: #fed7aa;
+    -fx-text-fill: #9a3412;
+    -fx-font-weight: 600;
+    -fx-padding: 8 10;
+    -fx-background-radius: 8;
+}
+
+.btn-disc-chat-disabled {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #94a3b8;
+    -fx-font-weight: 600;
+    -fx-padding: 8 12;
+    -fx-background-radius: 8;
+}
+
+.btn-disc-pending {
+    -fx-background-color: #fde68a;
+    -fx-text-fill: #92400e;
+    -fx-font-weight: 600;
+    -fx-padding: 8 10;
+    -fx-background-radius: 8;
+}
+
+.btn-disc-detail {
+    -fx-background-color: white;
+    -fx-text-fill: #334155;
+    -fx-font-weight: 600;
+    -fx-padding: 8 12;
+    -fx-background-radius: 8;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 8;
+    -fx-cursor: hand;
+}
+
+.badge-disc-status {
+    -fx-padding: 4 10;
+    -fx-background-radius: 999;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+}
+
+.badge-d-active { -fx-background-color: #dcfce7; -fx-text-fill: #166534; }
+.badge-d-completed { -fx-background-color: #e0f2fe; -fx-text-fill: #0369a1; }
+.badge-d-paused { -fx-background-color: #ffedd5; -fx-text-fill: #c2410c; }
+.badge-d-failed { -fx-background-color: #ffe4e6; -fx-text-fill: #be123c; }
+.badge-d-draft { -fx-background-color: #f1f5f9; -fx-text-fill: #475569; }
+.badge-d-other { -fx-background-color: #fef3c7; -fx-text-fill: #92400e; }

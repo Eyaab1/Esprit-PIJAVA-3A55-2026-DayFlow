@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.coaching_session.FindCoachViewController"
+            fitToWidth="true">
+
+    <VBox spacing="0" style="-fx-background-color: #f5f7fb;">
+
+        <!-- Navbar -->
+        <HBox alignment="CENTER_LEFT" spacing="20"
+              style="-fx-background-color: white;">
+            <padding>
+                <Insets top="15" right="30" bottom="15" left="30"/>
+            </padding>
+
+            <Label text="DayFlow"
+                   style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #6c5ce7;"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <HBox spacing="10">
+                <Button text="Accueil"/>
+                <Button text="Objectifs"/>
+                <Button text="Community"/>
+                <Button text="Calendrier"/>
+                <Button text="Favoris"/>
+                <Button text="Posts"/>
+                <Button fx:id="mesDemandesButton" text="Mes demandes" onAction="#handleMesDemandes"/>
+            </HBox>
+
+            <!-- removed emoji -->
+            <Button text="U"/>
+        </HBox>
+
+        <!-- Content -->
+        <VBox spacing="25">
+            <padding>
+                <Insets top="40" right="40" bottom="40" left="40"/>
+            </padding>
+
+            <!-- Search -->
+            <VBox spacing="15" alignment="CENTER">
+                <Label text="Trouvez votre coach idéal"
+                       style="-fx-font-size: 28px; -fx-font-weight: bold;"/>
+
+                <HBox spacing="10" maxWidth="600">
+                    <TextField promptText="Rechercher un coach..." HBox.hgrow="ALWAYS"/>
+                    <Button text="Rechercher"/>
+                </HBox>
+            </VBox>
+
+            <!-- Filters -->
+            <VBox spacing="15"
+                  style="-fx-background-color: white; -fx-background-radius: 10;">
+                <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                </padding>
+
+                <Label text="Filtres avancés"
+                       style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+                <HBox spacing="10">
+                    <ComboBox promptText="Spécialité"/>
+                    <TextField promptText="Prix min"/>
+                    <TextField promptText="Prix max"/>
+                    <ComboBox promptText="Note"/>
+                    <ComboBox promptText="Disponibilité"/>
+                    <Button text="Appliquer"/>
+                </HBox>
+            </VBox>
+
+            <!-- Coaches -->
+            <VBox spacing="15">
+                <Label text="Nos coachs disponibles"
+                       style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+
+                <TilePane hgap="20" vgap="20" prefColumns="3">
+
+                    <!-- SIMPLE CARD -->
+                    <VBox spacing="10"
+                          style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10;">
+
+                        <Label text="Jean Dupont"/>
+                        <Label text="jean@email.com"/>
+                        <Label text="50€ / session"/>
+                        <Label text="Disponible"/>
+
+                        <Button text="Voir disponibilités"/>
+                        <Button text="Demande"/>
+                    </VBox>
+
+                </TilePane>
+
+            </VBox>
+
+        </VBox>
+
+    </VBox>
+
+</ScrollPane>

@@ -1,0 +1,24 @@
+.shell-back-bar {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #e9ecef;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 6 12 6 12;
+    -fx-spacing: 8;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.shell-back-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #495057;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-padding: 4 10 4 4;
+}
+
+.shell-back-button:hover {
+    -fx-text-fill: #6c5ce7;
+}
+
+.shell-back-button:disabled {
+    -fx-opacity: 0.4;
+}

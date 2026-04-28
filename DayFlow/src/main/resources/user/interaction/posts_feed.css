@@ -1,0 +1,344 @@
+/* Fil de posts — dégradé lavande / cartes blanches */
+.posts-feed-root {
+    -fx-font-family: "Segoe UI", "Inter", "Arial", sans-serif;
+    -fx-background-color: linear-gradient(to bottom right, #ede9fe 0%, #e0e7ff 40%, #f5f3ff 100%);
+    -fx-alignment: top-center;
+}
+
+.posts-feed-inner {
+    -fx-spacing: 0;
+    -fx-padding: 28 40 24 40;
+    -fx-max-width: 760;
+    -fx-alignment: top-center;
+
+}
+
+.posts-toolbar {
+    -fx-padding: 0 0 16 0;
+}
+
+.posts-combo {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 12;
+    -fx-padding: 8 12;
+    -fx-font-size: 13px;
+}
+
+.btn-create-post {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-font-size: 14px;
+    -fx-padding: 10 20;
+    -fx-background-radius: 12;
+    -fx-cursor: hand;
+}
+
+.btn-create-post:hover {
+    -fx-background-color: #1d4ed8;
+}
+
+.posts-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.posts-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.posts-list-wrap {
+    -fx-max-width: 720;
+}
+
+.post-card {
+    -fx-spacing: 12;
+    -fx-padding: 20 22;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 18, 0, 0, 3);
+}
+
+.post-card-header {
+    -fx-alignment: center-left;
+    -fx-spacing: 12;
+}
+
+.post-avatar {
+    -fx-min-width: 44px;
+    -fx-min-height: 44px;
+    -fx-pref-width: 44px;
+    -fx-pref-height: 44px;
+    -fx-alignment: center;
+    -fx-background-radius: 22px;
+    -fx-background-color: linear-gradient(to bottom right, #a78bfa, #60a5fa);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.post-author-name {
+    -fx-font-size: 15px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #111827;
+}
+
+.post-meta {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6b7280;
+}
+
+.post-icon-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 16px;
+    -fx-padding: 6 8;
+    -fx-cursor: hand;
+    -fx-background-radius: 8;
+}
+
+.post-icon-btn:hover {
+    -fx-background-color: #f3f4f6;
+}
+
+.post-icon-btn.saved {
+    -fx-text-fill: #2563eb;
+}
+
+.post-tags-flow {
+    -fx-hgap: 8;
+    -fx-vgap: 8;
+    -fx-padding: 4 0 0 0;
+}
+
+.post-tag-pill {
+    -fx-background-color: #dbeafe;
+    -fx-text-fill: #1d4ed8;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 4 12;
+    -fx-background-radius: 20;
+}
+
+.post-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+    -fx-wrap-text: true;
+}
+
+.post-body {
+    -fx-font-size: 14px;
+    -fx-text-fill: #374151;
+    -fx-wrap-text: true;
+    -fx-line-spacing: 2;
+}
+
+.post-stats {
+    -fx-spacing: 20;
+    -fx-alignment: center-left;
+    -fx-padding: 8 0 4 0;
+}
+
+.post-stat-text {
+    -fx-font-size: 13px;
+    -fx-text-fill: #6b7280;
+}
+
+.post-sep {
+    -fx-padding: 4 0;
+}
+
+.post-sep .line {
+    -fx-stroke: #e5e7eb;
+}
+
+.comment-row {
+    -fx-spacing: 10;
+    -fx-alignment: center-left;
+    -fx-padding: 8 0 0 0;
+}
+
+.comment-avatar-sm {
+    -fx-min-width: 32px;
+    -fx-min-height: 32px;
+    -fx-pref-width: 32px;
+    -fx-pref-height: 32px;
+    -fx-alignment: center;
+    -fx-background-radius: 16px;
+    -fx-background-color: linear-gradient(to bottom right, #c4b5fd, #93c5fd);
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.comment-field {
+    -fx-background-radius: 10;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 10;
+    -fx-padding: 8 12;
+}
+
+.btn-comment-send {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-padding: 8 16;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.btn-comment-send:hover {
+    -fx-background-color: #1d4ed8;
+}
+
+.post-empty-comments {
+    -fx-background-color: #f9fafb;
+    -fx-background-radius: 12;
+    -fx-padding: 14 16;
+    -fx-font-size: 13px;
+    -fx-text-fill: #9ca3af;
+    -fx-alignment: center-left;
+}
+
+.like-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 14px;
+    -fx-padding: 4 8 4 0;
+    -fx-cursor: hand;
+}
+
+.like-btn.liked {
+    -fx-text-fill: #dc2626;
+}
+
+/* ===== ENHANCED COMMENT CARD STYLES ===== */
+
+.comment-card {
+    -fx-background-color: #f9fafb;
+    -fx-background-radius: 14;
+    -fx-padding: 12 16;
+    -fx-spacing: 8;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 14;
+}
+
+.comment-text {
+    -fx-font-size: 13px;
+    -fx-text-fill: #374151;
+    -fx-wrap-text: true;
+}
+
+.comment-author {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #111827;
+}
+
+.comment-options-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 16px;
+    -fx-padding: 0;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.comment-options-btn:hover {
+    -fx-background-color: #eef2ff;
+}
+
+.comment-options-btn > .arrow-button {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+    -fx-opacity: 0;
+    -fx-max-width: 0;
+}
+
+.comment-options-btn > .label {
+    -fx-padding: 0;
+}
+
+.comment-edit-field {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 10;
+    -fx-padding: 8 10;
+    -fx-font-size: 13px;
+}
+
+.comment-edit-actions {
+    -fx-spacing: 8;
+    -fx-alignment: center-left;
+}
+
+.comment-secondary-btn {
+    -fx-background-color: #e5e7eb;
+    -fx-text-fill: #111827;
+    -fx-background-radius: 10;
+    -fx-padding: 6 12;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.comment-secondary-btn:hover {
+    -fx-background-color: #d1d5db;
+}
+
+.comment-actions {
+    -fx-spacing: 10;
+    -fx-padding: 4 0 0 0;
+    -fx-alignment: center-left;
+}
+
+.comment-like-btn,
+.comment-reply-btn {
+    -fx-background-color: #f3f4f6;
+    -fx-background-radius: 8;
+    -fx-padding: 4 10;
+    -fx-font-size: 12px;
+    -fx-text-fill: #374151;
+    -fx-cursor: hand;
+}
+
+.comment-like-btn:hover,
+.comment-reply-btn:hover {
+    -fx-background-color: #e5e7eb;
+}
+
+.comment-replies {
+    -fx-padding: 8 0 0 20;
+    -fx-spacing: 6;
+}
+
+.comment-input-row {
+    -fx-spacing: 8;
+    -fx-alignment: center-left;
+    -fx-padding: 8 0 0 0;
+}
+
+.comment-reply-field {
+    -fx-background-radius: 10;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 10;
+    -fx-padding: 6 10;
+    -fx-font-size: 12px;
+}
+
+.btn-comment-reply {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-padding: 6 12;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.btn-comment-reply:hover {
+    -fx-background-color: #1d4ed8;
+}

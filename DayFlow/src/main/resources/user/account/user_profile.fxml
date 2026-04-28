@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.account.UserProfileController"
+            styleClass="profile-root" stylesheets="@user_profile.css">
+   <top>
+      <HBox styleClass="profile-hero" alignment="CENTER_LEFT" spacing="20">
+         <children>
+            <Label fx:id="heroAvatarLabel" styleClass="profile-hero-avatar" alignment="CENTER" text="?" />
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label fx:id="heroNameLabel" styleClass="profile-hero-name" text=" " />
+                  <Label fx:id="heroEmailLabel" styleClass="profile-hero-email" text=" " />
+               </children>
+            </VBox>
+         </children>
+         <padding>
+            <Insets bottom="28" left="32" right="32" top="28" />
+         </padding>
+      </HBox>
+   </top>
+   <left>
+      <VBox spacing="16" styleClass="profile-sidebar">
+         <children>
+            <VBox spacing="10" styleClass="profile-side-card">
+               <children>
+                  <HBox alignment="CENTER_LEFT" spacing="8">
+                     <children>
+                        <Label styleClass="profile-side-title" text="👤  Informations personnelles" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button fx:id="savePersonalInfoButton" text="Valider" styleClass="profile-save-btn" visible="false" managed="false" />
+                        <Button fx:id="editPersonalInfoButton" text="🖉" styleClass="profile-edit-btn" />
+                     </children>
+                  </HBox>
+                  <Label fx:id="sideNameLabel" styleClass="profile-side-line" text="NOM —" />
+                  <Label fx:id="sideEmailLabel" styleClass="profile-side-line" text="EMAIL —" />
+                  <Label fx:id="sidePhoneLabel" styleClass="profile-side-line" text="TEL —" />
+                  <Label fx:id="sideAgeLabel" styleClass="profile-side-line" text="ÂGE —" />
+                  <TextField fx:id="editFirstNameField" promptText="First name" visible="false" managed="false" />
+                  <TextField fx:id="editLastNameField" promptText="Last name" visible="false" managed="false" />
+                  <TextField fx:id="editPhoneField" promptText="Phone number" visible="false" managed="false" />
+                  <TextField fx:id="editAgeField" promptText="Age" visible="false" managed="false" />
+                  <Label fx:id="sideMemberLabel" styleClass="profile-side-line" text="MEMBRE DEPUIS —" />
+               </children>
+               <padding>
+                  <Insets bottom="16" left="16" right="16" top="16" />
+               </padding>
+            </VBox>
+            <FlowPane hgap="10" vgap="10" prefWrapLength="260">
+               <children>
+                  <VBox styleClass="profile-stat-tile stat-pub" alignment="CENTER_LEFT" spacing="4">
+                     <children>
+                        <Label fx:id="statPublishedLabel" styleClass="profile-stat-value" text="0" />
+                        <Label styleClass="profile-stat-caption" text="Publiés" />
+                     </children>
+                     <padding>
+                        <Insets bottom="12" left="14" right="14" top="12" />
+                     </padding>
+                  </VBox>
+                  <VBox styleClass="profile-stat-tile stat-saved" alignment="CENTER_LEFT" spacing="4">
+                     <children>
+                        <Label fx:id="statSavedLabel" styleClass="profile-stat-value" text="0" />
+                        <Label styleClass="profile-stat-caption" text="Sauvegardés" />
+                     </children>
+                     <padding>
+                        <Insets bottom="12" left="14" right="14" top="12" />
+                     </padding>
+                  </VBox>
+                  <VBox styleClass="profile-stat-tile stat-draft" alignment="CENTER_LEFT" spacing="4">
+                     <children>
+                        <Label fx:id="statDraftsLabel" styleClass="profile-stat-value" text="0" />
+                        <Label styleClass="profile-stat-caption" text="Brouillons" />
+                     </children>
+                     <padding>
+                        <Insets bottom="12" left="14" right="14" top="12" />
+                     </padding>
+                  </VBox>
+                  <VBox styleClass="profile-stat-tile stat-sched" alignment="CENTER_LEFT" spacing="4">
+                     <children>
+                        <Label fx:id="statScheduledLabel" styleClass="profile-stat-value" text="0" />
+                        <Label styleClass="profile-stat-caption" text="Planifiés" />
+                     </children>
+                     <padding>
+                        <Insets bottom="12" left="14" right="14" top="12" />
+                     </padding>
+                  </VBox>
+               </children>
+            </FlowPane>
+         </children>
+         <padding>
+            <Insets bottom="24" left="20" right="16" top="8" />
+         </padding>
+      </VBox>
+   </left>
+   <center>
+      <VBox spacing="14" styleClass="profile-main">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="12">
+               <children>
+                  <Label styleClass="profile-activity-title" text="📓  Mes activités" />
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Hyperlink fx:id="openFeedLink" onAction="#onOpenFeed" styleClass="profile-feed-link" text="Voir le fil →" />
+               </children>
+            </HBox>
+            <VBox spacing="10" styleClass="profile-ai-hero">
+               <children>
+                  <HBox alignment="CENTER_LEFT" spacing="10">
+                     <children>
+                        <Label styleClass="profile-ai-badge" text="✴" />
+                        <VBox spacing="3" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label text="AI Profile Analyzer" styleClass="profile-ai-title" />
+                              <Label text="One click to refresh your profile insights." styleClass="profile-ai-subtitle" />
+                           </children>
+                        </VBox>
+                        <Button fx:id="runAnalysisButton" text="Analyze now" styleClass="btn-open-chat" />
+                     </children>
+                  </HBox>
+                  <Label fx:id="aiSummaryLabel" styleClass="profile-ai-summary" text="No analysis yet." wrapText="true" />
+                  <HBox alignment="CENTER_LEFT" spacing="12" styleClass="profile-archetype-card">
+                     <children>
+                        <Label styleClass="profile-ai-badge" text="✴" />
+                        <VBox spacing="2" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label fx:id="archetypeNameLabel" wrapText="true" text="Your archetype will appear here" styleClass="profile-archetype-name" />
+                              <Label fx:id="archetypeDescriptionLabel" wrapText="true" text="Click Analyze now to generate your AI archetype." styleClass="profile-archetype-desc" />
+                           </children>
+                        </VBox>
+                        <Label text="›" styleClass="profile-archetype-arrow" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            <VBox spacing="8" styleClass="profile-tabs-wrap">
+               <children>
+                  <HBox spacing="8" alignment="CENTER_LEFT">
+                     <children>
+                        <ToggleButton fx:id="tabPosts" mnemonicParsing="false" styleClass="profile-tab" text="Mes posts (0)" />
+                        <ToggleButton fx:id="tabSaved" mnemonicParsing="false" styleClass="profile-tab" text="Sauvegardés (0)" />
+                        <ToggleButton fx:id="tabScheduled" mnemonicParsing="false" styleClass="profile-tab" text="Planifiés (0)" />
+                        <ToggleButton fx:id="tabDrafts" mnemonicParsing="false" styleClass="profile-tab" text="Brouillons (0)" />
+                     </children>
+                  </HBox>
+                  <HBox spacing="8" alignment="CENTER_LEFT">
+                     <children>
+                        <ToggleButton fx:id="tabChatrooms" mnemonicParsing="false" styleClass="profile-tab" text="Chatrooms (0)" />
+                        <ToggleButton fx:id="tabLoginSecurity" mnemonicParsing="false" styleClass="profile-tab" text="Security History" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            <ScrollPane fitToWidth="true" styleClass="profile-scroll" VBox.vgrow="ALWAYS">
+               <content>
+                  <VBox spacing="14" styleClass="profile-content-inner">
+                     <children>
+                        <VBox fx:id="contentBox" spacing="12" />
+                        <VBox fx:id="loginSecuritySection" spacing="8" styleClass="profile-login-security-section">
+                           <children>
+                              <Label styleClass="profile-section-title" text="🛡 Login Security" />
+                              <Label styleClass="profile-section-subtitle" text="Review your active devices and recent login activity." wrapText="true" />
+                              <VBox spacing="10" styleClass="profile-security-card">
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT" spacing="10">
+                                       <children>
+                                          <Label styleClass="profile-security-title" text="Login Activity" />
+                                          <Region HBox.hgrow="ALWAYS" />
+                                          <Button fx:id="logoutAllDevicesButton" text="Logout all devices" styleClass="profile-danger-btn" />
+                                       </children>
+                                    </HBox>
+                                    <Label fx:id="securityStatusLabel" styleClass="profile-security-status" text="Loading security status..." wrapText="true" />
+                                    <Label styleClass="profile-security-subtitle" text="Active sessions" />
+                                    <VBox fx:id="activeSessionsBox" spacing="8" />
+                                    <Label styleClass="profile-security-subtitle" text="Recent login history" />
+                                    <VBox fx:id="loginHistoryBox" spacing="8" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
+               </content>
+            </ScrollPane>
+         </children>
+         <padding>
+            <Insets bottom="24" left="12" right="28" top="8" />
+         </padding>
+      </VBox>
+   </center>
+</BorderPane>

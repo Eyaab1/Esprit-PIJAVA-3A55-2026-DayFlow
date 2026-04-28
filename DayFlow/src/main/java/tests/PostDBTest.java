@@ -1,9 +1,9 @@
 package tests;
 
-import controllers.postModule.CommentController;
-import controllers.postModule.InteractionController;
-import controllers.postModule.PostController;
-import controllers.postModule.TagController;
+import controllers.interaction.CommentController;
+import controllers.interaction.InteractionController;
+import controllers.interaction.PostController;
+import controllers.interaction.TagController;
 import enums.PostStatus;
 import model.interaction.Post;
 import model.interaction.Comment;
@@ -12,12 +12,12 @@ import model.interaction.PostLike;
 import model.interaction.CommentLike;
 import model.interaction.SavedPost;
 import org.junit.jupiter.api.*;
-import services.comment.CommentLikeService;
-import services.comment.CommentService;
-import services.post.PostLikeService;
-import services.post.PostService;
-import services.post.SavedPostService;
-import services.tag.TagService;
+import services.interaction.CommentLikeService;
+import services.interaction.CommentService;
+import services.interaction.PostLikeService;
+import services.interaction.PostService;
+import services.interaction.SavedPostService;
+import services.interaction.TagService;
 import utils.DbConnexion;
 
 import java.sql.SQLException;
@@ -90,7 +90,6 @@ public class PostDBTest {
         System.out.println("=== Integration Tests Completed ===");
     }
 
-    // ==================== POST SERVICE TESTS ====================
 
     @Test
     @Order(1)

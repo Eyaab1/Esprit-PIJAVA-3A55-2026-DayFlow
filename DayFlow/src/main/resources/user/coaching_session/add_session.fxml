@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.coaching_session.AddSessionController"
+            minWidth="380" minHeight="420"
+            prefWidth="560" prefHeight="680"
+            style="-fx-background-color: #f5f7fb;">
+    <padding>
+        <Insets top="16" right="20" bottom="16" left="20"/>
+    </padding>
+
+    <top>
+        <VBox spacing="6" alignment="CENTER_LEFT" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="12"/>
+            </padding>
+            <Label text="Créer une session de coaching"
+                   style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2d3436;">
+                <font>
+                    <Font name="System Bold" size="22"/>
+                </font>
+            </Label>
+            <Label text="Planifiez une session avec votre client"
+                   style="-fx-font-size: 14px; -fx-text-fill: #636e72;">
+                <font>
+                    <Font size="14"/>
+                </font>
+            </Label>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: transparent; -fx-background: transparent;"
+                    BorderPane.vgrow="ALWAYS">
+            <VBox spacing="18">
+                <padding>
+                    <Insets bottom="8"/>
+                </padding>
+
+                <!-- Client -->
+                <VBox spacing="8"
+                      style="-fx-background-color: #e3f2fd; -fx-background-radius: 10; -fx-padding: 14;">
+                    <Label text="Informations du client"
+                           style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1565c0;"/>
+                    <Label fx:id="clientInfoLabel" text="Client: ..." wrapText="true"
+                           style="-fx-font-size: 13px; -fx-text-fill: #2d3436;"/>
+                    <Label fx:id="requestInfoLabel" text="Message: ..." wrapText="true"
+                           style="-fx-font-size: 13px; -fx-text-fill: #2d3436;"/>
+                </VBox>
+
+                <!-- Carte formulaire -->
+                <VBox spacing="0" maxWidth="800" alignment="TOP_LEFT" VBox.vgrow="NEVER"
+                      style="-fx-background-color: white; -fx-background-radius: 12;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);">
+                    <padding>
+                        <Insets top="22" right="24" bottom="22" left="24"/>
+                    </padding>
+
+                    <Label text="Planning"
+                           style="-fx-font-size: 11px; -fx-text-fill: #636e72; -fx-font-weight: bold;
+                                  -fx-letter-spacing: 0.08em;"/>
+                    <Separator style="-fx-padding: 0 0 12 0;"/>
+
+                    <GridPane hgap="14" vgap="14">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="120" prefWidth="140" maxWidth="160" hgrow="NEVER"/>
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="120"/>
+                        </columnConstraints>
+
+                        <Label text="Date de la session" GridPane.rowIndex="0" GridPane.columnIndex="0"
+                               style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #34495e;"
+                               GridPane.valignment="CENTER"/>
+                        <DatePicker fx:id="sessionDatePicker" promptText="Sélectionner une date"
+                                    GridPane.rowIndex="0" GridPane.columnIndex="1" maxWidth="1.7976931348623157E308"
+                                    style="-fx-background-color: white; -fx-border-color: #dfe6e9;
+                                           -fx-border-radius: 6; -fx-background-radius: 6;"/>
+
+                        <Label text="Heure de début" GridPane.rowIndex="1" GridPane.columnIndex="0"
+                               style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #34495e;"
+                               GridPane.valignment="CENTER"/>
+                        <TextField fx:id="sessionTimeField" promptText="Ex : 14:30"
+                                   GridPane.rowIndex="1" GridPane.columnIndex="1" maxWidth="1.7976931348623157E308"
+                                   style="-fx-border-color: #dfe6e9; -fx-border-radius: 6; -fx-background-radius: 6;
+                                          -fx-padding: 10; -fx-font-size: 13px;"/>
+
+                        <Label text="Durée (minutes)" GridPane.rowIndex="2" GridPane.columnIndex="0"
+                               style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #34495e;"
+                               GridPane.valignment="CENTER"/>
+                        <ComboBox fx:id="durationCombo" promptText="Sélectionner..."
+                                  GridPane.rowIndex="2" GridPane.columnIndex="1" maxWidth="1.7976931348623157E308"
+                                  style="-fx-background-color: white; -fx-border-color: #dfe6e9;
+                                         -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8;"/>
+                    </GridPane>
+
+                    <Label text="Contenu de la session"
+                           style="-fx-font-size: 11px; -fx-text-fill: #636e72; -fx-font-weight: bold;
+                                  -fx-letter-spacing: 0.08em; -fx-padding: 20 0 0 0;"/>
+                    <Separator style="-fx-padding: 0 0 12 0;"/>
+
+                    <VBox spacing="6">
+                        <Label text="Objectif"
+                               style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #34495e;"/>
+                        <TextField fx:id="objectiveField" promptText="Ex : Améliorer la confiance en soi"
+                                   maxWidth="1.7976931348623157E308"
+                                   style="-fx-border-color: #dfe6e9; -fx-border-radius: 6; -fx-background-radius: 6;
+                                          -fx-padding: 10; -fx-font-size: 13px;"/>
+                    </VBox>
+
+                    <VBox spacing="6" style="-fx-padding: 14 0 0 0;">
+                        <Label text="Description / notes"
+                               style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #34495e;"/>
+                        <TextArea fx:id="descriptionArea" promptText="Détails de la session..."
+                                  prefRowCount="4" minHeight="88" prefHeight="110" maxHeight="180" wrapText="true"
+                                  maxWidth="1.7976931348623157E308"
+                                  style="-fx-border-color: #dfe6e9; -fx-border-radius: 6; -fx-background-radius: 6;
+                                         -fx-padding: 10; -fx-font-size: 13px;"/>
+                    </VBox>
+
+                    <Label text="Tarification"
+                           style="-fx-font-size: 11px; -fx-text-fill: #636e72; -fx-font-weight: bold;
+                                  -fx-letter-spacing: 0.08em; -fx-padding: 18 0 0 0;"/>
+                    <Separator style="-fx-padding: 0 0 12 0;"/>
+
+                    <VBox spacing="6">
+                        <Label text="Prix (€)"
+                               style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #34495e;"/>
+                        <TextField fx:id="priceField" promptText="Ex : 50" maxWidth="200"
+                                   style="-fx-border-color: #dfe6e9; -fx-border-radius: 6; -fx-background-radius: 6;
+                                          -fx-padding: 10; -fx-font-size: 13px;"/>
+                    </VBox>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <VBox spacing="0" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets top="14"/>
+            </padding>
+            <Separator/>
+            <HBox spacing="12" alignment="CENTER_RIGHT" style="-fx-padding: 14 0 0 0;">
+                <Button fx:id="cancelBtn" text="Annuler"
+                        style="-fx-background-color: #636e72; -fx-text-fill: white; -fx-font-size: 14px;
+                               -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 12 22 12 22;
+                               -fx-cursor: hand;">
+                    <font>
+                        <Font name="System Bold" size="14"/>
+                    </font>
+                </Button>
+                <Button fx:id="createBtn" text="Créer la session"
+                        style="-fx-background-color: #6c5ce7; -fx-text-fill: white; -fx-font-size: 14px;
+                               -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 12 22 12 22;
+                               -fx-cursor: hand;">
+                    <font>
+                        <Font name="System Bold" size="14"/>
+                    </font>
+                </Button>
+            </HBox>
+        </VBox>
+    </bottom>
+</BorderPane>

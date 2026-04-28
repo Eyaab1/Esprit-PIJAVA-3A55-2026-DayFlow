@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.Region?>
+
+<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.goals_routines.ActivityDetailsController">
+   <content>
+      <VBox spacing="25.0" styleClass="dashboard-root" stylesheets="@goals.css">
+         <padding>
+            <Insets bottom="40.0" left="50.0" right="50.0" top="40.0" />
+         </padding>
+         <children>
+            <!-- Back Button -->
+            <Button onAction="#onBackToRoutine" styleClass="breadcrumb-button" text="← Retour aux routines">
+               <padding>
+                  <Insets bottom="8.0" left="16.0" right="16.0" top="8.0" />
+               </padding>
+            </Button>
+            
+            <!-- Routine Header -->
+            <VBox styleClass="goal-detail-header">
+               <children>
+                  <HBox alignment="CENTER_LEFT" spacing="15.0">
+                     <children>
+                        <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label fx:id="routineTitleLabel" styleClass="goal-detail-title" text="Titre de la routine" />
+                              <Label fx:id="routineDescriptionLabel" styleClass="goal-detail-subtitle" text="Description de la routine" wrapText="true" />
+                           </children>
+                        </VBox>
+                        
+                        <Label fx:id="routineStatusBadge" styleClass="status-badge-active" text="ACTIVE" />
+                        
+                        <Button onAction="#onEditRoutine" styleClass="secondary-button" text="✏️ Modifier">
+                           <padding>
+                              <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                           </padding>
+                        </Button>
+                        
+                        <Button onAction="#onDeleteRoutine" styleClass="delete-button" text="🗑️ Supprimer">
+                           <padding>
+                              <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                           </padding>
+                        </Button>
+                     </children>
+                  </HBox>
+                  
+                  <!-- Routine Details -->
+                  <HBox spacing="30.0">
+                     <padding>
+                        <Insets top="15.0" />
+                     </padding>
+                     <children>
+                        <VBox spacing="5.0">
+                           <children>
+                              <Label styleClass="detail-label" text="Visibilité" />
+                              <Label fx:id="routineVisibilityLabel" styleClass="detail-value" text="Private" />
+                           </children>
+                        </VBox>
+                        
+                        <VBox spacing="5.0">
+                           <children>
+                              <Label styleClass="detail-label" text="Priorité" />
+                              <Label fx:id="routinePriorityLabel" styleClass="detail-value" text="Medium" />
+                           </children>
+                        </VBox>
+                        
+                        <VBox spacing="5.0">
+                           <children>
+                              <Label styleClass="detail-label" text="Activités" />
+                              <Label fx:id="activityCountLabel" styleClass="detail-value" text="0" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+               <padding>
+                  <Insets bottom="25.0" left="30.0" right="30.0" top="25.0" />
+               </padding>
+            </VBox>
+            
+            <!-- Activities Section -->
+            <HBox alignment="CENTER_LEFT" spacing="15.0">
+               <children>
+                  <Label styleClass="section-title" text="Activités" />
+                  <Label fx:id="activityCountLabel2" styleClass="section-count" text="(0)" />
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Button onAction="#onNewActivity" styleClass="new-goal-button" text="➕ Nouvelle Activité">
+                     <padding>
+                        <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                     </padding>
+                  </Button>
+               </children>
+            </HBox>
+            
+            <!-- Activities Grid -->
+            <FlowPane fx:id="activitiesContainer" hgap="20.0" vgap="20.0" styleClass="goals-grid" />
+         </children>
+      </VBox>
+   </content>
+</ScrollPane>

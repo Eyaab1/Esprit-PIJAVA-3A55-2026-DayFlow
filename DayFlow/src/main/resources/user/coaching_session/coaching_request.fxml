@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.coaching_session.CoachingRequestController"
+            fitToWidth="true"
+            stylesheets="@coaching_request.css"
+            styleClass="root">
+
+    <VBox spacing="0" alignment="TOP_CENTER">
+
+        <!-- Barre navigation — pastel -->
+        <HBox alignment="CENTER_LEFT" spacing="20" maxWidth="Infinity"
+              style="-fx-background-color: #fafbff; -fx-border-color: #e0e7ff; -fx-border-width: 0 0 1 0;">
+            <padding>
+                <Insets top="14" right="32" bottom="14" left="32"/>
+            </padding>
+
+            <Label text="DayFlow" styleClass="logo-text">
+                <font>
+                    <Font name="System Bold" size="24"/>
+                </font>
+            </Label>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <HBox spacing="6" alignment="CENTER">
+                <Button fx:id="accueilButton" text="Accueil" styleClass="nav-button"
+                        onAction="#handleAccueil"/>
+                <Button fx:id="objectifsButton" text="Objectifs" styleClass="nav-button"
+                        onAction="#handleObjectifs"/>
+                <Button fx:id="communityButton" text="Communauté" styleClass="nav-button"
+                        onAction="#handleCommunity"/>
+                <Button fx:id="calendrierButton" text="Calendrier" styleClass="nav-button"
+                        onAction="#handleCalendrier"/>
+                <Button fx:id="favorisButton" text="Favoris" styleClass="nav-button"
+                        onAction="#handleFavoris"/>
+                <Button fx:id="postsButton" text="Posts" styleClass="nav-button"
+                        onAction="#handlePosts"/>
+                <Button fx:id="mesDemandesButton" text="Mes demandes" styleClass="nav-button"
+                        onAction="#handleMesDemandes"
+                        style="-fx-background-color: #e0e7ff; -fx-text-fill: #4338ca; -fx-font-weight: 700;"/>
+            </HBox>
+
+            <Button fx:id="userButton" text="HH" styleClass="user-button"/>
+        </HBox>
+
+        <!-- Contenu principal — centré, largeur max cohérente -->
+        <VBox spacing="36" alignment="TOP_CENTER" maxWidth="Infinity">
+            <padding>
+                <Insets top="40" right="32" bottom="60" left="32"/>
+            </padding>
+
+            <!-- Hero recherche -->
+            <VBox spacing="20" alignment="CENTER" maxWidth="1100">
+                <VBox spacing="12" alignment="CENTER" styleClass="hero-section">
+                    <Label text="✨ Trouvez votre coach idéal" styleClass="hero-title">
+                        <font>
+                            <Font name="System Bold" size="36"/>
+                        </font>
+                    </Label>
+                    <Label text="Recherchez parmi nos experts certifiés pour atteindre vos objectifs" 
+                           styleClass="hero-subtitle" wrapText="true">
+                        <font>
+                            <Font size="16"/>
+                        </font>
+                    </Label>
+                    <HBox spacing="14" alignment="CENTER" maxWidth="680">
+                        <TextField fx:id="searchTextField" promptText="Rechercher un coach par nom ou spécialité..."
+                                   HBox.hgrow="ALWAYS" styleClass="search-field"/>
+                        <Button fx:id="searchButton" text="🔍 Rechercher" styleClass="search-button">
+                            <font>
+                                <Font name="System Bold" size="15"/>
+                            </font>
+                        </Button>
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <!-- Filtres -->
+            <VBox spacing="20" maxWidth="1100" alignment="TOP_LEFT" styleClass="filter-card">
+                <Label text="🎯 Filtres avancés" styleClass="filter-title">
+                    <font>
+                        <Font name="System Bold" size="19"/>
+                    </font>
+                </Label>
+
+                <FlowPane hgap="16" vgap="16" prefWrapLength="950" columnHalignment="LEFT">
+                    <VBox spacing="8" minWidth="150" prefWidth="170">
+                        <Label text="Spécialité" styleClass="filter-label"/>
+                        <ComboBox fx:id="specialiteComboBox" promptText="Toutes" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="8" minWidth="110" prefWidth="130">
+                        <Label text="Prix min (€)" styleClass="filter-label"/>
+                        <TextField fx:id="prixMinTextField" promptText="0"/>
+                    </VBox>
+                    <VBox spacing="8" minWidth="110" prefWidth="130">
+                        <Label text="Prix max (€)" styleClass="filter-label"/>
+                        <TextField fx:id="prixMaxTextField" promptText="200"/>
+                    </VBox>
+                    <VBox spacing="8" minWidth="130" prefWidth="150">
+                        <Label text="Note minimum" styleClass="filter-label"/>
+                        <ComboBox fx:id="noteComboBox" promptText="Toutes" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="8" minWidth="130" prefWidth="170">
+                        <Label text="Disponibilité" styleClass="filter-label"/>
+                        <ComboBox fx:id="disponibiliteComboBox" promptText="Toutes" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="8" alignment="BOTTOM_LEFT" minWidth="110">
+                        <Label text=" " style="-fx-font-size: 12px;"/>
+                        <Button fx:id="applyFiltersButton" text="Appliquer" styleClass="filter-button"/>
+                    </VBox>
+                </FlowPane>
+            </VBox>
+
+            <!-- Liste coachs — grille fluide -->
+            <VBox spacing="16" maxWidth="1100" alignment="TOP_LEFT">
+                <VBox spacing="6">
+                    <Label text="👥 Nos coachs disponibles" styleClass="section-title">
+                        <font>
+                            <Font name="System Bold" size="26"/>
+                        </font>
+                    </Label>
+                    <Label text="Découvrez nos experts certifiés prêts à vous accompagner" 
+                           styleClass="section-subtitle"/>
+                </VBox>
+
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" pannable="false"
+                            style="-fx-background-color: transparent; -fx-background: transparent;">
+                    <FlowPane fx:id="coachCardsFlow" hgap="20" vgap="20" alignment="TOP_LEFT"
+                              maxWidth="Infinity" prefWrapLength="1050"
+                              style="-fx-background-color: transparent;"/>
+                </ScrollPane>
+            </VBox>
+
+            <!-- Formulaire demande -->
+            <VBox spacing="14" alignment="CENTER" maxWidth="1100">
+                <Label text="✈️ Faire une demande de coaching" styleClass="section-title">
+                    <font>
+                        <Font name="System Bold" size="28"/>
+                    </font>
+                </Label>
+                <Label text="Choisissez votre coach et décrivez vos objectifs" styleClass="section-subtitle">
+                    <font>
+                        <Font size="15"/>
+                    </font>
+                </Label>
+            </VBox>
+
+            <HBox alignment="CENTER" maxWidth="1100">
+                <VBox spacing="24" maxWidth="760" HBox.hgrow="NEVER" fillWidth="true" styleClass="form-card">
+
+                    <Label text="📝 VOTRE DEMANDE" styleClass="form-section-title"/>
+
+                    <VBox spacing="10">
+                        <Label text="Sélectionnez votre coach" styleClass="form-field-label"/>
+                        <ComboBox fx:id="coachComboBox" promptText="Choisir un coach..." maxWidth="Infinity"/>
+                        <Label text="ℹ️ Choisissez le coach qui correspond le mieux à vos besoins" 
+                               styleClass="form-hint"/>
+                    </VBox>
+
+                    <Separator/>
+
+                    <VBox spacing="10">
+                        <Label text="Votre message" styleClass="form-field-label"/>
+                        <TextArea fx:id="messageTextArea" 
+                                  promptText="Décrivez vos objectifs, votre niveau actuel, vos disponibilités et toute information utile pour le coach..."
+                                  prefRowCount="5" wrapText="true"/>
+                        <Label text="💬 Minimum 10 caractères, maximum 1000" styleClass="form-hint"/>
+                    </VBox>
+
+                    <VBox spacing="10">
+                        <Label text="Priorité de la demande" styleClass="form-field-label"/>
+                        <HBox spacing="16" alignment="CENTER_LEFT" styleClass="priority-container">
+                            <RadioButton fx:id="normalRadio" text="Normal (réponse sous 48h)" selected="true">
+                                <toggleGroup>
+                                    <ToggleGroup fx:id="priorityToggleGroup"/>
+                                </toggleGroup>
+                            </RadioButton>
+                            <RadioButton fx:id="moyenRadio" text="Moyen (réponse sous 36h)" 
+                                         toggleGroup="$priorityToggleGroup"/>
+                            <RadioButton fx:id="urgentRadio" text="Urgent (réponse sous 24h)" 
+                                         toggleGroup="$priorityToggleGroup"/>
+                        </HBox>
+                        <Label text="ℹ️ Les demandes urgentes sont traitées en priorité par les coaches" 
+                               styleClass="form-hint"/>
+                    </VBox>
+
+                    <HBox spacing="16">
+                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                            <Label text="Objectif principal" styleClass="form-field-label"/>
+                            <ComboBox fx:id="objectifComboBox" promptText="Sélectionner..." maxWidth="Infinity"/>
+                        </VBox>
+                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                            <Label text="Niveau actuel" styleClass="form-field-label"/>
+                            <ComboBox fx:id="niveauComboBox" promptText="Sélectionner..." maxWidth="Infinity"/>
+                        </VBox>
+                    </HBox>
+
+                    <HBox spacing="16">
+                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                            <Label text="Fréquence souhaitée" styleClass="form-field-label"/>
+                            <ComboBox fx:id="frequenceComboBox" promptText="Sélectionner..." maxWidth="Infinity"/>
+                        </VBox>
+                        <VBox spacing="10">
+                            <Label text="Budget par séance (€)" styleClass="form-field-label"/>
+                            <TextField fx:id="budgetTextField" promptText="Ex: 50" prefWidth="160"/>
+                        </VBox>
+                    </HBox>
+
+                    <Button fx:id="submitButton" text="✈️ Envoyer ma demande" maxWidth="Infinity" 
+                            styleClass="submit-button">
+                        <font>
+                            <Font name="System Bold" size="17"/>
+                        </font>
+                    </Button>
+
+                    <Label fx:id="aiAnalysisStatusLabel"
+                           text="Commencez à écrire votre message pour lancer l'analyse IA."
+                           wrapText="true" styleClass="form-hint"/>
+
+                    <VBox fx:id="aiResultCard" spacing="12" visible="false" managed="false" 
+                          styleClass="ai-result-card">
+                        <Label text="🤖 Résultat de l'analyse IA" styleClass="ai-result-title"/>
+                        <Label fx:id="detectedNeedValueLabel" text="Besoin détecté : -" 
+                               wrapText="true" styleClass="ai-result-label"/>
+                        <Label fx:id="recommendedCoachValueLabel" text="Coach recommandé : -" 
+                               wrapText="true" styleClass="ai-result-label"/>
+                        <Label fx:id="compatibilityScoreValueLabel" text="Score de compatibilité : -" 
+                               wrapText="true" styleClass="ai-result-label"/>
+                        <Label fx:id="justificationValueLabel" text="Justification : -" 
+                               wrapText="true" styleClass="ai-result-label"/>
+                    </VBox>
+                </VBox>
+            </HBox>
+        </VBox>
+    </VBox>
+</ScrollPane>

@@ -35,6 +35,8 @@ public class AdminShellController {
     @FXML
     private Button navPostsBtn;
     @FXML
+    private Button navModerationLogsBtn;
+    @FXML
     private Button navCoachesBtn;
     @FXML
     private Button navCoachRequestsBtn;
@@ -55,6 +57,9 @@ public class AdminShellController {
                 navCoachesBtn,
                 navCoachRequestsBtn,
                 navReclamationsBtn
+                navModerationLogsBtn,
+                navCoachesBtn,
+                navCoachRequestsBtn
         );
         if (!AppSession.isAdmin()) {
             try {
@@ -105,6 +110,13 @@ public class AdminShellController {
     @FXML
     private void onNavReclamations() throws IOException {
         loadReclamations();
+    private void onNavModerationLogs() throws IOException {
+        loadModerationLogs();
+    }
+
+    @FXML
+    private void onNavCoachRequests() throws IOException {
+        loadCoachRequests();
     }
 
     @FXML
@@ -147,6 +159,19 @@ public class AdminShellController {
 
     public void loadPosts() throws IOException {
         loadCenter("/admin/admin_posts.fxml", navPostsBtn);
+        FXMLLoader loader = loadCenter("/admin/admin_posts.fxml", navPostsBtn);
+        AdminPostsController c = loader.getController();
+        c.setShell(this);
+    }
+
+    public void loadPostDetails(int postId) throws IOException {
+        FXMLLoader loader = loadCenter("/admin/admin_post_details.fxml", navPostsBtn);
+        AdminPostDetailsController c = loader.getController();
+        c.setContext(this, postId);
+    }
+
+    public void loadModerationLogs() throws IOException {
+        loadCenter("/admin/admin_moderation_logs.fxml", navModerationLogsBtn);
     }
 
     public void loadCoaches() throws IOException {

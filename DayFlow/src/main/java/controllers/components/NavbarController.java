@@ -1,27 +1,61 @@
 package controllers.components;
 
-import controllers.auth.AuthNavigation;
+import controllers.account.AuthNavigation;
 import controllers.navigation.NavigationManager;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
+import javafx.geometry.Side;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import model.notification.Notification;
+import services.account.AccountSecurityService;
+import services.notification.NotificationService;
 import session.AppSession;
 
 import java.io.IOException;
+import java.sql.SQLException;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+
+import javafx.util.Duration;
 
 public class NavbarController {
 
     private static NavbarController instance;
+    private final AccountSecurityService accountSecurityService = new AccountSecurityService();
+    private final NotificationService notificationService = new NotificationService();
+    private static final DateTimeFormatter NOTIF_DF = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", Locale.FRENCH);
+    private Timeline notificationsRefreshTimeline;
+    private ContextMenu notificationsMenu;
 
     @FXML
     private Hyperlink manageSessionsLink;
     @FXML
-    private Label avatarLabel;
+    private Hyperlink avatarLink;
+    @FXML
+    private StackPane notificationsContainer;
+    @FXML
+    private Button notificationsBellButton;
+    @FXML
+    private Label notificationsBadgeLabel;
 
     @FXML
     private void initialize() {
         instance = this;
+        initNotificationAutoRefresh();
         refreshFromSession();
     }
 
@@ -30,6 +64,7 @@ public class NavbarController {
         if (instance != null) {
             instance.applyRoleVisibility();
             instance.applyAvatar();
+            instance.refreshNotifications();
         }
     }
 
@@ -37,12 +72,24 @@ public class NavbarController {
         boolean coach = AppSession.isCoach();
         manageSessionsLink.setVisible(coach);
         manageSessionsLink.setManaged(coach);
+        boolean authenticated = AppSession.getCurrentUser().isPresent();
+        notificationsContainer.setVisible(authenticated);
+        notificationsContainer.setManaged(authenticated);
     }
 
     private void applyAvatar() {
-        avatarLabel.setText(AppSession.getCurrentUser()
+        avatarLink.setText(AppSession.getCurrentUser()
                 .map(u -> initials(u.getFirstName(), u.getLastName()))
                 .orElse("?"));
+    }
+
+    @FXML
+    private void onProfile() {
+        if (AppSession.getCurrentUser().isEmpty()) {
+            toastSoon("Profil");
+            return;
+        }
+        navigate("/user/account/user_profile.fxml", "DayFlow — Profil");
     }
 
     private static String initials(String first, String last) {
@@ -55,20 +102,20 @@ public class NavbarController {
     @FXML
     private void onAccueil() {
         if (AppSession.isCoach()) {
-            navigate("/user/coachdashboard/coach_dashboard.fxml", "DayFlow — Coach");
+            navigate("/user/account/coach_dashboard.fxml", "DayFlow — Coach");
         } else {
-            navigate("/user/userdashboard/user_dashboard.fxml", "DayFlow — Accueil");
+            navigate("/user/account/user_dashboard.fxml", "DayFlow — Accueil");
         }
     }
 
     @FXML
     private void onObjectifs() {
-        navigate("/user/goals/goals_dashboard.fxml", "DayFlow — Goals");
+        navigate("/user/goals_routines/goals_dashboard.fxml", "DayFlow — Mes objectifs");
     }
 
     @FXML
     private void onCommunity() {
-        navigate("/user/community/community.fxml", "DayFlow — Community");
+        navigate("/user/interaction/community.fxml", "DayFlow — Community");
     }
 
     @FXML
@@ -83,18 +130,18 @@ public class NavbarController {
 
     @FXML
     private void onPosts() {
-        navigate("/user/posts/posts_feed.fxml", "DayFlow — Posts");
+        navigate("/user/interaction/posts_feed.fxml", "DayFlow — Posts");
     }
 
     @FXML
-    private void onMesDemandes() {
-        toastSoon("Mes demandes");
+    private void handleMesDemandes() {
+        navigate("/user/coaching_session/mes_demandes.fxml", "DayFlow — Mes demandes");
     }
 
     @FXML
     private void onGererSessions() {
         if (AppSession.isCoach()) {
-            navigate("/user/coachdashboard/coach_dashboard.fxml", "DayFlow — Coach");
+            navigate("/user/coaching_session/mes_sessions.fxml", "DayFlow — Mes sessions");
         } else {
             toastSoon("Gérer sessions");
         }
@@ -107,11 +154,23 @@ public class NavbarController {
 
     @FXML
     private void onNotifications() {
-        toastSoon("Notifications");
+        if (AppSession.getCurrentUser().isEmpty()) {
+            toastSoon("Notifications");
+            return;
+        }
+        showNotificationsPopup();
     }
 
     @FXML
     private void onLogout() {
+        AppSession.getCurrentUser().ifPresent(u -> {
+            try {
+                if (u.getId() != null) {
+                    accountSecurityService.revokeCurrentSession(u.getId(), AppSession.getSessionToken().orElse(null));
+                }
+            } catch (Exception ignored) {
+            }
+        });
         AppSession.clear();
         try {
             AuthNavigation.showLanding();
@@ -130,5 +189,134 @@ public class NavbarController {
 
     private static void toastSoon(String module) {
         new Alert(Alert.AlertType.INFORMATION, module + " — bientôt disponible.").showAndWait();
+    }
+
+    private void initNotificationAutoRefresh() {
+        notificationsRefreshTimeline = new Timeline(
+                new KeyFrame(Duration.seconds(5), e -> refreshNotifications())
+        );
+        notificationsRefreshTimeline.setCycleCount(Timeline.INDEFINITE);
+        notificationsRefreshTimeline.play();
+    }
+
+    private void refreshNotifications() {
+        Optional<Integer> userId = AppSession.getCurrentUser().map(u -> u.getId());
+        if (userId.isEmpty() || userId.get() == null) {
+            notificationsBadgeLabel.setVisible(false);
+            notificationsBadgeLabel.setManaged(false);
+            return;
+        }
+        try {
+            int unread = notificationService.countUnreadByUser(userId.get());
+            notificationsBadgeLabel.setText(String.valueOf(unread));
+            boolean hasUnread = unread > 0;
+            notificationsBadgeLabel.setVisible(hasUnread);
+            notificationsBadgeLabel.setManaged(hasUnread);
+        } catch (SQLException e) {
+            notificationsBadgeLabel.setVisible(false);
+            notificationsBadgeLabel.setManaged(false);
+        }
+    }
+
+    private void showNotificationsPopup() {
+        Integer uid = AppSession.getCurrentUser().map(u -> u.getId()).orElse(null);
+        if (uid == null) {
+            return;
+        }
+        try {
+            List<Notification> notifications = notificationService.findLatestByUser(uid, 20);
+            VBox panel = new VBox(8);
+            panel.getStyleClass().add("notif-panel");
+            panel.setPrefWidth(360);
+
+            HBox header = new HBox(8);
+            Label title = new Label("Notifications");
+            title.getStyleClass().add("notif-title");
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+            Button markAllBtn = new Button("Mark all as read");
+            markAllBtn.getStyleClass().add("notif-mark-all-btn");
+            markAllBtn.setOnAction(e -> {
+                try {
+                    notificationService.markAllAsRead(uid);
+                    refreshNotifications();
+                    if (notificationsMenu != null) {
+                        notificationsMenu.hide();
+                    }
+                    showNotificationsPopup();
+                } catch (SQLException ex) {
+                    new Alert(Alert.AlertType.ERROR, "Impossible de marquer comme lu : " + ex.getMessage()).showAndWait();
+                }
+            });
+            header.getChildren().addAll(title, spacer, markAllBtn);
+            panel.getChildren().add(header);
+
+            if (notifications.isEmpty()) {
+                Label empty = new Label("Aucune notification");
+                empty.getStyleClass().add("notif-meta");
+                panel.getChildren().add(empty);
+            } else {
+                VBox list = new VBox(6);
+                for (Notification n : notifications) {
+                    list.getChildren().add(buildNotificationItem(n, uid));
+                }
+                ScrollPane scroll = new ScrollPane(list);
+                scroll.setFitToWidth(true);
+                scroll.setPrefViewportHeight(320);
+                scroll.setStyle("-fx-background-color:transparent; -fx-border-color:transparent;");
+                panel.getChildren().add(scroll);
+            }
+
+            if (notificationsMenu != null) {
+                notificationsMenu.hide();
+            }
+            notificationsMenu = new ContextMenu();
+            MenuItem host = new MenuItem();
+            host.setGraphic(panel);
+            host.setDisable(true);
+            notificationsMenu.getItems().add(host);
+            notificationsMenu.show(notificationsBellButton, Side.BOTTOM, 0, 6);
+        } catch (SQLException e) {
+            new Alert(Alert.AlertType.ERROR, "Impossible de charger les notifications : " + e.getMessage()).showAndWait();
+        }
+    }
+
+    private VBox buildNotificationItem(Notification n, int uid) {
+        VBox item = new VBox(4);
+        item.getStyleClass().add("notif-item");
+        if (!n.isRead()) {
+            item.getStyleClass().add("notif-item-unread");
+        }
+        item.setOnMouseClicked(e -> {
+            try {
+                if (!n.isRead() && n.getId() != null) {
+                    notificationService.markAsRead(n.getId(), uid);
+                    refreshNotifications();
+                    if (notificationsMenu != null) {
+                        notificationsMenu.hide();
+                    }
+                    showNotificationsPopup();
+                }
+            } catch (SQLException ex) {
+                new Alert(Alert.AlertType.ERROR, "Impossible de marquer la notification : " + ex.getMessage()).showAndWait();
+            }
+        });
+
+        Label type = new Label(humanType(n.getType()));
+        type.getStyleClass().add("notif-type");
+        Label msg = new Label(n.getMessage() != null ? n.getMessage() : "—");
+        msg.getStyleClass().add("notif-message");
+        Label meta = new Label((n.getCreatedAt() != null ? n.getCreatedAt().format(NOTIF_DF) : "—")
+                + (n.isRead() ? " • Lu" : " • Non lu"));
+        meta.getStyleClass().add("notif-meta");
+        item.getChildren().addAll(type, msg, meta);
+        return item;
+    }
+
+    private static String humanType(String type) {
+        if (type == null || type.isBlank()) {
+            return "INFO";
+        }
+        return type.replace('_', ' ').toUpperCase(Locale.ROOT);
     }
 }

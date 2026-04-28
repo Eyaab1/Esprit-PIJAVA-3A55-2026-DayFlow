@@ -2,7 +2,7 @@ package tests;
 
 import model.user.User;
 import org.junit.jupiter.api.Test;
-import services.UserServices.UserService;
+import services.account.UserService;
 import utils.PasswordHasher;
 
 import java.sql.SQLException;

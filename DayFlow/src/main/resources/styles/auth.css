@@ -20,6 +20,13 @@
     -fx-text-fill: #5d6b8a;
 }
 
+.auth-field-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #4a5878;
+    -fx-padding: 8 0 0 0;
+}
+
 .text-field,
 .password-field,
 .date-picker,
@@ -52,4 +59,18 @@
 
 .secondary-button:hover {
     -fx-background-color: #e2e9ff;
+}
+
+.auth-error-msg {
+    -fx-text-fill: #c62828;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 2 0 2 0;
+}
+
+.auth-success-msg {
+    -fx-text-fill: #1b8f3a;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 2 0 2 0;
 }

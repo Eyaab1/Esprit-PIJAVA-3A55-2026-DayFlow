@@ -16,7 +16,8 @@ import javafx.stage.FileChooser;
 import model.reclamation.Reclamation;
 import model.reclamation.Response;
 import services.ai.PerspectiveAPIService;
-import services.reclamation_services.ReclamationService;
+
+import services.reclamation.ReclamationService;
 import session.AppSession;
 
 import java.io.File;

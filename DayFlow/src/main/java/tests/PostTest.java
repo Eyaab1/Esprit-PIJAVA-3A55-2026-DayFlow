@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import services.comment.CommentService;
-import services.post.PostService;
-import services.tag.TagService;
+import services.interaction.CommentService;
+import services.interaction.PostService;
+import services.interaction.TagService;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;

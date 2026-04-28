@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.coaching_session.EditSessionController"
+            fitToWidth="true" styleClass="scroll-pane" stylesheets="@edit_session.css">
+    <content>
+    <VBox spacing="24" alignment="TOP_CENTER" styleClass="main-container">
+        <padding>
+            <Insets top="32" right="32" bottom="36" left="32"/>
+        </padding>
+
+        <!-- En-tête -->
+        <VBox spacing="10" alignment="CENTER" maxWidth="900" styleClass="header-section">
+            <Label text="✏️ Modifier la session" styleClass="page-title">
+                <font>
+                    <Font name="System Bold" size="42"/>
+                </font>
+            </Label>
+            <Label fx:id="sessionInfoLabel" text="Session #..." styleClass="session-info-label">
+                <font>
+                    <Font size="16"/>
+                </font>
+            </Label>
+        </VBox>
+
+        <!-- Formulaire -->
+        <VBox spacing="20" maxWidth="860" prefWidth="860" styleClass="form-card">
+            <padding>
+                <Insets top="32" right="32" bottom="28" left="32"/>
+            </padding>
+        
+        <!-- Date -->
+        <VBox spacing="8" styleClass="field-section">
+            <Label text="📅 Date de la session" styleClass="field-label">
+                <font>
+                    <Font name="System Bold" size="14"/>
+                </font>
+            </Label>
+            <DatePicker fx:id="sessionDatePicker" promptText="Sélectionner une date" 
+                        maxWidth="Infinity" styleClass="date-picker">
+            </DatePicker>
+        </VBox>
+        
+        <!-- Heure -->
+        <VBox spacing="8" styleClass="field-section">
+            <Label text="🕐 Heure de début" styleClass="field-label">
+                <font>
+                    <Font name="System Bold" size="14"/>
+                </font>
+            </Label>
+            <TextField fx:id="sessionTimeField" promptText="Ex: 14:30" styleClass="text-field">
+            </TextField>
+        </VBox>
+        
+        <!-- Durée -->
+        <VBox spacing="8" styleClass="field-section">
+            <Label text="⏱️ Durée (en minutes)" styleClass="field-label">
+                <font>
+                    <Font name="System Bold" size="14"/>
+                </font>
+            </Label>
+            <ComboBox fx:id="durationCombo" promptText="Sélectionner..." 
+                      maxWidth="Infinity" styleClass="combo-box">
+            </ComboBox>
+        </VBox>
+        
+        <!-- Objectif -->
+        <VBox spacing="8" styleClass="field-section">
+            <Label text="🎯 Objectif de la session" styleClass="field-label">
+                <font>
+                    <Font name="System Bold" size="14"/>
+                </font>
+            </Label>
+            <TextField fx:id="objectiveField" promptText="Ex: Améliorer la confiance en soi" 
+                       styleClass="text-field">
+            </TextField>
+        </VBox>
+        
+        <!-- Prix -->
+        <VBox spacing="8" styleClass="field-section">
+            <Label text="💰 Prix de la session (€)" styleClass="field-label">
+                <font>
+                    <Font name="System Bold" size="14"/>
+                </font>
+            </Label>
+            <TextField fx:id="priceField" promptText="Ex: 50" styleClass="text-field">
+            </TextField>
+        </VBox>
+        
+        <!-- Statut -->
+        <VBox spacing="8" styleClass="field-section">
+            <Label text="📊 Statut" styleClass="field-label">
+                <font>
+                    <Font name="System Bold" size="14"/>
+                </font>
+            </Label>
+            <ComboBox fx:id="statusCombo" promptText="Sélectionner..." 
+                      maxWidth="Infinity" styleClass="combo-box">
+            </ComboBox>
+        </VBox>
+        
+        <!-- Boutons -->
+        <HBox spacing="12" alignment="CENTER_RIGHT" styleClass="buttons-container">
+            <Button fx:id="cancelBtn" text="❌ Annuler" styleClass="cancel-button">
+                <font>
+                    <Font name="System Bold" size="14"/>
+                </font>
+            </Button>
+            <Button fx:id="saveBtn" text="💾 Enregistrer" styleClass="save-button">
+                <font>
+                    <Font name="System Bold" size="14"/>
+                </font>
+            </Button>
+        </HBox>
+        
+    </VBox>
+    </VBox>
+    </content>
+</ScrollPane>

@@ -12,6 +12,7 @@ public class Message {
 
     private int chatroomId;
     private int authorId;
+    private int replyToId; // 0 = pas une réponse
 
     public Message() {
         this.createdAt = LocalDateTime.now();
@@ -28,14 +29,16 @@ public class Message {
         this.isEdited = false;
     }
 
+    /** NULL ou vide (BD) → chaîne vide. La validation des envois se fait dans MessageValidator / postMessage. */
     public void setContent(String content) {
         if (content == null || content.trim().isEmpty()) {
-            throw new IllegalArgumentException("Content required");
+            this.content = "";
+            return;
         }
         if (content.length() > 1000) {
             throw new IllegalArgumentException("Message too long");
         }
-        this.content = content;
+        this.content = content.trim();
     }
 
     public void setChatroomId(int chatroomId) {
@@ -79,6 +82,9 @@ public class Message {
     public boolean isEdited() {
         return isEdited;
     }
+
+    public int getReplyToId()              { return replyToId; }
+    public void setReplyToId(int replyToId){ this.replyToId = replyToId; }
 
     public void setId(int id) {
         this.id = id;

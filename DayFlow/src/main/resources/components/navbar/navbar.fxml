@@ -1,59 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
 
-<HBox alignment="CENTER_LEFT" spacing="16.0" styleClass="navbar-root" stylesheets="@navbar.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.components.NavbarController">
-   <children>
-      <HBox alignment="CENTER_LEFT" spacing="10.0">
-         <children>
-            <StackPane styleClass="navbar-logo-box">
-               <children>
-                  <Label styleClass="navbar-logo-text" text="DF" />
-               </children>
-            </StackPane>
-            <Label styleClass="navbar-brand" text="DayFlow" />
-         </children>
-      </HBox>
-      <Region HBox.hgrow="ALWAYS" />
-      <HBox alignment="CENTER_RIGHT" spacing="6.0">
-         <children>
-            <Hyperlink onAction="#onAccueil" styleClass="nav-link" text="Accueil" />
-            <Hyperlink onAction="#onObjectifs" styleClass="nav-link" text="Objectifs" />
-            <Hyperlink onAction="#onCommunity" styleClass="nav-link" text="Community" />
-            <Hyperlink onAction="#onCalendrier" styleClass="nav-link" text="Calendrier" />
-            <Hyperlink onAction="#onFavoris" styleClass="nav-link" text="Favoris" />
-            <Hyperlink onAction="#onPosts" styleClass="nav-link" text="Posts" />
-            <Hyperlink onAction="#onMesDemandes" styleClass="nav-link" text="Mes demandes" />
-            <Hyperlink fx:id="manageSessionsLink" onAction="#onGererSessions" styleClass="nav-link" text="Gérer sessions" />
-         </children>
-      </HBox>
-      <Region prefWidth="12.0" />
-      <HBox alignment="CENTER_RIGHT" spacing="8.0">
-         <children>
-            <Button focusTraversable="false" onAction="#onMessages" styleClass="nav-icon-btn" text="💬" />
-            <StackPane>
-               <children>
-                  <Button focusTraversable="false" onAction="#onNotifications" styleClass="nav-icon-btn" text="🔔" />
-                  <VBox alignment="TOP_RIGHT" mouseTransparent="true" StackPane.alignment="TOP_RIGHT">
-                     <children>
-                        <StackPane styleClass="notif-badge" translateX="-4.0" translateY="2.0" />
-                     </children>
-                  </VBox>
-               </children>
-            </StackPane>
-            <Label fx:id="avatarLabel" alignment="CENTER" styleClass="navbar-avatar" text="?" />
-            <Button mnemonicParsing="false" onAction="#onLogout" styleClass="btn-logout" text="Déconnexion" />
-         </children>
-      </HBox>
-   </children>
-   <padding>
-      <Insets />
-   </padding>
+<HBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.components.NavbarController"
+      styleClass="navbar-root"
+      stylesheets="@navbar.css"
+      minHeight="44"
+      spacing="6" alignment="CENTER_LEFT">
+    <padding>
+        <Insets top="8" right="16" bottom="8" left="16"/>
+    </padding>
+
+    <Label text="DayFlow" styleClass="navbar-brand"/>
+    <Separator orientation="VERTICAL" prefHeight="22" styleClass="navbar-brand-sep"/>
+
+    <Hyperlink text="Accueil" onAction="#onAccueil"/>
+    <Hyperlink text="Objectifs" onAction="#onObjectifs"/>
+    <Hyperlink text="Communauté" onAction="#onCommunity"/>
+    <Hyperlink text="Posts" onAction="#onPosts"/>
+    <Hyperlink text="Mes demandes" onAction="#handleMesDemandes"/>
+    <Hyperlink fx:id="manageSessionsLink" text="Mes sessions" onAction="#onGererSessions"/>
+    <Hyperlink text="Messages" onAction="#onMessages"/>
+    <Hyperlink text="Calendrier" onAction="#onCalendrier"/>
+    <Hyperlink text="Favoris" onAction="#onFavoris"/>
+    <Region styleClass="navbar-spacer" HBox.hgrow="ALWAYS"/>
+
+    <StackPane fx:id="notificationsContainer" styleClass="navbar-notif-wrap">
+        <Button fx:id="notificationsBellButton" text="🔔" onAction="#onNotifications" styleClass="navbar-bell-btn" />
+        <Label fx:id="notificationsBadgeLabel" text="0" styleClass="navbar-notif-badge" visible="false" managed="false"/>
+    </StackPane>
+
+    <Hyperlink fx:id="avatarLink" text="?" styleClass="navbar-avatar" alignment="CENTER" onAction="#onProfile" />
+    <Separator orientation="VERTICAL" prefHeight="24"/>
+    <Hyperlink text="Déconnexion" onAction="#onLogout"/>
 </HBox>

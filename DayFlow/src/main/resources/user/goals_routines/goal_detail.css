@@ -1,0 +1,246 @@
+.gd-root {
+    -fx-background-color: #f8fafc;
+}
+
+.gd-root > .viewport {
+    -fx-background-color: #f8fafc;
+}
+
+.gd-inner {
+    -fx-max-width: 960;
+    -fx-spacing: 20;
+}
+
+.gd-back {
+    -fx-text-fill: #4338ca;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-border-color: transparent;
+    -fx-padding: 4 0 8 0;
+}
+
+.gd-back:hover {
+    -fx-underline: true;
+    -fx-text-fill: #3730a3;
+}
+
+.gd-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.gd-badge-active {
+    -fx-background-color: #dcfce7;
+    -fx-text-fill: #166534;
+    -fx-padding: 4 12;
+    -fx-background-radius: 999;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.gd-badge-paused {
+    -fx-background-color: #ffedd5;
+    -fx-text-fill: #c2410c;
+    -fx-padding: 4 12;
+    -fx-background-radius: 999;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.gd-badge-done {
+    -fx-background-color: #e0f2fe;
+    -fx-text-fill: #0369a1;
+    -fx-padding: 4 12;
+    -fx-background-radius: 999;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.gd-badge-fail {
+    -fx-background-color: #ffe4e6;
+    -fx-text-fill: #be123c;
+    -fx-padding: 4 12;
+    -fx-background-radius: 999;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.gd-badge-other {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #334155;
+    -fx-padding: 4 12;
+    -fx-background-radius: 999;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.gd-desc {
+    -fx-font-size: 14px;
+    -fx-text-fill: #475569;
+}
+
+.gd-progress-row {
+    -fx-padding: 8 0 0 0;
+}
+
+.gd-progress-lbl {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+}
+
+.gd-progress-pct {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6366f1;
+}
+
+.gd-main-progress {
+    -fx-accent: #6366f1;
+}
+
+.gd-date-row {
+    -fx-padding: 8 0 0 0;
+}
+
+.gd-date-card {
+    -fx-background-color: #f5f3ff;
+    -fx-background-radius: 14;
+    -fx-padding: 16 18;
+}
+
+.gd-date-icon {
+    -fx-font-size: 18px;
+}
+
+.gd-date-k {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748b;
+}
+
+.gd-date-v {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e1b4b;
+}
+
+.btn-gd-open-routine {
+    -fx-background-color: #6366f1;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-padding: 8 14;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.gd-sep {
+    -fx-padding: 8 0;
+}
+
+.gd-routines-head {
+    -fx-padding: 4 0 0 0;
+}
+
+.gd-routines-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4338ca;
+}
+
+.btn-gd-chat, .btn-gd-new-routine {
+    -fx-background-color: #6366f1;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-padding: 10 16;
+    -fx-background-radius: 12;
+    -fx-cursor: hand;
+}
+
+.btn-gd-chat:hover, .btn-gd-new-routine:hover {
+    -fx-background-color: #4f46e5;
+}
+
+.gd-empty {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-border-color: #e9d5ff;
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+}
+
+.gd-empty-icon {
+    -fx-font-size: 48px;
+}
+
+.gd-empty-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.gd-empty-sub {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+}
+
+.btn-gd-empty-cta {
+    -fx-background-color: #6366f1;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-padding: 12 28;
+    -fx-background-radius: 14;
+    -fx-cursor: hand;
+}
+
+.gd-routines-list {
+}
+
+.gd-routine-item {
+    -fx-spacing: 4;
+    -fx-padding: 14 16;
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.05), 8, 0, 0, 1);
+}
+
+.gd-routine-title {
+    -fx-font-weight: 700;
+    -fx-text-fill: #0f172a;
+}
+
+.gd-routine-meta {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748b;
+}
+
+.gd-goal-actions {
+    -fx-padding: 4 0 8 0;
+    -fx-spacing: 10;
+}
+
+.btn-gd-edit-goal {
+    -fx-background-color: #6366f1;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-padding: 8 16;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.btn-gd-delete-goal {
+    -fx-background-color: transparent;
+    -fx-text-fill: #b91c1c;
+    -fx-border-color: #fecaca;
+    -fx-border-radius: 10;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.btn-gd-delete-routine {
+    -fx-background-color: #fef2f2;
+    -fx-text-fill: #b91c1c;
+    -fx-font-size: 12px;
+    -fx-padding: 6 12;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
