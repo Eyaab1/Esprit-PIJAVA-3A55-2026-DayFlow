@@ -48,7 +48,7 @@ public class RoutineService implements CRUD<Routine, Integer> {
                 ps.setNull(5, Types.VARCHAR);
             }
 
-            ps.setDate(6, r.getDeadline() != null ? Date.valueOf(r.getDeadline()) : null);
+            ps.setTimestamp(6, r.getDeadline() != null ? Timestamp.valueOf(r.getDeadline()) : null);
             ps.setBoolean(7, r.isFavorite());
 
             ps.setTimestamp(8, Timestamp.valueOf(r.getCreatedAt()));
@@ -141,9 +141,9 @@ public class RoutineService implements CRUD<Routine, Integer> {
         if (pr != null) {
             r.setPriority(pr);
         }
-        Date dl = rs.getDate("deadline");
+        Timestamp dl = rs.getTimestamp("deadline");
         if (dl != null) {
-            r.setDeadline(dl.toLocalDate());
+            r.setDeadline(dl.toLocalDateTime());
         }
         r.setFavorite(rs.getBoolean("is_favorite"));
         Timestamp ca = rs.getTimestamp("created_at");
@@ -182,7 +182,7 @@ public class RoutineService implements CRUD<Routine, Integer> {
                 ps.setNull(5, Types.VARCHAR);
             }
 
-            ps.setDate(6, r.getDeadline() != null ? Date.valueOf(r.getDeadline()) : null);
+            ps.setTimestamp(6, r.getDeadline() != null ? Timestamp.valueOf(r.getDeadline()) : null);
             ps.setBoolean(7, r.isFavorite());
 
             ps.setTimestamp(8, Timestamp.valueOf(r.getUpdatedAt()));

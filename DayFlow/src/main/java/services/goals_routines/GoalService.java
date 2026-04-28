@@ -60,7 +60,7 @@ public class GoalService implements CRUD<Goal, Integer> {
             ps.setString(i++, goal.getDescription());
             ps.setDate(i++, goal.getStartDate() != null ? Date.valueOf(goal.getStartDate()) : null);
             ps.setDate(i++, goal.getEndDate() != null ? Date.valueOf(goal.getEndDate()) : null);
-            ps.setDate(i++, goal.getDeadline() != null ? Date.valueOf(goal.getDeadline()) : null);
+            ps.setTimestamp(i++, goal.getDeadline() != null ? Timestamp.valueOf(goal.getDeadline()) : null);
             ps.setString(i++, goal.getStatus());
             if (goal.getPriority() == null) {
                 ps.setNull(i++, Types.VARCHAR);
@@ -107,7 +107,7 @@ public class GoalService implements CRUD<Goal, Integer> {
             ps.setString(i++, goal.getDescription());
             ps.setDate(i++, goal.getStartDate() != null ? Date.valueOf(goal.getStartDate()) : null);
             ps.setDate(i++, goal.getEndDate() != null ? Date.valueOf(goal.getEndDate()) : null);
-            ps.setDate(i++, goal.getDeadline() != null ? Date.valueOf(goal.getDeadline()) : null);
+            ps.setTimestamp(i++, goal.getDeadline() != null ? Timestamp.valueOf(goal.getDeadline()) : null);
             ps.setString(i++, goal.getStatus());
             if (goal.getPriority() == null) {
                 ps.setNull(i++, Types.VARCHAR);
@@ -234,8 +234,8 @@ public class GoalService implements CRUD<Goal, Integer> {
         g.setStartDate(sd != null ? sd.toLocalDate() : null);
         Date ed = rs.getDate("end_date");
         g.setEndDate(ed != null ? ed.toLocalDate() : null);
-        Date dl = rs.getDate("deadline");
-        g.setDeadline(dl != null ? dl.toLocalDate() : null);
+        Timestamp dl = rs.getTimestamp("deadline");
+        g.setDeadline(dl != null ? dl.toLocalDateTime() : null);
         g.setStatus(rs.getString("status"));
         g.setPriority(rs.getString("priority"));
         g.setFavorite(rs.getBoolean("is_favorite"));

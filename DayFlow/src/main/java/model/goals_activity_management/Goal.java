@@ -21,7 +21,7 @@ public class Goal {
 
     private LocalDate startDate;    // NotNull
     private LocalDate endDate;      // NotNull, must be after startDate
-    private LocalDate deadline;     // Optional
+    private LocalDateTime deadline; // Optional
 
     private String status;          // draft | active | paused | completed | failed | archived
     private String priority;        // low | medium | high (nullable)
@@ -170,7 +170,7 @@ public class Goal {
         this.progress = progress;
     }
 
-    public void setDeadline(LocalDate deadline) { this.deadline = deadline; }
+    public void setDeadline(LocalDateTime deadline) { this.deadline = deadline; }
     public void setFavorite(boolean favorite)   { this.isFavorite = favorite; }
     public void setRequiredTasks(Integer n)     { this.requiredTasks = n; }
     public void setTrelloBoardId(String id)     { this.trelloBoardId = id; }
@@ -208,7 +208,7 @@ public class Goal {
     public String         getDescription()   { return description; }
     public LocalDate      getStartDate()     { return startDate; }
     public LocalDate      getEndDate()       { return endDate; }
-    public LocalDate      getDeadline()      { return deadline; }
+    public LocalDateTime  getDeadline()      { return deadline; }
     public String         getStatus()        { return status; }
     public String         getPriority()      { return priority; }
     public boolean        isFavorite()       { return isFavorite; }
@@ -305,10 +305,14 @@ public class Goal {
     // ─── Deadline helpers ─────────────────────────────────────
 
     public boolean isDeadlineNear() {
-        LocalDate ref = deadline != null ? deadline : endDate;
-        if (ref == null) return false;
-        long days = ChronoUnit.DAYS.between(LocalDate.now(), ref);
+        if (deadline == null) return false;
+        long days = ChronoUnit.DAYS.between(LocalDateTime.now(), deadline);
         return days >= 0 && days <= 7;
+    }
+
+    public boolean isOverdue() {
+        if (deadline == null) return false;
+        return LocalDateTime.now().isAfter(deadline) && !"completed".equals(status);
     }
 
     public boolean isAtRisk() {
@@ -392,9 +396,12 @@ public class Goal {
             status = "completed";
             return;
         }
-        LocalDate dateToCheck = deadline != null ? deadline : endDate;
-        if (dateToCheck != null && !"completed".equals(status)) {
-            if (LocalDate.now().isAfter(dateToCheck) && getProgressPercentage() < 50) {
+        if (deadline != null && !"completed".equals(status)) {
+            if (LocalDateTime.now().isAfter(deadline) && getProgressPercentage() < 50) {
+                status = "failed";
+            }
+        } else if (endDate != null && !"completed".equals(status)) {
+            if (LocalDate.now().isAfter(endDate) && getProgressPercentage() < 50) {
                 status = "failed";
             }
         }

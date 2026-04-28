@@ -201,6 +201,12 @@ public class GoalsDashboardController {
             badges.getChildren().add(pr);
         }
 
+        // Add deadline countdown
+        if (g.getDeadline() != null) {
+            Label deadlineLabel = createDeadlineLabel(g);
+            badges.getChildren().add(deadlineLabel);
+        }
+
         int prog = g.getProgress();
         Label progLbl = new Label("Progression " + prog + "%");
         progLbl.getStyleClass().add("goal-progress-line");
@@ -225,6 +231,48 @@ public class GoalsDashboardController {
 
         card.getChildren().addAll(head, badges, progLbl, bar, actions);
         return card;
+    }
+
+    private Label createDeadlineLabel(Goal g) {
+        java.time.LocalDateTime deadline = g.getDeadline();
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        
+        long daysRemaining = java.time.temporal.ChronoUnit.DAYS.between(now, deadline);
+        long hoursRemaining = java.time.temporal.ChronoUnit.HOURS.between(now, deadline);
+        
+        String deadlineText;
+        String styleClass = "badge-deadline";
+        
+        if (daysRemaining < 0) {
+            // Overdue
+            deadlineText = "⏰ OVERDUE";
+            styleClass = "badge-deadline-overdue";
+        } else if (daysRemaining == 0) {
+            // Today
+            if (hoursRemaining <= 0) {
+                deadlineText = "⏰ TODAY (expired)";
+                styleClass = "badge-deadline-critical";
+            } else {
+                deadlineText = "⏰ TODAY (" + hoursRemaining + "h left)";
+                styleClass = "badge-deadline-critical";
+            }
+        } else if (daysRemaining == 1) {
+            deadlineText = "⏰ TOMORROW";
+            styleClass = "badge-deadline-urgent";
+        } else if (daysRemaining <= 3) {
+            deadlineText = "⏰ Still " + daysRemaining + " days to end";
+            styleClass = "badge-deadline-urgent";
+        } else if (daysRemaining <= 7) {
+            deadlineText = "⏰ Still " + daysRemaining + " days to end";
+            styleClass = "badge-deadline-warning";
+        } else {
+            deadlineText = "⏰ Still " + daysRemaining + " days to end";
+            styleClass = "badge-deadline-normal";
+        }
+        
+        Label deadlineLabel = new Label(deadlineText);
+        deadlineLabel.getStyleClass().addAll("badge", styleClass);
+        return deadlineLabel;
     }
 
     private static String statusBadgeClass(String status) {
@@ -295,6 +343,9 @@ public class GoalsDashboardController {
         descF.setWrapText(true);
         DatePicker start = new DatePicker();
         DatePicker end = new DatePicker();
+        DatePicker deadlineDate = new DatePicker();
+        Spinner<Integer> deadlineHour = new Spinner<>(0, 23, 12);
+        Spinner<Integer> deadlineMinute = new Spinner<>(0, 59, 0);
         ComboBox<String> status = new ComboBox<>();
         status.getItems().addAll("active", "draft");
         status.getSelectionModel().select("active");
@@ -312,6 +363,10 @@ public class GoalsDashboardController {
         grid.add(start, 1, r++);
         grid.add(new Label("Fin *"), 0, r);
         grid.add(end, 1, r++);
+        grid.add(new Label("Deadline (optionnel)"), 0, r);
+        javafx.scene.layout.HBox deadlineBox = new javafx.scene.layout.HBox(5);
+        deadlineBox.getChildren().addAll(deadlineDate, new Label("à"), deadlineHour, new Label("h"), deadlineMinute);
+        grid.add(deadlineBox, 1, r++);
         grid.add(new Label("Statut"), 0, r);
         grid.add(status, 1, r);
         dialog.getDialogPane().setContent(grid);
@@ -326,6 +381,16 @@ public class GoalsDashboardController {
             g.setDescription(descF.getText() != null ? descF.getText().trim() : null);
             g.setStartDate(start.getValue());
             g.setEndDate(end.getValue());
+            
+            // Set deadline if provided
+            if (deadlineDate.getValue() != null) {
+                java.time.LocalDateTime deadline = java.time.LocalDateTime.of(
+                    deadlineDate.getValue(),
+                    java.time.LocalTime.of(deadlineHour.getValue(), deadlineMinute.getValue())
+                );
+                g.setDeadline(deadline);
+            }
+            
             g.setStatus(status.getValue());
             User owner = new User();
             owner.setId(uid.get());
@@ -456,6 +521,12 @@ public class GoalsDashboardController {
             newGoal.setPriority(originalGoal.getPriority());
             newGoal.setProgress(0); // Reset progress
             newGoal.setRequiredTasks(originalGoal.getRequiredTasks());
+            
+            // Recalculate deadline: add 7 days to original deadline
+            if (originalGoal.getDeadline() != null) {
+                java.time.LocalDateTime newDeadline = originalGoal.getDeadline().plusDays(7);
+                newGoal.setDeadline(newDeadline);
+            }
             
             User owner = new User();
             owner.setId(uid.get());

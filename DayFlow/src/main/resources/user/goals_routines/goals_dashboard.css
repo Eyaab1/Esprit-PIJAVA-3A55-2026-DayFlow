@@ -266,3 +266,36 @@
 .btn-icon-delete:hover {
     -fx-background-color: #dc2626;
 }
+
+/* Deadline Badge Styles */
+.badge-deadline {
+    -fx-padding: 6 12;
+    -fx-background-radius: 999;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-fill: white;
+}
+
+.badge-deadline-normal {
+    -fx-background-color: #16a34a;
+}
+
+.badge-deadline-warning {
+    -fx-background-color: #eab308;
+    -fx-text-fill: #1f2937;
+}
+
+.badge-deadline-urgent {
+    -fx-background-color: #f97316;
+    -fx-text-fill: white;
+}
+
+.badge-deadline-critical {
+    -fx-background-color: #dc2626;
+    -fx-text-fill: white;
+}
+
+.badge-deadline-overdue {
+    -fx-background-color: #7f1d1d;
+    -fx-text-fill: #fca5a5;
+}

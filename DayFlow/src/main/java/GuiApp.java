@@ -10,6 +10,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
+import services.deadline.DeadlineScheduler;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -28,6 +29,10 @@ public class GuiApp extends Application {
     public void start(Stage stage) {
         try {
             DatabaseMigrator.migrate();
+            
+            // Start the deadline scheduler
+            DeadlineScheduler.getInstance().start();
+            
             FXMLLoader shellLoader = new FXMLLoader(GuiApp.class.getResource("/user/account/app_root.fxml"));
             Parent shellRoot = shellLoader.load();
             ShellController shell = shellLoader.getController();

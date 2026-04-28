@@ -285,7 +285,9 @@ public class ActivityDetailsController {
                 durationField.setText(String.valueOf(activity.getDurationInMinutes()));
                 priorityChoice.setValue(activity.getPriority());
                 statusChoice.setValue(activity.getStatus());
-                deadlinePicker.setValue(activity.getDeadline());
+                if (activity.getDeadline() != null) {
+                    deadlinePicker.setValue(activity.getDeadline().toLocalDate());
+                }
                 hasReminderCheck.setSelected(activity.isHasReminder());
                 Label formTitle = (Label) formRoot.lookup(".form-title");
                 if (formTitle != null) formTitle.setText("Modifier l'Activité");
@@ -324,7 +326,9 @@ public class ActivityDetailsController {
                     
                     activityToSave.setPriority(priorityChoice.getValue());
                     activityToSave.setStatus(statusChoice.getValue());
-                    activityToSave.setDeadline(deadlinePicker.getValue());
+                    if (deadlinePicker.getValue() != null) {
+                        activityToSave.setDeadline(deadlinePicker.getValue().atStartOfDay());
+                    }
                     activityToSave.setHasReminder(hasReminderCheck.isSelected());
                     activityToSave.setRoutine(currentRoutine);
                     
