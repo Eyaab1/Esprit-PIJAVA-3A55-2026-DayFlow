@@ -6,6 +6,10 @@
     -fx-background-color: linear-gradient(to bottom, #f0f9ff 0%, #fef3f9 100%);
 }
 
+.root > .viewport {
+    -fx-background-color: transparent;
+}
+
 /* Boutons de navigation */
 .nav-button-back {
     -fx-background-color: transparent;

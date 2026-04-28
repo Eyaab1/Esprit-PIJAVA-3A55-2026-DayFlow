@@ -91,7 +91,6 @@ public class MesDemandesController implements Initializable {
         setupTableView();
         setupButtons();
         loadRequests();
-        updateStatistics();
     }
 
     private void setupFilters() {
@@ -150,6 +149,7 @@ public class MesDemandesController implements Initializable {
 
         messageColumn.setCellValueFactory(cellData -> {
             String message = cellData.getValue().getMessage();
+            if (message == null || message.isBlank()) return new SimpleStringProperty("—");
             return new SimpleStringProperty(message.length() > 50 ? message.substring(0, 47) + "..." : message);
         });
 
@@ -164,6 +164,9 @@ public class MesDemandesController implements Initializable {
         });
 
         dateColumn.setCellValueFactory(cellData -> {
+            if (cellData.getValue().getCreatedAt() == null) {
+                return new SimpleStringProperty("—");
+            }
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
             return new SimpleStringProperty(sdf.format(cellData.getValue().getCreatedAt()));
         });
@@ -207,10 +210,7 @@ public class MesDemandesController implements Initializable {
         payButton.setOnAction(event -> handlePayment());
         updateBtn.setOnAction(event -> handleUpdate());
         deleteBtn.setOnAction(event -> handleDelete());
-        refreshBtn.setOnAction(event -> {
-            loadRequests();
-            updateStatistics();
-        });
+        refreshBtn.setOnAction(event -> loadRequests());
         filterBtn.setOnAction(event -> applyFilters());
         
         // Désactiver le bouton de paiement par défaut
@@ -219,18 +219,17 @@ public class MesDemandesController implements Initializable {
 
     private void loadRequests() {
         try {
-            User currentUser = AppSession.getCurrentUser()
-                    .filter(u -> u.getId() != null)
-                    .orElseGet(() -> {
-                        User fallback = new User();
-                        fallback.setId(currentUserId);
-                        return fallback;
-                    });
-            List<CoachingRequest> requests = requestService.getRequestsByUser(currentUser);
+            Optional<User> sessionUser = AppSession.getCurrentUser();
+            if (sessionUser.isEmpty() || sessionUser.get().getId() == null) {
+                showError("Session expirée", "Veuillez vous reconnecter.");
+                return;
+            }
+            List<CoachingRequest> requests = requestService.getRequestsByUser(sessionUser.get());
             requestsList.clear();
             requestsList.addAll(requests);
             buildSearchCache(requests);
             applyFilters();
+            updateStatistics();
         } catch (SQLException e) {
             showError("Erreur lors du chargement des demandes", e.getMessage());
         }
