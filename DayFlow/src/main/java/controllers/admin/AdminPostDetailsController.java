@@ -272,7 +272,38 @@ public class AdminPostDetailsController {
         if (currentPostDetails == null) {
             return;
         }
-        new Alert(Alert.AlertType.INFORMATION, "Fonctionnalité Supprimer : à implémenter").showAndWait();
+        
+        // Confirmation dialog
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirmer la suppression");
+        confirm.setHeaderText("Supprimer cette publication ?");
+        confirm.setContentText("Cette action est irréversible. La publication sera définitivement supprimée.");
+        
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == javafx.scene.control.ButtonType.OK) {
+                try {
+                    // Delete the post
+                    services.interaction.PostService postService = new services.interaction.PostService();
+                    postService.deletePost(currentPostDetails.id());
+                    
+                    // Show success message
+                    Alert success = new Alert(Alert.AlertType.INFORMATION);
+                    success.setTitle("Suppression réussie");
+                    success.setHeaderText(null);
+                    success.setContentText("La publication a été supprimée avec succès.");
+                    success.showAndWait();
+                    
+                    // Return to posts list
+                    onBack();
+                } catch (SQLException e) {
+                    Alert error = new Alert(Alert.AlertType.ERROR);
+                    error.setTitle("Erreur");
+                    error.setHeaderText("Échec de la suppression");
+                    error.setContentText("Impossible de supprimer la publication : " + e.getMessage());
+                    error.showAndWait();
+                }
+            }
+        });
     }
 
     private static String statusFr(PostStatus st, String raw) {
