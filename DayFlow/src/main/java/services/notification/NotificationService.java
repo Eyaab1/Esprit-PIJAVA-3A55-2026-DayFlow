@@ -39,6 +39,11 @@ public class NotificationService {
             WHERE user_id = ? AND is_read = FALSE
             """;
 
+    private static final String INSERT_NOTIFICATION = """
+            INSERT INTO notifications (user_id, type, message, is_read, created_at)
+            VALUES (?, ?, ?, FALSE, NOW())
+            """;
+
     public List<Notification> findLatestByUser(int userId, int limit) throws SQLException {
         List<Notification> out = new ArrayList<>();
         Connection c = DbConnexion.getConnection();
@@ -85,6 +90,24 @@ public class NotificationService {
         Connection c = DbConnexion.getConnection();
         try (PreparedStatement ps = c.prepareStatement(MARK_ALL_AS_READ)) {
             ps.setInt(1, userId);
+            ps.executeUpdate();
+        }
+    }
+
+    /**
+     * Creates a new notification for a user.
+     *
+     * @param userId  The user to notify
+     * @param type    Notification type (e.g., "BAN", "WARNING", "INFO")
+     * @param message The notification message
+     * @throws SQLException If database operation fails
+     */
+    public void createNotification(int userId, String type, String message) throws SQLException {
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(INSERT_NOTIFICATION)) {
+            ps.setInt(1, userId);
+            ps.setString(2, type);
+            ps.setString(3, message);
             ps.executeUpdate();
         }
     }

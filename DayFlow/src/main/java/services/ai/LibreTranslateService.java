@@ -6,32 +6,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Properties;
 
 /**
- * Service for translating text using LibreTranslate API (free and open-source).
- * Translates English to French for AI-generated responses.
+ * Service for translating text using MyMemory Translation API (free and reliable).
+ * No API key required for basic usage (up to 1000 words/day).
  */
 public class LibreTranslateService {
 
-    private static final String PROPERTIES_FILE = "/application.properties";
+    private static final String API_URL = "https://api.mymemory.translated.net/get";
     private static final Duration TIMEOUT = Duration.ofSeconds(30);
 
-    private final String apiUrl;
-    private final String apiKey;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
     public LibreTranslateService() {
-        Properties props = loadProperties();
-        // Try alternative instances if main one fails
-        String configuredUrl = props.getProperty("libretranslate.api.url", "https://libretranslate.com/translate");
-        this.apiUrl = configuredUrl;
-        this.apiKey = props.getProperty("libretranslate.api.key", ""); // Optional, can be empty for public instance
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(TIMEOUT)
                 .build();
@@ -46,8 +41,7 @@ public class LibreTranslateService {
      * @throws IOException If translation fails
      */
     public String translateToFrench(String text) throws IOException, InterruptedException {
-        // Use auto-detect for source language
-        return translate(text, "auto", "fr");
+        return translate(text, "en", "fr");
     }
 
     /**
@@ -58,12 +52,11 @@ public class LibreTranslateService {
      * @throws IOException If translation fails
      */
     public String translateToEnglish(String text) throws IOException, InterruptedException {
-        // Use auto-detect for source language
-        return translate(text, "auto", "en");
+        return translate(text, "fr", "en");
     }
 
     /**
-     * Translates text between languages.
+     * Translates text between languages using MyMemory API.
      *
      * @param text Text to translate
      * @param sourceLang Source language code (e.g., "en", "fr")
@@ -83,35 +76,25 @@ public class LibreTranslateService {
             return text;
         }
 
-        String requestBody = buildRequestBody(text, sourceLang, targetLang);
+        // Encode text for URL
+        String encodedText = URLEncoder.encode(text, StandardCharsets.UTF_8);
+        String langPair = sourceLang + "|" + targetLang;
+        String encodedLangPair = URLEncoder.encode(langPair, StandardCharsets.UTF_8);
+        
+        // Build URL with query parameters
+        String url = API_URL + "?q=" + encodedText + "&langpair=" + encodedLangPair;
 
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create(apiUrl))
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
                 .timeout(TIMEOUT)
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody));
+                .header("Accept", "application/json")
+                .GET()
+                .build();
 
-        // Add API key if configured
-        if (apiKey != null && !apiKey.isBlank()) {
-            requestBuilder.header("Authorization", "Bearer " + apiKey);
-        }
-
-        HttpRequest request = requestBuilder.build();
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200) {
-            String errorBody = response.body();
-            // Try to extract error message
-            try {
-                com.fasterxml.jackson.databind.JsonNode errorNode = objectMapper.readTree(errorBody);
-                String errorMsg = errorNode.path("error").asText();
-                if (errorMsg != null && !errorMsg.isBlank()) {
-                    throw new IOException("LibreTranslate API error: " + errorMsg);
-                }
-            } catch (Exception e) {
-                // Ignore JSON parsing error
-            }
-            throw new IOException("LibreTranslate API error (code " + response.statusCode() + "): " + errorBody);
+            throw new IOException("MyMemory API error (code " + response.statusCode() + "): " + response.body());
         }
 
         String translatedText = parseResponse(response.body());
@@ -125,26 +108,23 @@ public class LibreTranslateService {
     }
 
     /**
-     * Builds the JSON request body for LibreTranslate API.
-     */
-    private String buildRequestBody(String text, String sourceLang, String targetLang) {
-        return String.format("""
-                {
-                    "q": %s,
-                    "source": "%s",
-                    "target": "%s",
-                    "format": "text"
-                }
-                """, escapeJson(text), sourceLang, targetLang);
-    }
-
-    /**
-     * Parses the translation response from LibreTranslate API.
+     * Parses the translation response from MyMemory API.
      */
     private String parseResponse(String responseBody) throws IOException {
         try {
             JsonNode root = objectMapper.readTree(responseBody);
-            String translatedText = root.path("translatedText").asText();
+            
+            // Check response status
+            int responseStatus = root.path("responseStatus").asInt();
+            if (responseStatus != 200) {
+                String errorMsg = root.path("responseDetails").asText("Unknown error");
+                throw new IOException("Translation failed: " + errorMsg);
+            }
+            
+            // Get translated text
+            String translatedText = root.path("responseData")
+                    .path("translatedText")
+                    .asText();
             
             // Check if translatedText is null or empty
             if (translatedText == null || translatedText.isBlank() || translatedText.equals("null")) {
@@ -158,40 +138,9 @@ public class LibreTranslateService {
     }
 
     /**
-     * Loads properties from application.properties.
-     */
-    private Properties loadProperties() {
-        Properties props = new Properties();
-        try (InputStream input = getClass().getResourceAsStream(PROPERTIES_FILE)) {
-            if (input != null) {
-                props.load(input);
-            }
-        } catch (IOException e) {
-            System.err.println("Cannot load application.properties: " + e.getMessage());
-        }
-        return props;
-    }
-
-    /**
-     * Escapes text for JSON.
-     */
-    private static String escapeJson(String text) {
-        if (text == null) {
-            return "\"\"";
-        }
-        String escaped = text
-                .replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r")
-                .replace("\t", "\\t");
-        return "\"" + escaped + "\"";
-    }
-
-    /**
      * Checks if the service is configured.
      */
     public boolean isConfigured() {
-        return apiUrl != null && !apiUrl.isBlank();
+        return true; // MyMemory doesn't require API key
     }
 }

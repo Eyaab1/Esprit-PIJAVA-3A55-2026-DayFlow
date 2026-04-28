@@ -12,10 +12,14 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import model.reclamation.Reclamation;
 import model.reclamation.Response;
+import model.user.User;
+import services.admin.AdminModerationService;
 import services.ai.GroqAIService;
 import services.ai.LibreTranslateService;
+import services.notification.NotificationService;
 import services.reclamation.ReclamationEmailService;
 import services.reclamation.ReclamationService;
+import session.AppSession;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -38,6 +42,8 @@ public class AdminReclamationsController {
     private final GroqAIService groqAIService = new GroqAIService();
     private final LibreTranslateService translateService = new LibreTranslateService();
     private final ReclamationEmailService emailService = new ReclamationEmailService();
+    private final AdminModerationService moderationService = new AdminModerationService();
+    private final NotificationService notificationService = new NotificationService();
 
     @FXML
     private TextField searchField;
@@ -251,6 +257,11 @@ public class AdminReclamationsController {
             sb.append("Utilisateur: ").append(getUserDisplayName(rec.getUserId())).append("\n");
             sb.append("Date: ").append(rec.getCreatedAt() != null ? rec.getCreatedAt().format(DATE_FMT) : "—").append("\n");
             
+            // Show post ID if this is a post-related reclamation
+            if (rec.getPostId() != null) {
+                sb.append("Post signalé: #").append(rec.getPostId()).append("\n");
+            }
+            
             // Show photo path if exists
             if (rec.getPhotoPath() != null && !rec.getPhotoPath().isBlank()) {
                 sb.append("Preuve jointe: ").append(rec.getPhotoPath()).append("\n");
@@ -281,6 +292,66 @@ public class AdminReclamationsController {
             alert.setHeaderText("Réclamation #" + rec.getId());
             
             VBox content = new VBox(10);
+            
+            // Get user status for ban information
+            String userStatus = getUserStatus(rec.getUserId());
+            java.time.LocalDateTime bannedUntil = getUserBannedUntil(rec.getUserId());
+            
+            // Show user ban status if applicable
+            if (userStatus != null && (userStatus.equals("banned") || userStatus.equals("temp_banned"))) {
+                Label banStatusLabel = new Label();
+                if (userStatus.equals("banned")) {
+                    banStatusLabel.setText("⛔ Utilisateur banni définitivement");
+                    banStatusLabel.setStyle("-fx-background-color:#fee2e2;-fx-text-fill:#991b1b;-fx-padding:8 12;" +
+                            "-fx-background-radius:6px;-fx-font-weight:bold;");
+                } else if (bannedUntil != null) {
+                    String until = bannedUntil.format(DATE_FMT);
+                    banStatusLabel.setText("⚠️ Utilisateur banni temporairement jusqu'au " + until);
+                    banStatusLabel.setStyle("-fx-background-color:#fef3c7;-fx-text-fill:#92400e;-fx-padding:8 12;" +
+                            "-fx-background-radius:6px;-fx-font-weight:bold;");
+                }
+                content.getChildren().add(banStatusLabel);
+            }
+            
+            // Moderation actions (only if reclamation is about a post)
+            if (rec.getPostId() != null && rec.getUserId() != null) {
+                HBox moderationBox = new HBox(10);
+                moderationBox.setAlignment(Pos.CENTER_LEFT);
+                moderationBox.setStyle("-fx-background-color:#fef3c7;-fx-padding:10;-fx-background-radius:6px;");
+                
+                Label moderationLabel = new Label("🛡️ Actions de modération :");
+                moderationLabel.setStyle("-fx-font-weight:bold;-fx-text-fill:#92400e;");
+                
+                Button tempBanBtn = new Button("⏱️ Bannir temporairement");
+                tempBanBtn.setStyle("-fx-background-color:#f59e0b;-fx-text-fill:white;-fx-font-weight:bold;" +
+                        "-fx-padding:6 12;-fx-background-radius:6px;-fx-cursor:hand;");
+                tempBanBtn.setOnAction(e -> {
+                    alert.close();
+                    showBanDialog(rec, false);
+                });
+                
+                Button permBanBtn = new Button("🚫 Bannir définitivement");
+                permBanBtn.setStyle("-fx-background-color:#dc2626;-fx-text-fill:white;-fx-font-weight:bold;" +
+                        "-fx-padding:6 12;-fx-background-radius:6px;-fx-cursor:hand;");
+                permBanBtn.setOnAction(e -> {
+                    alert.close();
+                    showBanDialog(rec, true);
+                });
+                
+                // Disable ban buttons if user is already permanently banned
+                if (userStatus != null && userStatus.equals("banned")) {
+                    tempBanBtn.setDisable(true);
+                    permBanBtn.setDisable(true);
+                }
+                
+                VBox moderationContent = new VBox(8);
+                moderationContent.getChildren().addAll(
+                        moderationLabel,
+                        new HBox(10, tempBanBtn, permBanBtn)
+                );
+                moderationBox.getChildren().add(moderationContent);
+                content.getChildren().add(moderationBox);
+            }
             
             // Translation button for reclamation content
             Button translateBtn = new Button("🌐 Traduire le contenu en français");
@@ -634,5 +705,174 @@ public class AdminReclamationsController {
             return s;
         }
         return s.substring(0, max - 1) + "…";
+    }
+
+    /**
+     * Gets the user's current status from database.
+     */
+    private String getUserStatus(Integer userId) {
+        if (userId == null) {
+            return null;
+        }
+        try {
+            String sql = "SELECT status FROM \"user\" WHERE id = ?";
+            Connection c = utils.DbConnexion.getConnection();
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
+                ps.setInt(1, userId);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getString("status");
+                    }
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            System.err.println("Error fetching user status: " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Gets the user's banned_until timestamp from database.
+     */
+    private java.time.LocalDateTime getUserBannedUntil(Integer userId) {
+        if (userId == null) {
+            return null;
+        }
+        try {
+            String sql = "SELECT banned_until FROM \"user\" WHERE id = ?";
+            Connection c = utils.DbConnexion.getConnection();
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
+                ps.setInt(1, userId);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        java.sql.Timestamp ts = rs.getTimestamp("banned_until");
+                        return ts != null ? ts.toLocalDateTime() : null;
+                    }
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            System.err.println("Error fetching banned_until: " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Shows dialog to ban a user (temporary or permanent).
+     */
+    private void showBanDialog(Reclamation reclamation, boolean permanent) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle(permanent ? "Bannir définitivement" : "Bannir temporairement");
+        dialog.setHeaderText("Bannir l'utilisateur pour cette réclamation");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        VBox content = new VBox(12);
+        content.setPadding(new Insets(10));
+
+        Label infoLabel = new Label(
+                permanent 
+                ? "⚠️ L'utilisateur sera banni définitivement et ne pourra plus publier de posts."
+                : "⏱️ L'utilisateur sera banni temporairement et ne pourra plus publier de posts pendant la durée spécifiée."
+        );
+        infoLabel.setWrapText(true);
+        infoLabel.setStyle("-fx-text-fill:#92400e;-fx-font-weight:bold;");
+
+        // Days input (only for temporary ban)
+        HBox daysBox = new HBox(10);
+        daysBox.setAlignment(Pos.CENTER_LEFT);
+        Label daysLabel = new Label("Durée (jours) :");
+        Spinner<Integer> daysSpinner = new Spinner<>(1, 365, 7);
+        daysSpinner.setEditable(true);
+        daysSpinner.setPrefWidth(100);
+        daysBox.getChildren().addAll(daysLabel, daysSpinner);
+        if (permanent) {
+            daysBox.setVisible(false);
+            daysBox.setManaged(false);
+        }
+
+        // Reason input
+        Label reasonLabel = new Label("Raison du bannissement :");
+        TextArea reasonArea = new TextArea();
+        reasonArea.setPromptText("Expliquez pourquoi cet utilisateur est banni...");
+        reasonArea.setPrefRowCount(4);
+        reasonArea.setWrapText(true);
+
+        Label statusLabel = new Label("");
+        statusLabel.setStyle("-fx-text-fill:#64748b;-fx-font-size:12px;");
+
+        content.getChildren().addAll(infoLabel, daysBox, reasonLabel, reasonArea, statusLabel);
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().setPrefWidth(500);
+
+        Optional<ButtonType> result = dialog.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.OK) {
+            return;
+        }
+
+        String reason = reasonArea.getText() != null ? reasonArea.getText().trim() : "";
+        if (reason.length() < 10) {
+            statusLabel.setText("❌ La raison doit contenir au moins 10 caractères.");
+            statusLabel.setStyle("-fx-text-fill:#dc2626;-fx-font-size:12px;-fx-font-weight:bold;");
+            showBanDialog(reclamation, permanent); // Reopen
+            return;
+        }
+
+        Integer days = permanent ? null : daysSpinner.getValue();
+        
+        // Apply ban
+        try {
+            Integer adminId = AppSession.getCurrentUser().map(User::getId).orElse(null);
+            String userName = getUserDisplayName(reclamation.getUserId());
+            
+            AdminModerationService.ModerationAction action = permanent 
+                    ? AdminModerationService.ModerationAction.PERMANENT_BAN
+                    : AdminModerationService.ModerationAction.TEMP_BAN;
+            
+            // Apply the ban (this updates user status in database)
+            moderationService.applyAction(
+                    reclamation.getId(),
+                    reclamation.getUserId(),
+                    adminId,
+                    null, // email not needed for notification
+                    userName,
+                    action,
+                    reason,
+                    days
+            );
+            
+            // Send in-app notification to user
+            String notificationMessage;
+            if (permanent) {
+                notificationMessage = "🚫 Votre compte a été banni définitivement. Raison : " + reason;
+            } else {
+                notificationMessage = "⚠️ Votre compte a été banni pour " + days + " jour(s). Raison : " + reason;
+            }
+            
+            notificationService.createNotification(
+                    reclamation.getUserId(),
+                    "BAN",
+                    notificationMessage
+            );
+            
+            // Show success message
+            Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+            successAlert.setTitle("Bannissement appliqué");
+            successAlert.setHeaderText("✅ Utilisateur banni avec succès");
+            successAlert.setContentText(
+                    permanent 
+                    ? "L'utilisateur a été banni définitivement et a reçu une notification."
+                    : "L'utilisateur a été banni pour " + days + " jour(s) et a reçu une notification."
+            );
+            successAlert.showAndWait();
+            
+            onFilter(); // Refresh list
+            
+        } catch (SQLException e) {
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Erreur");
+            errorAlert.setHeaderText("Erreur lors du bannissement");
+            errorAlert.setContentText("Impossible de bannir l'utilisateur : " + e.getMessage());
+            errorAlert.showAndWait();
+            System.err.println("Error banning user: " + e.getMessage());
+        }
     }
 }

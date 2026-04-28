@@ -18,6 +18,7 @@ public class Reclamation {
     private ReclamationStatus status;
     private LocalDateTime createdAt;
     private String photoPath;
+    private Integer postId;
     
     private Integer userId;
     
@@ -95,6 +96,14 @@ public class Reclamation {
 
     public void setPhotoPath(String photoPath) {
         this.photoPath = photoPath;
+    }
+
+    public Integer getPostId() {
+        return postId;
+    }
+
+    public void setPostId(Integer postId) {
+        this.postId = postId;
     }
 
     public Integer getUserId() {

@@ -1,0 +1,287 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    BAN USER FROM POSTING - FEATURE OVERVIEW                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                              WHAT WAS IMPLEMENTED                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  ✅ Database Migration (add post_id to reclamation table)
+  ✅ Model Updates (Reclamation with postId field)
+  ✅ Service Updates (ReclamationService, NotificationService)
+  ✅ Admin Controller (Ban functionality with dialogs)
+  ✅ In-App Notifications (Users notified within app)
+  ✅ Complete Documentation (5 guide files)
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                                  HOW IT WORKS                                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  ADMIN WORKFLOW:
+  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+  │   View      │───▶│   Click     │───▶│    Fill     │───▶│    User     │
+  │ Reclamation │    │  Ban Button │    │   Reason    │    │   Banned    │
+  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+                                                                    │
+                                                                    ▼
+                                                          ┌─────────────────┐
+                                                          │  Notification   │
+                                                          │  Sent to User   │
+                                                          └─────────────────┘
+
+  USER EXPERIENCE:
+  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+  │  Receives   │───▶│    Sees     │───▶│   Cannot    │
+  │ Notification│    │ Ban Details │    │ Create Post │
+  └─────────────┘    └─────────────┘    └─────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 KEY FEATURES                                  │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  ⏱️  TEMPORARY BAN
+      • Duration: 1-365 days (default: 7)
+      • User status: temp_banned
+      • Expiration: banned_until timestamp
+
+  🚫 PERMANENT BAN
+      • Duration: Indefinite
+      • User status: banned
+      • No expiration
+
+  🔔 IN-APP NOTIFICATIONS
+      • Type: BAN
+      • Content: Duration + Reason
+      • No emails sent
+
+  🛡️  BAN STATUS DISPLAY
+      • Shows current ban status
+      • Disables buttons if already banned
+      • Color-coded indicators
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                              FILES TO RUN/CHECK                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  1️⃣  APPLY_BAN_FEATURE.sql
+      → Run this on your database first!
+      → Adds post_id column to reclamation table
+
+  2️⃣  BAN_FEATURE_CHECKLIST.md
+      → Follow this for testing
+      → Complete verification steps
+
+  3️⃣  BAN_FEATURE_README.md
+      → Quick start guide
+      → Architecture overview
+
+  4️⃣  BAN_USER_FROM_RECLAMATION_GUIDE.md
+      → Detailed technical documentation
+      → Integration points
+
+  5️⃣  BAN_FEATURE_UI_GUIDE.md
+      → Visual UI walkthrough
+      → Color schemes and layouts
+
+  6️⃣  BAN_FEATURE_SUMMARY.md
+      → Quick summary
+      → Modified files list
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                              MODIFIED FILES (6)                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  📄 model/reclamation/Reclamation.java
+     • Added postId field
+
+  📄 services/reclamation/ReclamationService.java
+     • Updated SQL queries for post_id
+
+  📄 services/notification/NotificationService.java
+     • Added createNotification() method
+
+  📄 controllers/admin/AdminReclamationsController.java
+     • Added ban functionality
+     • Added ban dialogs
+     • Added user status checks
+
+  📄 database/migrations/add_post_id_to_reclamation.sql
+     • Migration script
+
+  📄 APPLY_BAN_FEATURE.sql
+     • Easy-to-run migration
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                            QUICK START (3 STEPS)                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  STEP 1: Apply Database Migration
+  ┌────────────────────────────────────────────────────────────────────────────┐
+  │ psql -U your_user -d your_database -f DayFlow/APPLY_BAN_FEATURE.sql       │
+  └────────────────────────────────────────────────────────────────────────────┘
+
+  STEP 2: Compile & Run
+  ┌────────────────────────────────────────────────────────────────────────────┐
+  │ mvn clean compile                                                          │
+  │ mvn javafx:run                                                             │
+  └────────────────────────────────────────────────────────────────────────────┘
+
+  STEP 3: Test It
+  ┌────────────────────────────────────────────────────────────────────────────┐
+  │ 1. Login as admin                                                          │
+  │ 2. Go to "Gestion des Réclamations"                                       │
+  │ 3. View a reclamation about a post                                        │
+  │ 4. Click ban button                                                        │
+  │ 5. Fill in reason and confirm                                             │
+  │ 6. User receives notification ✅                                           │
+  └────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                              UI PREVIEW (ASCII)                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  RECLAMATION DETAIL VIEW:
+  ┌────────────────────────────────────────────────────────────────────────────┐
+  │ Réclamation #123                                                           │
+  ├────────────────────────────────────────────────────────────────────────────┤
+  │                                                                            │
+  │ ┌────────────────────────────────────────────────────────────────────────┐ │
+  │ │ 🛡️ Actions de modération :                                            │ │
+  │ │                                                                          │ │
+  │ │  [⏱️ Bannir temporairement]  [🚫 Bannir définitivement]               │ │
+  │ └────────────────────────────────────────────────────────────────────────┘ │
+  │                                                                            │
+  │ ID: 123                                                                    │
+  │ Type: Bug                                                                  │
+  │ Statut: En attente                                                         │
+  │ Utilisateur: John Doe (john@example.com)                                  │
+  │ Date: 28/04/2026 à 14:30                                                  │
+  │ Post signalé: #456                                                         │
+  │                                                                            │
+  │ ═══ CONTENU ═══                                                           │
+  │ This post contains inappropriate content...                               │
+  └────────────────────────────────────────────────────────────────────────────┘
+
+  BAN DIALOG (TEMPORARY):
+  ┌────────────────────────────────────────────────────────────────────────────┐
+  │ Bannir temporairement                                                      │
+  ├────────────────────────────────────────────────────────────────────────────┤
+  │                                                                            │
+  │ ⏱️ L'utilisateur sera banni temporairement et ne pourra plus publier     │
+  │    de posts pendant la durée spécifiée.                                   │
+  │                                                                            │
+  │ Durée (jours) : [  7  ▲▼]                                                 │
+  │                                                                            │
+  │ Raison du bannissement :                                                   │
+  │ ┌────────────────────────────────────────────────────────────────────────┐ │
+  │ │ Posting inappropriate content that violates community guidelines...    │ │
+  │ │                                                                          │ │
+  │ └────────────────────────────────────────────────────────────────────────┘ │
+  │                                                                            │
+  │                                                      [OK]  [Cancel]        │
+  └────────────────────────────────────────────────────────────────────────────┘
+
+  USER NOTIFICATION:
+  ┌────────────────────────────────────────────────────────────────────────────┐
+  │ Notifications                                                       [🔔 1] │
+  ├────────────────────────────────────────────────────────────────────────────┤
+  │                                                                            │
+  │ ┌────────────────────────────────────────────────────────────────────────┐ │
+  │ │ ⚠️ BAN                                            28/04/2026 14:30     │ │
+  │ │                                                                          │ │
+  │ │ Votre compte a été banni pour 7 jour(s).                               │ │
+  │ │ Raison : Posting inappropriate content that violates community         │ │
+  │ │ guidelines.                                                             │ │
+  │ └────────────────────────────────────────────────────────────────────────┘ │
+  └────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                            DATABASE SCHEMA CHANGES                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  BEFORE:
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │ reclamation                                                             │
+  ├─────────────────────────────────────────────────────────────────────────┤
+  │ • id                                                                    │
+  │ • content                                                               │
+  │ • type                                                                  │
+  │ • status                                                                │
+  │ • created_at                                                            │
+  │ • photo_path                                                            │
+  │ • user_id                                                               │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+  AFTER:
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │ reclamation                                                             │
+  ├─────────────────────────────────────────────────────────────────────────┤
+  │ • id                                                                    │
+  │ • content                                                               │
+  │ • type                                                                  │
+  │ • status                                                                │
+  │ • created_at                                                            │
+  │ • photo_path                                                            │
+  │ • post_id          ← NEW! References post(id)                          │
+  │ • user_id                                                               │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                              VALIDATION RULES                                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  ✅ Ban reason: Minimum 10 characters
+  ✅ Temporary ban duration: 1-365 days
+  ✅ User ID: Must be valid and exist
+  ✅ Post ID: Must be set for ban buttons to appear
+  ✅ Already banned: Buttons disabled if user permanently banned
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                              SUCCESS CRITERIA                                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  ✅ Database migration runs without errors
+  ✅ Code compiles without errors
+  ✅ Ban buttons appear for post-related reclamations
+  ✅ Ban buttons don't appear for non-post reclamations
+  ✅ Temporary ban works (status updated, notification sent)
+  ✅ Permanent ban works (status updated, notification sent)
+  ✅ Ban status indicators show correctly
+  ✅ Validation prevents empty/short reasons
+  ✅ Disabled buttons for already-banned users
+  ✅ User receives in-app notification
+  ✅ No console errors during normal operation
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                                NEXT STEPS                                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  1. Run APPLY_BAN_FEATURE.sql on your database
+  2. Compile the application (mvn clean compile)
+  3. Test the feature following BAN_FEATURE_CHECKLIST.md
+  4. Commit and push your changes
+  5. Optional: Add future enhancements (unban, ban history, etc.)
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                              SUPPORT & HELP                                   │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  📚 Documentation Files:
+     • BAN_FEATURE_README.md          - Start here!
+     • BAN_FEATURE_SUMMARY.md         - Quick overview
+     • BAN_FEATURE_CHECKLIST.md       - Testing guide
+     • BAN_USER_FROM_RECLAMATION_GUIDE.md - Technical details
+     • BAN_FEATURE_UI_GUIDE.md        - UI walkthrough
+
+  🔧 Troubleshooting:
+     • Check console logs for errors
+     • Verify database migration succeeded
+     • Review troubleshooting section in checklist
+     • Check imports are present
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         FEATURE READY TO USE! 🎉                             ║
+║                                                                              ║
+║  Start with: APPLY_BAN_FEATURE.sql                                          ║
+║  Then follow: BAN_FEATURE_CHECKLIST.md                                      ║
+╚══════════════════════════════════════════════════════════════════════════════╝

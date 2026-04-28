@@ -26,12 +26,12 @@ public class ReclamationService implements CRUD<Reclamation, Integer> {
             Votre réclamation a été reçue et est en cours d'examen. Notre équipe vous répondra dans les plus brefs délais.""";
 
     private static final String INSERT = """
-            INSERT INTO reclamation (content, type, status, created_at, photo_path, user_id)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO reclamation (content, type, status, created_at, photo_path, post_id, user_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """;
 
     private static final String UPDATE = """
-            UPDATE reclamation SET content = ?, type = ?, status = ?, photo_path = ? WHERE id = ?
+            UPDATE reclamation SET content = ?, type = ?, status = ?, photo_path = ?, post_id = ? WHERE id = ?
             """;
 
     private static final String UPDATE_STATUS = "UPDATE reclamation SET status = ? WHERE id = ?";
@@ -40,12 +40,12 @@ public class ReclamationService implements CRUD<Reclamation, Integer> {
     private static final String DELETE = "DELETE FROM reclamation WHERE id = ?";
 
     private static final String SELECT_BY_ID = """
-            SELECT id, content, type, status, created_at, photo_path, user_id
+            SELECT id, content, type, status, created_at, photo_path, post_id, user_id
             FROM reclamation WHERE id = ?
             """;
 
     private static final String SELECT_BY_USER_BASE = """
-            SELECT id, content, type, status, created_at, photo_path, user_id
+            SELECT id, content, type, status, created_at, photo_path, post_id, user_id
             FROM reclamation WHERE user_id = ?
             ORDER BY created_at DESC
             """;
@@ -82,7 +82,12 @@ public class ReclamationService implements CRUD<Reclamation, Integer> {
             } else {
                 ps.setString(5, r.getPhotoPath());
             }
-            ps.setInt(6, r.getUserId());
+            if (r.getPostId() == null) {
+                ps.setNull(6, Types.INTEGER);
+            } else {
+                ps.setInt(6, r.getPostId());
+            }
+            ps.setInt(7, r.getUserId());
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
@@ -104,7 +109,12 @@ public class ReclamationService implements CRUD<Reclamation, Integer> {
             } else {
                 ps.setString(4, r.getPhotoPath());
             }
-            ps.setInt(5, r.getId());
+            if (r.getPostId() == null) {
+                ps.setNull(5, Types.INTEGER);
+            } else {
+                ps.setInt(5, r.getPostId());
+            }
+            ps.setInt(6, r.getId());
             ps.executeUpdate();
         }
     }
@@ -198,7 +208,7 @@ public class ReclamationService implements CRUD<Reclamation, Integer> {
     public List<Reclamation> findForAdmin(ReclamationStatus status, ReclamationType type,
                                           String search, int limit, int offset) throws SQLException {
         StringBuilder sql = new StringBuilder("""
-                SELECT r.id, r.content, r.type, r.status, r.created_at, r.photo_path, r.user_id
+                SELECT r.id, r.content, r.type, r.status, r.created_at, r.photo_path, r.post_id, r.user_id
                 FROM reclamation r
                 LEFT JOIN "user" u ON u.id = r.user_id
                 WHERE 1=1
@@ -342,6 +352,8 @@ public class ReclamationService implements CRUD<Reclamation, Integer> {
         r.setCreatedAt(ts != null ? ts.toLocalDateTime() : LocalDateTime.now());
         String photo = rs.getString("photo_path");
         r.setPhotoPath(rs.wasNull() ? null : photo);
+        Integer postId = (Integer) rs.getObject("post_id");
+        r.setPostId(postId);
         r.setUserId(rs.getInt("user_id"));
         return r;
     }
