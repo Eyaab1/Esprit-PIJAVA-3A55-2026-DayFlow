@@ -33,7 +33,8 @@ public class ModerationLogFileService {
             String highestAttribute,
             Double thresholdUsed,
             String source,
-            String analyzedAt
+            String analyzedAt,
+            String status // NOT_VIEWED, VIEWED, ACTION_DONE
     ) {
         public LocalDateTime getTimestampAsDateTime() {
             try {
@@ -41,6 +42,10 @@ public class ModerationLogFileService {
             } catch (Exception e) {
                 return null;
             }
+        }
+        
+        public String getStatusOrDefault() {
+            return status != null ? status : "NOT_VIEWED";
         }
     }
 
@@ -83,6 +88,7 @@ public class ModerationLogFileService {
         Double thresholdUsed = root.path("thresholdUsed").isNull() ? null : root.path("thresholdUsed").asDouble();
         String source = root.path("source").asText(null);
         String analyzedAt = root.path("analyzedAt").asText(null);
+        String status = root.path("status").asText("NOT_VIEWED"); // Default to NOT_VIEWED if missing
 
         // Parse toxicity scores
         Map<String, Double> toxicityScores = new LinkedHashMap<>();
@@ -112,7 +118,80 @@ public class ModerationLogFileService {
                 highestAttribute,
                 thresholdUsed,
                 source,
-                analyzedAt
+                analyzedAt,
+                status
         );
+    }
+
+    /**
+     * Met à jour le statut d'une entrée de log spécifique
+     */
+    public void updateLogStatus(String timestamp, String newStatus) throws IOException {
+        if (!Files.exists(LOG_PATH)) {
+            return;
+        }
+
+        List<String> lines = Files.readAllLines(LOG_PATH);
+        List<String> updatedLines = new ArrayList<>();
+
+        for (String line : lines) {
+            if (line.trim().isEmpty()) {
+                updatedLines.add(line);
+                continue;
+            }
+
+            try {
+                JsonNode root = JSON.readTree(line);
+                String lineTimestamp = root.path("timestamp").asText(null);
+
+                if (timestamp.equals(lineTimestamp)) {
+                    // Mettre à jour le statut
+                    Map<String, Object> updatedEntry = JSON.convertValue(root, Map.class);
+                    updatedEntry.put("status", newStatus);
+                    updatedLines.add(JSON.writeValueAsString(updatedEntry));
+                } else {
+                    updatedLines.add(line);
+                }
+            } catch (Exception e) {
+                // Garder la ligne originale en cas d'erreur
+                updatedLines.add(line);
+            }
+        }
+
+        // Réécrire le fichier
+        Files.write(LOG_PATH, updatedLines);
+    }
+
+    /**
+     * Lit les logs récents avec filtre de statut
+     */
+    public List<ModerationLogEntry> readRecentLogsWithFilter(int limit, String statusFilter) throws IOException {
+        if (!Files.exists(LOG_PATH)) {
+            return Collections.emptyList();
+        }
+
+        List<String> lines = Files.readAllLines(LOG_PATH);
+        List<ModerationLogEntry> entries = new ArrayList<>();
+
+        // Read from end to beginning (newest first)
+        for (int i = lines.size() - 1; i >= 0 && entries.size() < limit; i--) {
+            String line = lines.get(i).trim();
+            if (line.isEmpty()) {
+                continue;
+            }
+
+            try {
+                ModerationLogEntry entry = parseLogLine(line);
+                
+                // Appliquer le filtre de statut
+                if (statusFilter == null || statusFilter.equals("Tous") || entry.getStatusOrDefault().equals(statusFilter)) {
+                    entries.add(entry);
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to parse log line: " + e.getMessage());
+            }
+        }
+
+        return entries;
     }
 }

@@ -45,16 +45,30 @@ public class AdminModerationLogsController {
 
     @FXML
     private ScrollPane moderationRowsScrollPane;
+    
+    @FXML
+    private javafx.scene.control.ComboBox<String> statusFilterCombo;
+    
+    private String currentStatusFilter = "Tous";
 
     @FXML
     private void initialize() {
+        // Initialize status filter combo
+        if (statusFilterCombo != null) {
+            statusFilterCombo.getItems().addAll("Tous", "NOT_VIEWED", "VIEWED", "ACTION_DONE");
+            statusFilterCombo.setValue("Tous");
+            statusFilterCombo.setOnAction(e -> {
+                currentStatusFilter = statusFilterCombo.getValue();
+                refresh();
+            });
+        }
         refresh();
     }
 
     private void refresh() {
         moderationRowsBox.getChildren().clear();
         try {
-            List<ModerationLogEntry> logs = logFileService.readRecentLogs(100);
+            List<ModerationLogEntry> logs = logFileService.readRecentLogsWithFilter(100, currentStatusFilter);
             if (logs.isEmpty()) {
                 Label emptyLabel = new Label("Aucun incident de modération pour le moment.");
                 emptyLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 14px; -fx-padding: 40;");
@@ -94,6 +108,10 @@ public class AdminModerationLogsController {
         Label score = new Label(log.highestScore() != null ? String.format("%.2f", log.highestScore()) : "—");
         setFixedWidth(score, COL_SCORE);
         score.setStyle("-fx-font-size: 12px; -fx-text-fill: #dc2626; -fx-font-weight: bold;");
+        
+        // Status badge
+        Label statusBadge = createStatusBadge(log.getStatusOrDefault());
+        setFixedWidth(statusBadge, 120);
 
         HBox actionBox = new HBox(8);
         actionBox.setAlignment(Pos.CENTER_LEFT);
@@ -103,15 +121,53 @@ public class AdminModerationLogsController {
         viewBtn.setStyle("-fx-background-color: #7c3aed; -fx-text-fill: white; -fx-padding: 6 12; -fx-cursor: hand; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 8;");
         viewBtn.setOnMouseEntered(e -> viewBtn.setStyle("-fx-background-color: #6d28d9; -fx-text-fill: white; -fx-padding: 6 12; -fx-cursor: hand; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 8;"));
         viewBtn.setOnMouseExited(e -> viewBtn.setStyle("-fx-background-color: #7c3aed; -fx-text-fill: white; -fx-padding: 6 12; -fx-cursor: hand; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 8;"));
-        viewBtn.setOnAction(e -> showDetailsModal(log));
+        viewBtn.setOnAction(e -> {
+            // Update status to VIEWED when clicking View
+            updateLogStatus(log, "VIEWED");
+            showDetailsModal(log);
+        });
 
         actionBox.getChildren().add(viewBtn);
 
-        HBox row = new HBox(12, timestamp, email, entityType, content, attribute, score, actionBox);
+        HBox row = new HBox(12, timestamp, email, entityType, content, attribute, score, statusBadge, actionBox);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(12, 10, 12, 10));
         row.getStyleClass().add("admin-post-row");
         return row;
+    }
+    
+    private Label createStatusBadge(String status) {
+        Label badge = new Label();
+        badge.setAlignment(Pos.CENTER);
+        badge.setStyle("-fx-padding: 4 12; -fx-background-radius: 12; -fx-font-size: 11px; -fx-font-weight: bold;");
+        
+        switch (status) {
+            case "NOT_VIEWED":
+                badge.setText("Non vu");
+                badge.setStyle(badge.getStyle() + " -fx-background-color: #fef3c7; -fx-text-fill: #92400e;");
+                break;
+            case "VIEWED":
+                badge.setText("Vu");
+                badge.setStyle(badge.getStyle() + " -fx-background-color: #dbeafe; -fx-text-fill: #1e40af;");
+                break;
+            case "ACTION_DONE":
+                badge.setText("Action effectuée");
+                badge.setStyle(badge.getStyle() + " -fx-background-color: #d1fae5; -fx-text-fill: #065f46;");
+                break;
+            default:
+                badge.setText("Non vu");
+                badge.setStyle(badge.getStyle() + " -fx-background-color: #fef3c7; -fx-text-fill: #92400e;");
+        }
+        
+        return badge;
+    }
+    
+    private void updateLogStatus(ModerationLogEntry log, String newStatus) {
+        try {
+            logFileService.updateLogStatus(log.timestamp(), newStatus);
+        } catch (IOException e) {
+            System.err.println("Failed to update log status: " + e.getMessage());
+        }
     }
 
     private void showBanDialog(ModerationLogEntry log, ModerationActionService.BanType banType) {
@@ -175,6 +231,10 @@ public class AdminModerationLogsController {
                     log.userEmail(), days, reason);
                 new Alert(Alert.AlertType.INFORMATION, "User account banned for " + days + " days.").showAndWait();
             }
+            
+            // Update log status to ACTION_DONE
+            updateLogStatus(log, "ACTION_DONE");
+            
             refresh();
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Ban action failed: " + e.getMessage()).showAndWait();

@@ -46,6 +46,7 @@ public class ModerationLogService {
         logEntry.put("thresholdUsed", result.getThreshold());
         logEntry.put("source", result.getSource());
         logEntry.put("analyzedAt", result.getAnalyzedAt().toString());
+        logEntry.put("status", "NOT_VIEWED"); // Default status
 
         try {
             Files.createDirectories(LOG_PATH.getParent());
