@@ -229,7 +229,12 @@ public class AdminReclamationsController {
                 "-fx-padding:6 12;-fx-background-radius:8px;-fx-cursor:hand;");
         replyBtn.setOnAction(e -> showReplyDialog(r.getId()));
 
-        actions.getChildren().addAll(viewBtn, replyBtn);
+        Button deleteBtn = new Button("🗑 Supprimer");
+        deleteBtn.setStyle("-fx-background-color:#dc2626;-fx-text-fill:white;-fx-font-size:11px;" +
+                "-fx-padding:6 12;-fx-background-radius:8px;-fx-cursor:hand;");
+        deleteBtn.setOnAction(e -> deleteReclamation(r.getId()));
+
+        actions.getChildren().addAll(viewBtn, replyBtn, deleteBtn);
 
         right.getChildren().addAll(statusBadge, typeBadge, actions);
 
@@ -238,6 +243,23 @@ public class AdminReclamationsController {
         row.setPadding(new Insets(14, 12, 14, 12));
         row.getStyleClass().add("admin-list-row");
         return row;
+    }
+
+    private void deleteReclamation(int reclamationId) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Supprimer la réclamation");
+        confirm.setHeaderText("Supprimer la réclamation #" + reclamationId + " ?");
+        confirm.setContentText("Cette action est irréversible. La réclamation et toutes ses réponses seront supprimées.");
+        confirm.showAndWait().ifPresent(btn -> {
+            if (btn == ButtonType.OK) {
+                try {
+                    reclamationService.delete(reclamationId);
+                    onFilter();
+                } catch (SQLException e) {
+                    new Alert(Alert.AlertType.ERROR, "Erreur lors de la suppression : " + e.getMessage()).showAndWait();
+                }
+            }
+        });
     }
 
     private void showReclamationDetail(int reclamationId) {

@@ -58,10 +58,51 @@ public class ReclamationService implements CRUD<Reclamation, Integer> {
 
     public ReclamationService(ReclamationResponseService responseService) {
         this.responseService = responseService;
+        ensurePostIdColumnExists();
     }
 
     public ReclamationResponseService getResponseService() {
         return responseService;
+    }
+
+    private void ensurePostIdColumnExists() {
+        String checkColumnSql = """
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_name = 'reclamation'
+                  AND column_name = 'post_id'
+                """;
+        String checkConstraintSql = """
+                SELECT 1
+                FROM information_schema.table_constraints
+                WHERE table_name = 'reclamation'
+                  AND constraint_name = 'fk_reclamation_post'
+                """;
+        Connection c = DbConnexion.getConnection();
+        try (PreparedStatement checkColumn = c.prepareStatement(checkColumnSql);
+             ResultSet columnRs = checkColumn.executeQuery()) {
+            boolean hasPostId = columnRs.next();
+            try (Statement st = c.createStatement()) {
+                if (!hasPostId) {
+                    st.execute("ALTER TABLE reclamation ADD COLUMN IF NOT EXISTS post_id INTEGER");
+                }
+            }
+            try (PreparedStatement checkConstraint = c.prepareStatement(checkConstraintSql);
+                 ResultSet constraintRs = checkConstraint.executeQuery();
+                 Statement st = c.createStatement()) {
+                if (!constraintRs.next()) {
+                    st.execute("""
+                            ALTER TABLE reclamation
+                            ADD CONSTRAINT fk_reclamation_post
+                            FOREIGN KEY (post_id) REFERENCES post(id)
+                            ON DELETE SET NULL
+                            """);
+                }
+                st.execute("CREATE INDEX IF NOT EXISTS idx_reclamation_post_id ON reclamation(post_id)");
+            }
+        } catch (SQLException e) {
+            System.err.println("Warning: unable to ensure reclamation.post_id schema: " + e.getMessage());
+        }
     }
 
     @Override

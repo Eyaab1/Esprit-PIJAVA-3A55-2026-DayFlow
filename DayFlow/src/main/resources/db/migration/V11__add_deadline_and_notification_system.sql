@@ -68,19 +68,34 @@ CREATE INDEX IF NOT EXISTS idx_reminder_log_sent_at ON reminder_log(sent_at);
 
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_goal_deadline_after_start') THEN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'goal' AND column_name = 'start_date'
+    )
+    AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_goal_deadline_after_start') THEN
         ALTER TABLE goal ADD CONSTRAINT chk_goal_deadline_after_start 
-            CHECK (deadline IS NULL OR deadline > start_date);
+            CHECK (deadline IS NULL OR deadline > start_date) NOT VALID;
     END IF;
     
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_routine_deadline_after_start') THEN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'routine' AND column_name = 'start_date'
+    )
+    AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_routine_deadline_after_start') THEN
         ALTER TABLE routine ADD CONSTRAINT chk_routine_deadline_after_start 
-            CHECK (deadline IS NULL OR deadline > start_date);
+            CHECK (deadline IS NULL OR deadline > start_date) NOT VALID;
     END IF;
     
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_activity_deadline_after_scheduled') THEN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'activity' AND column_name = 'scheduled_date'
+    )
+    AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_activity_deadline_after_scheduled') THEN
         ALTER TABLE activity ADD CONSTRAINT chk_activity_deadline_after_scheduled 
-            CHECK (deadline IS NULL OR deadline > scheduled_date);
+            CHECK (deadline IS NULL OR deadline > scheduled_date) NOT VALID;
     END IF;
 END $$;
 

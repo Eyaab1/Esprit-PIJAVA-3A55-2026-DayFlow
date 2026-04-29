@@ -94,7 +94,12 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_routine_status') THEN
         ALTER TABLE routine ADD CONSTRAINT chk_routine_status CHECK (status IN ('active', 'paused', 'completed', 'cancelled')) NOT VALID;
     END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_routine_frequency') THEN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'routine' AND column_name = 'frequency'
+    )
+    AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_routine_frequency') THEN
         ALTER TABLE routine ADD CONSTRAINT chk_routine_frequency CHECK (frequency IN ('daily', 'weekly', 'monthly', 'custom')) NOT VALID;
     END IF;
 END $$;
@@ -102,7 +107,16 @@ END $$;
 -- Create indexes for routine
 CREATE INDEX IF NOT EXISTS idx_routine_goal ON routine(goal_id);
 CREATE INDEX IF NOT EXISTS idx_routine_status ON routine(status);
-CREATE INDEX IF NOT EXISTS idx_routine_frequency ON routine(frequency);
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'routine' AND column_name = 'frequency'
+    ) THEN
+        EXECUTE 'CREATE INDEX IF NOT EXISTS idx_routine_frequency ON routine(frequency)';
+    END IF;
+END $$;
 
 -- Create activity table
 CREATE TABLE IF NOT EXISTS activity (
@@ -129,5 +143,24 @@ END $$;
 -- Create indexes for activity
 CREATE INDEX IF NOT EXISTS idx_activity_routine ON activity(routine_id);
 CREATE INDEX IF NOT EXISTS idx_activity_status ON activity(status);
-CREATE INDEX IF NOT EXISTS idx_activity_scheduled_date ON activity(scheduled_date);
-CREATE INDEX IF NOT EXISTS idx_activity_completed_date ON activity(completed_date);
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'activity' AND column_name = 'scheduled_date'
+    ) THEN
+        EXECUTE 'CREATE INDEX IF NOT EXISTS idx_activity_scheduled_date ON activity(scheduled_date)';
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'activity' AND column_name = 'completed_date'
+    ) THEN
+        EXECUTE 'CREATE INDEX IF NOT EXISTS idx_activity_completed_date ON activity(completed_date)';
+    END IF;
+END $$;
