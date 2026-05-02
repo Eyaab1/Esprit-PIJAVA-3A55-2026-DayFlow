@@ -116,6 +116,52 @@
     -fx-background-color: #0d9488;
 }
 
+.btn-view-toggle {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #334155;
+    -fx-font-weight: 700;
+    -fx-padding: 10 16;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.btn-view-toggle.view-toggle-active {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+}
+
+.goal-inline-form {
+    -fx-padding: 14 36 6 36;
+    -fx-background-color: #f1f5f9;
+}
+
+.goal-inline-form > .label {
+    -fx-text-fill: #334155;
+}
+
+.goal-form-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #0f172a;
+}
+
+.btn-inline-clear {
+    -fx-background-color: #cbd5e1;
+    -fx-text-fill: #0f172a;
+}
+
+.btn-inline-cancel {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #334155;
+    -fx-font-weight: 700;
+}
+
+.btn-inline-save {
+    -fx-background-color: #4f46e5;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+}
+
 .goals-scroll {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
@@ -129,12 +175,20 @@
     -fx-padding: 0 32 32 32;
 }
 
+.goals-grid-wrap {
+    -fx-padding: 0 32 32 32;
+}
+
 .goal-row-card {
     -fx-spacing: 12;
     -fx-padding: 20 22;
     -fx-background-color: white;
     -fx-background-radius: 16;
     -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.07), 16, 0, 0, 2);
+}
+
+.goal-grid-card {
+    -fx-pref-width: 340;
 }
 
 .goal-row-title {

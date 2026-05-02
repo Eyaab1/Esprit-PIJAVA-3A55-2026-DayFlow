@@ -22,6 +22,8 @@ public class Goal {
     private LocalDate startDate;    // NotNull
     private LocalDate endDate;      // NotNull, must be after startDate
     private LocalDateTime deadline; // Optional
+    private boolean emailReminderEnabled = false;
+    private LocalDateTime emailReminderAt;
 
     private String status;          // draft | active | paused | completed | failed | archived
     private String priority;        // low | medium | high (nullable)
@@ -70,6 +72,7 @@ public class Goal {
         validateDateRange(this.startDate, this.endDate);
         validateStatus(this.status);
         if (this.priority != null) validatePriority(this.priority);
+        validateEmailReminder(this.emailReminderEnabled, this.emailReminderAt, this.deadline);
     }
 
     // --- Title ---
@@ -104,6 +107,25 @@ public class Goal {
     public static void validateDateRange(LocalDate startDate, LocalDate endDate) {
         if (startDate != null && endDate != null && !endDate.isAfter(startDate))
             throw new IllegalArgumentException("La date de fin doit être postérieure à la date de début.");
+    }
+
+    // --- Deadline ---
+    public static void validateDeadline(LocalDateTime deadline, LocalDate startDate) {
+        if (deadline != null && startDate != null && deadline.toLocalDate().isBefore(startDate)) {
+            throw new IllegalArgumentException("La deadline ne peut pas être avant la date de début.");
+        }
+    }
+
+    public static void validateEmailReminder(boolean enabled, LocalDateTime reminderAt, LocalDateTime deadline) {
+        if (!enabled) {
+            return;
+        }
+        if (reminderAt == null) {
+            throw new IllegalArgumentException("Veuillez choisir la date/heure du rappel email.");
+        }
+        if (deadline != null && reminderAt.isAfter(deadline)) {
+            throw new IllegalArgumentException("Le rappel email doit être avant (ou à) la deadline.");
+        }
     }
 
     // --- Status ---
@@ -146,6 +168,7 @@ public class Goal {
     public void setStartDate(LocalDate startDate) {
         validateStartDate(startDate);
         if (this.endDate != null) validateDateRange(startDate, this.endDate);
+        if (this.deadline != null) validateDeadline(this.deadline, startDate);
         this.startDate = startDate;
     }
 
@@ -170,7 +193,21 @@ public class Goal {
         this.progress = progress;
     }
 
-    public void setDeadline(LocalDateTime deadline) { this.deadline = deadline; }
+    public void setDeadline(LocalDateTime deadline) {
+        validateDeadline(deadline, this.startDate);
+        validateEmailReminder(this.emailReminderEnabled, this.emailReminderAt, deadline);
+        this.deadline = deadline;
+    }
+    public void setEmailReminderEnabled(boolean emailReminderEnabled) {
+        this.emailReminderEnabled = emailReminderEnabled;
+        if (!emailReminderEnabled) {
+            this.emailReminderAt = null;
+        }
+    }
+    public void setEmailReminderAt(LocalDateTime emailReminderAt) {
+        validateEmailReminder(this.emailReminderEnabled, emailReminderAt, this.deadline);
+        this.emailReminderAt = emailReminderAt;
+    }
     public void setFavorite(boolean favorite)   { this.isFavorite = favorite; }
     public void setRequiredTasks(Integer n)     { this.requiredTasks = n; }
     public void setTrelloBoardId(String id)     { this.trelloBoardId = id; }
@@ -209,6 +246,8 @@ public class Goal {
     public LocalDate      getStartDate()     { return startDate; }
     public LocalDate      getEndDate()       { return endDate; }
     public LocalDateTime  getDeadline()      { return deadline; }
+    public boolean        isEmailReminderEnabled() { return emailReminderEnabled; }
+    public LocalDateTime  getEmailReminderAt() { return emailReminderAt; }
     public String         getStatus()        { return status; }
     public String         getPriority()      { return priority; }
     public boolean        isFavorite()       { return isFavorite; }

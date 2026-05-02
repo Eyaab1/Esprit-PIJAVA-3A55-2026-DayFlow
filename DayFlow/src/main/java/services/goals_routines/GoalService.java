@@ -7,6 +7,7 @@ import services.CRUD;
 import services.chatroom.ChatroomService;
 import services.chatroom.MessageService;
 import services.chatroom.GoalParticipationService;
+import services.deadline.DeadlineEmailReminderWorkflowService;
 import utils.DbConnexion;
 
 import java.sql.Connection;
@@ -26,23 +27,36 @@ import java.time.LocalDateTime;
 public class GoalService implements CRUD<Goal, Integer> {
 
     private Connection cnx;
+    private DeadlineEmailReminderWorkflowService deadlineEmailWorkflow;
 
     private static final String INSERT_GOAL = """
             INSERT INTO goal (
                 title, description, start_date, end_date, deadline, status, priority,
-                is_favorite, progress, required_tasks, trello_board_id, user_id, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                is_favorite, progress, required_tasks, trello_board_id,
+                email_reminder_enabled, email_reminder_at,
+                user_id, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
 
     private static final String UPDATE_GOAL = """
             UPDATE goal SET
                 title=?, description=?, start_date=?, end_date=?, deadline=?, status=?, priority=?,
-                is_favorite=?, progress=?, required_tasks=?, trello_board_id=?, updated_at=?
+                is_favorite=?, progress=?, required_tasks=?, trello_board_id=?,
+                email_reminder_enabled=?, email_reminder_at=?, updated_at=?
             WHERE id=?
             """;
 
     public GoalService() {
         cnx = DbConnexion.getInstance().getCnx();
+    }
+
+    // Lazy initialization to avoid circular dependency
+    private DeadlineEmailReminderWorkflowService getDeadlineEmailWorkflow() {
+        if (deadlineEmailWorkflow == null) {
+            deadlineEmailWorkflow = new DeadlineEmailReminderWorkflowService();
+            deadlineEmailWorkflow.setGoalService(this); // Set this instance to avoid circular dependency
+        }
+        return deadlineEmailWorkflow;
     }
 
     @Override
@@ -80,6 +94,8 @@ public class GoalService implements CRUD<Goal, Integer> {
             } else {
                 ps.setString(i++, goal.getTrelloBoardId());
             }
+            ps.setBoolean(i++, goal.isEmailReminderEnabled());
+            ps.setTimestamp(i++, goal.getEmailReminderAt() != null ? Timestamp.valueOf(goal.getEmailReminderAt()) : null);
             // Add user_id
             if (goal.getUser() != null && goal.getUser().getId() != null) {
                 ps.setInt(i++, goal.getUser().getId());
@@ -102,6 +118,7 @@ public class GoalService implements CRUD<Goal, Integer> {
         if (goal.getStartDate() != null && goal.getEndDate() != null && goal.getEndDate().isBefore(goal.getStartDate())) {
             throw new IllegalArgumentException("La date de fin ne peut pas être avant la date de début");
         }
+        Goal previousState = findById(goal.getId());
         try (PreparedStatement ps = cnx.prepareStatement(UPDATE_GOAL)) {
             int i = 1;
             ps.setString(i++, goal.getTitle());
@@ -127,9 +144,14 @@ public class GoalService implements CRUD<Goal, Integer> {
             } else {
                 ps.setString(i++, goal.getTrelloBoardId());
             }
+            ps.setBoolean(i++, goal.isEmailReminderEnabled());
+            ps.setTimestamp(i++, goal.getEmailReminderAt() != null ? Timestamp.valueOf(goal.getEmailReminderAt()) : null);
             ps.setTimestamp(i++, goal.getUpdatedAt() != null ? Timestamp.valueOf(goal.getUpdatedAt()) : null);
             ps.setInt(i, goal.getId());
             ps.executeUpdate();
+        }
+        if (previousState != null) {
+            getDeadlineEmailWorkflow().handleGoalUpdated(previousState, goal);
         }
     }
 
@@ -173,7 +195,9 @@ public class GoalService implements CRUD<Goal, Integer> {
     public Goal findById(int id) throws SQLException {
         String sql = """
                 SELECT id, title, description, start_date, end_date, deadline, status, priority,
-                       is_favorite, progress, required_tasks, trello_board_id, created_at, updated_at, user_id
+                       is_favorite, progress, required_tasks, trello_board_id,
+                       email_reminder_enabled, email_reminder_at,
+                       created_at, updated_at, user_id
                 FROM goal WHERE id = ?
                 """;
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
@@ -193,7 +217,9 @@ public class GoalService implements CRUD<Goal, Integer> {
     public List<GoalListRow> findAllForDashboard() throws SQLException {
         String sql = """
                 SELECT g.id, g.title, g.description, g.start_date, g.end_date, g.deadline, g.status, g.priority,
-                       g.is_favorite, g.progress, g.required_tasks, g.trello_board_id, g.created_at, g.updated_at,
+                       g.is_favorite, g.progress, g.required_tasks, g.trello_board_id,
+                       g.email_reminder_enabled, g.email_reminder_at,
+                       g.created_at, g.updated_at,
                        g.user_id,
                        u.first_name AS owner_fn, u.last_name AS owner_ln,
                        c.id AS chatroom_id,
@@ -244,6 +270,11 @@ public class GoalService implements CRUD<Goal, Integer> {
         int rt = rs.getInt("required_tasks");
         g.setRequiredTasks(rs.wasNull() ? null : rt);
         g.setTrelloBoardId(rs.getString("trello_board_id"));
+        g.setEmailReminderEnabled(rs.getBoolean("email_reminder_enabled"));
+        Timestamp er = rs.getTimestamp("email_reminder_at");
+        if (er != null) {
+            g.setEmailReminderAt(er.toLocalDateTime());
+        }
         Timestamp ca = rs.getTimestamp("created_at");
         if (ca != null) {
             g.setCreatedAt(ca.toLocalDateTime());
@@ -287,7 +318,9 @@ public class GoalService implements CRUD<Goal, Integer> {
     public List<GoalDiscussionRow> findGoalsForCommunityDiscussion(int userId) throws SQLException {
         String sql = """
                 SELECT g.id, g.title, g.description, g.start_date, g.end_date, g.deadline, g.status, g.priority,
-                       g.is_favorite, g.progress, g.required_tasks, g.trello_board_id, g.created_at, g.updated_at,
+                       g.is_favorite, g.progress, g.required_tasks, g.trello_board_id,
+                       g.email_reminder_enabled, g.email_reminder_at,
+                       g.created_at, g.updated_at,
                        g.user_id,
                        u.first_name AS owner_fn, u.last_name AS owner_ln,
                        owner_gp.user_id AS owner_user_id,
@@ -368,7 +401,9 @@ public class GoalService implements CRUD<Goal, Integer> {
     public List<Goal> findByUserId(int userId) throws SQLException {
         String sql = """
                 SELECT id, title, description, start_date, end_date, deadline, status, priority,
-                       is_favorite, progress, required_tasks, trello_board_id, created_at, updated_at, user_id
+                       is_favorite, progress, required_tasks, trello_board_id,
+                       email_reminder_enabled, email_reminder_at,
+                       created_at, updated_at, user_id
                 FROM goal WHERE user_id = ?
                 ORDER BY created_at DESC
                 """;

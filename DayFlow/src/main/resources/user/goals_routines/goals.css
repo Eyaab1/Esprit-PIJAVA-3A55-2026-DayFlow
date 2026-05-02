@@ -1,223 +1,378 @@
-/* Root Styles */
-.goals-root, .dashboard-root {
-    -fx-background-color: #f5f7fa;
-    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+/* ===== MODERN PASTEL OBJECTIVES PAGE DESIGN ===== */
+
+/* Root Styles - Matching Home Page Aesthetic */
+.objectives-root {
+    -fx-font-family: "Segoe UI", "Inter", "Arial", sans-serif;
+    -fx-background-color: linear-gradient(to bottom right, #f0f9ff 0%, #fef3f9 50%, #fef3c7 100%);
 }
 
-/* Dashboard Header */
-.dashboard-header {
-    -fx-background-color: linear-gradient(to right, #2d3561, #4a5a8f);
-    -fx-background-radius: 15;
+.objectives-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
 }
 
-.breadcrumb-button {
-    -fx-background-color: rgba(255, 255, 255, 0.15);
-    -fx-text-fill: white;
-    -fx-background-radius: 8;
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-    -fx-cursor: hand;
+.objectives-scroll > .viewport {
+    -fx-background-color: transparent;
 }
 
-.breadcrumb-button:hover {
-    -fx-background-color: rgba(255, 255, 255, 0.25);
+.objectives-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
 }
 
-.dashboard-title {
-    -fx-font-size: 36px;
+.objectives-scroll .scroll-bar:vertical .track {
+    -fx-background-color: rgba(226, 232, 240, 0.3);
+    -fx-background-radius: 4px;
+}
+
+.objectives-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: linear-gradient(to bottom, #c4b5fd 0%, #a78bfa 100%);
+    -fx-background-radius: 4px;
+}
+
+.objectives-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: linear-gradient(to bottom, #a78bfa 0%, #8b5cf6 100%);
+}
+
+.objectives-inner {
+    -fx-spacing: 36;
+    -fx-padding: 40 48 120 48;
+    -fx-max-width: 1400;
+}
+
+/* ===== HERO HEADER SECTION ===== */
+.objectives-hero {
+    -fx-padding: 48 48 52 48;
+    -fx-background-radius: 28;
+    -fx-background-color: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 50%, #fce7f3 100%);
+    -fx-border-color: rgba(255, 255, 255, 0.6);
+    -fx-border-width: 2;
+    -fx-border-radius: 28;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.18), 24, 0, 0, 8);
+}
+
+.objectives-pill {
+    -fx-background-color: rgba(255, 255, 255, 0.98);
+    -fx-background-radius: 30;
+    -fx-padding: 12 24;
+    -fx-text-fill: #6366f1;
+    -fx-font-size: 14px;
     -fx-font-weight: 700;
-    -fx-text-fill: white;
+    -fx-letter-spacing: 0.3px;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.15), 10, 0, 0, 3);
 }
 
-.dashboard-subtitle {
-    -fx-font-size: 15px;
-    -fx-text-fill: rgba(255, 255, 255, 0.85);
+.objectives-title {
+    -fx-font-size: 42px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+    -fx-letter-spacing: -0.5px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 6, 0, 0, 2);
+}
+
+.objectives-subtitle {
+    -fx-font-size: 17px;
+    -fx-text-fill: #334155;
+    -fx-font-weight: 500;
+    -fx-letter-spacing: 0.2px;
 }
 
 .new-goal-button {
-    -fx-background-color: #6366f1;
+    -fx-background-color: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     -fx-text-fill: white;
-    -fx-background-radius: 10;
-    -fx-font-size: 14px;
+    -fx-background-radius: 16;
+    -fx-font-size: 15px;
     -fx-font-weight: 600;
+    -fx-padding: 16 28;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.25), 12, 0, 0, 4);
 }
 
 .new-goal-button:hover {
-    -fx-background-color: #5558e3;
+    -fx-background-color: linear-gradient(135deg, #5558e3 0%, #7c3aed 100%);
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.35), 16, 0, 0, 6);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
 }
 
-/* Statistics Cards */
-.stat-card {
-    -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 12, 0.1, 0, 4);
+.calendar-button {
+    -fx-background-color: rgba(255, 255, 255, 0.9);
+    -fx-text-fill: #6366f1;
+    -fx-background-radius: 16;
+    -fx-font-size: 15px;
+    -fx-font-weight: 600;
+    -fx-padding: 16 28;
+    -fx-cursor: hand;
+    -fx-border-color: rgba(99, 102, 241, 0.2);
+    -fx-border-width: 2;
+    -fx-border-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.1), 8, 0, 0, 2);
 }
 
-.stat-icon-container-green {
-    -fx-background-color: #d1f4e0;
-    -fx-background-radius: 50;
-    -fx-pref-width: 60;
-    -fx-pref-height: 60;
+.calendar-button:hover {
+    -fx-background-color: #f0f4ff;
+    -fx-border-color: #6366f1;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.2), 12, 0, 0, 4);
 }
 
-.stat-icon-container-blue {
-    -fx-background-color: #cfe4ff;
-    -fx-background-radius: 50;
-    -fx-pref-width: 60;
-    -fx-pref-height: 60;
+/* ===== STATS SUMMARY BAR ===== */
+.stats-summary-wrap {
+    -fx-padding: 0;
 }
 
-.stat-icon-container-orange {
-    -fx-background-color: #ffe4cc;
-    -fx-background-radius: 50;
-    -fx-pref-width: 60;
-    -fx-pref-height: 60;
+.stats-summary-bar {
+    -fx-spacing: 16;
+    -fx-padding: 32 16 36 16;
+    -fx-alignment: center;
+    -fx-background-radius: 24;
+    -fx-border-radius: 24;
+    -fx-border-width: 2;
+    -fx-border-color: rgba(255, 255, 255, 0.9);
+    -fx-background-color: linear-gradient(to bottom, #ffffff 0%, #fefcff 100%);
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.12), 20, 0, 0, 6);
 }
 
-.stat-icon-container-pink {
-    -fx-background-color: #ffd4e5;
-    -fx-background-radius: 50;
-    -fx-pref-width: 60;
-    -fx-pref-height: 60;
+.stat-item {
+    -fx-padding: 16 20 12 20;
+    -fx-alignment: center;
+    -fx-min-width: 0;
+    -fx-background-radius: 16;
+    -fx-cursor: hand;
 }
 
-.stat-icon {
+.stat-item:hover {
+    -fx-background-color: linear-gradient(to bottom, #faf5ff 0%, #f5f3ff 100%);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+}
+
+.stat-icon-frame {
+    -fx-min-width: 56px;
+    -fx-min-height: 56px;
+    -fx-pref-width: 56px;
+    -fx-pref-height: 56px;
+    -fx-max-width: 56px;
+    -fx-max-height: 56px;
+    -fx-alignment: center;
+    -fx-background-color: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%);
+    -fx-background-radius: 28;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.15), 10, 0, 0, 3);
+}
+
+.stat-icon-symbol {
     -fx-font-size: 28px;
-}
-
-.stat-number {
-    -fx-font-size: 32px;
-    -fx-font-weight: 700;
     -fx-text-fill: #1e293b;
+    -fx-alignment: center;
+    -fx-padding: 0;
 }
 
-.stat-label {
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-    -fx-text-fill: #64748b;
-    -fx-letter-spacing: 0.5px;
+.stat-value {
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6366f1;
+    -fx-letter-spacing: -0.5px;
 }
 
-/* Summary Section */
-.summary-section {
-    -fx-background-color: linear-gradient(to right, #2d3561, #4a5a8f);
-    -fx-background-radius: 15;
-}
-
-.summary-title {
-    -fx-font-size: 13px;
-    -fx-font-weight: 700;
-    -fx-text-fill: rgba(255, 255, 255, 0.7);
-    -fx-letter-spacing: 1px;
-}
-
-.summary-card {
-    -fx-background-color: rgba(255, 255, 255, 0.1);
-    -fx-background-radius: 12;
-}
-
-.summary-card-title {
-    -fx-font-size: 16px;
-    -fx-font-weight: 600;
-    -fx-text-fill: white;
-}
-
-.summary-icon-container-purple {
-    -fx-background-color: rgba(139, 92, 246, 0.3);
-    -fx-background-radius: 8;
-    -fx-pref-width: 40;
-    -fx-pref-height: 40;
-}
-
-.summary-icon-text {
-    -fx-font-size: 20px;
-}
-
-.summary-item-label {
+.stat-caption {
     -fx-font-size: 14px;
-    -fx-text-fill: rgba(255, 255, 255, 0.9);
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 600;
+    -fx-letter-spacing: 0.3px;
 }
 
-.summary-item-value {
-    -fx-font-size: 18px;
-    -fx-font-weight: 700;
-    -fx-text-fill: white;
-}
-
-/* Filter Section */
+/* ===== FILTER SECTION ===== */
 .filter-section {
-    -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-padding: 20;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 10, 0.1, 0, 2);
+    -fx-background-color: linear-gradient(to bottom, #ffffff 0%, #fefcff 100%);
+    -fx-background-radius: 24;
+    -fx-padding: 32;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.08), 16, 0, 0, 4);
+    -fx-border-color: rgba(255, 255, 255, 0.8);
+    -fx-border-width: 2;
+    -fx-border-radius: 24;
+}
+
+.section-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e293b;
+    -fx-letter-spacing: -0.3px;
+}
+
+.section-count {
+    -fx-font-size: 16px;
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 500;
 }
 
 .filter-label {
-    -fx-font-size: 13px;
+    -fx-font-size: 14px;
     -fx-font-weight: 600;
     -fx-text-fill: #475569;
+    -fx-letter-spacing: 0.2px;
 }
 
 .search-field, .filter-choice {
-    -fx-background-color: #f8fafc;
-    -fx-background-radius: 8;
-    -fx-border-color: #e2e8f0;
-    -fx-border-radius: 8;
-    -fx-border-width: 1;
+    -fx-background-color: #fafbfc;
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(226, 232, 240, 0.8);
+    -fx-border-radius: 12;
+    -fx-border-width: 2;
     -fx-font-size: 14px;
+    -fx-padding: 14 16;
+    -fx-font-weight: 500;
 }
 
 .search-field:focused, .filter-choice:focused {
     -fx-border-color: #6366f1;
+    -fx-background-color: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.15), 8, 0, 0, 2);
 }
 
 .apply-button {
-    -fx-background-color: #60a5fa;
+    -fx-background-color: linear-gradient(135deg, #10b981 0%, #059669 100%);
     -fx-text-fill: white;
-    -fx-background-radius: 8;
+    -fx-background-radius: 12;
     -fx-font-size: 14px;
     -fx-font-weight: 600;
+    -fx-padding: 14 24;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.25), 8, 0, 0, 2);
 }
 
 .apply-button:hover {
-    -fx-background-color: #3b82f6;
+    -fx-background-color: linear-gradient(135deg, #059669 0%, #047857 100%);
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.35), 12, 0, 0, 4);
 }
 
-/* Goals Grid */
+/* ===== GOALS GRID ===== */
 .goals-grid {
-    -fx-padding: 10;
+    -fx-padding: 0;
+    -fx-alignment: center;
 }
 
-/* Goal Card */
-.goal-card {
-    -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 12, 0.1, 0, 4);
+/* ===== MODERN GOAL CARDS ===== */
+.modern-goal-card {
+    -fx-background-color: linear-gradient(to bottom, #ffffff 0%, #fefcff 100%);
+    -fx-background-radius: 24;
+    -fx-padding: 28;
+    -fx-spacing: 20;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.1), 20, 0, 0, 8);
+    -fx-border-color: rgba(255, 255, 255, 0.8);
+    -fx-border-width: 2;
+    -fx-border-radius: 24;
+    -fx-cursor: hand;
 }
 
-.goal-icon-container {
-    -fx-background-color: #e0e7ff;
-    -fx-background-radius: 50;
-    -fx-pref-width: 50;
-    -fx-pref-height: 50;
+.modern-goal-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.2), 28, 0, 0, 12);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+    -fx-border-color: rgba(99, 102, 241, 0.3);
 }
 
-.goal-icon {
-    -fx-font-size: 24px;
+.modern-goal-icon-container {
+    -fx-min-width: 64px;
+    -fx-min-height: 64px;
+    -fx-pref-width: 64px;
+    -fx-pref-height: 64px;
+    -fx-max-width: 64px;
+    -fx-max-height: 64px;
+    -fx-alignment: center;
+    -fx-background-color: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%);
+    -fx-background-radius: 32;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.15), 8, 0, 0, 2);
 }
 
-.goal-title {
-    -fx-font-size: 16px;
-    -fx-font-weight: 700;
+.modern-goal-icon {
+    -fx-font-size: 32px;
     -fx-text-fill: #1e293b;
+    -fx-alignment: center;
 }
 
-.goal-description {
-    -fx-font-size: 13px;
+.modern-goal-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #0f172a;
+    -fx-letter-spacing: -0.2px;
+    -fx-wrap-text: true;
+}
+
+.modern-goal-description {
+    -fx-font-size: 14px;
     -fx-text-fill: #64748b;
-    -fx-line-spacing: 2px;
+    -fx-line-spacing: 3;
+    -fx-wrap-text: true;
+    -fx-font-weight: 500;
+}
+
+/* ===== MODERN STATUS BADGES ===== */
+.modern-status-badge-failed {
+    -fx-background-color: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    -fx-text-fill: #dc2626;
+    -fx-background-radius: 12;
+    -fx-padding: 6 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-letter-spacing: 0.5px;
+}
+
+.modern-status-badge-active {
+    -fx-background-color: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    -fx-text-fill: #059669;
+    -fx-background-radius: 12;
+    -fx-padding: 6 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-letter-spacing: 0.5px;
+}
+
+.modern-status-badge-completed {
+    -fx-background-color: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    -fx-text-fill: #2563eb;
+    -fx-background-radius: 12;
+    -fx-padding: 6 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-letter-spacing: 0.5px;
+}
+
+/* ===== MODERN PRIORITY BADGES ===== */
+.modern-priority-badge-high {
+    -fx-background-color: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    -fx-text-fill: #dc2626;
+    -fx-background-radius: 12;
+    -fx-padding: 6 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-letter-spacing: 0.3px;
+}
+
+.modern-priority-badge-medium {
+    -fx-background-color: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    -fx-text-fill: #6366f1;
+    -fx-background-radius: 12;
+    -fx-padding: 6 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-letter-spacing: 0.3px;
+}
+
+.modern-priority-badge-low {
+    -fx-background-color: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    -fx-text-fill: #d97706;
+    -fx-background-radius: 12;
+    -fx-padding: 6 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-letter-spacing: 0.3px;
+}
+
+/* ===== PROGRESS SECTION ===== */
+.progress-section {
+    -fx-background-color: rgba(248, 250, 252, 0.8);
+    -fx-background-radius: 16;
+    -fx-padding: 16;
 }
 
 .progress-label {
@@ -226,360 +381,229 @@
     -fx-text-fill: #475569;
 }
 
-/* Status Badges */
-.status-badge-failed {
-    -fx-background-color: #fee2e2;
-    -fx-text-fill: #dc2626;
-    -fx-background-radius: 6;
-    -fx-padding: 4 10 4 10;
-    -fx-font-size: 11px;
+.progress-value {
+    -fx-font-size: 16px;
     -fx-font-weight: 700;
-}
-
-.status-badge-active {
-    -fx-background-color: #d1fae5;
-    -fx-text-fill: #059669;
-    -fx-background-radius: 6;
-    -fx-padding: 4 10 4 10;
-    -fx-font-size: 11px;
-    -fx-font-weight: 700;
-}
-
-.status-badge-completed {
-    -fx-background-color: #dbeafe;
-    -fx-text-fill: #2563eb;
-    -fx-background-radius: 6;
-    -fx-padding: 4 10 4 10;
-    -fx-font-size: 11px;
-    -fx-font-weight: 700;
-}
-
-/* Priority Badges */
-.priority-badge-medium {
-    -fx-background-color: #e0e7ff;
     -fx-text-fill: #6366f1;
-    -fx-background-radius: 6;
-    -fx-padding: 4 10 4 10;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
 }
 
-.priority-badge-low {
-    -fx-background-color: #fef3c7;
-    -fx-text-fill: #d97706;
-    -fx-background-radius: 6;
-    -fx-padding: 4 10 4 10;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
+.progress-bar-container {
+    -fx-min-height: 8;
+    -fx-pref-height: 8;
+    -fx-max-height: 8;
 }
 
-.priority-badge-high {
-    -fx-background-color: #fee2e2;
-    -fx-text-fill: #dc2626;
-    -fx-background-radius: 6;
-    -fx-padding: 4 10 4 10;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
+.progress-bar-background {
+    -fx-background-color: #e2e8f0;
+    -fx-background-radius: 4;
 }
 
-/* Date Labels */
-.goal-dates {
-    -fx-spacing: 10;
+.progress-bar-fill {
+    -fx-background-color: linear-gradient(to right, #6366f1 0%, #8b5cf6 100%);
+    -fx-background-radius: 4;
 }
 
-.date-label {
-    -fx-font-size: 11px;
-    -fx-text-fill: #64748b;
-}
-
-/* Action Buttons */
-.action-button-modify {
-    -fx-background-color: #e0e7ff;
-    -fx-text-fill: #4f46e5;
-    -fx-background-radius: 6;
-    -fx-padding: 6 12 6 12;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-cursor: hand;
-}
-
-.action-button-modify:hover {
-    -fx-background-color: #c7d2fe;
-}
-
-.action-button-duplicate {
-    -fx-background-color: transparent;
-    -fx-text-fill: #64748b;
-    -fx-border-color: #cbd5e1;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-border-width: 1;
-    -fx-padding: 6 12 6 12;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-cursor: hand;
-}
-
-.action-button-duplicate:hover {
-    -fx-background-color: #f8fafc;
-}
-
-.action-button-delete {
-    -fx-background-color: #fee2e2;
-    -fx-text-fill: #dc2626;
-    -fx-background-radius: 6;
-    -fx-padding: 6 12 6 12;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-cursor: hand;
-}
-
-.action-button-delete:hover {
-    -fx-background-color: #fecaca;
-}
-
-/* Form Styles */
-.form-container {
-    -fx-background-color: white;
+/* ===== GOAL META INFORMATION ===== */
+.goal-meta {
+    -fx-background-color: rgba(248, 250, 252, 0.6);
     -fx-background-radius: 12;
+    -fx-padding: 12;
+}
+
+.meta-item {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 500;
+}
+
+/* ===== MODERN ACTION BUTTONS ===== */
+.action-buttons {
+    -fx-padding: 8 0 0 0;
+}
+
+.modern-action-button-primary {
+    -fx-background-color: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-padding: 12 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.2), 6, 0, 0, 2);
+}
+
+.modern-action-button-primary:hover {
+    -fx-background-color: linear-gradient(135deg, #5558e3 0%, #7c3aed 100%);
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.3), 8, 0, 0, 3);
+}
+
+.modern-action-button-secondary {
+    -fx-background-color: rgba(248, 250, 252, 0.9);
+    -fx-text-fill: #64748b;
+    -fx-background-radius: 12;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-padding: 12 16;
+    -fx-cursor: hand;
+    -fx-border-color: rgba(226, 232, 240, 0.8);
+    -fx-border-width: 2;
+    -fx-border-radius: 12;
+}
+
+.modern-action-button-secondary:hover {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #475569;
+    -fx-border-color: #cbd5e1;
+}
+
+.modern-action-button-danger {
+    -fx-background-color: rgba(254, 226, 226, 0.9);
+    -fx-text-fill: #dc2626;
+    -fx-background-radius: 12;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-padding: 12 16;
+    -fx-cursor: hand;
+    -fx-border-color: rgba(252, 165, 165, 0.6);
+    -fx-border-width: 2;
+    -fx-border-radius: 12;
+}
+
+.modern-action-button-danger:hover {
+    -fx-background-color: #fecaca;
+    -fx-border-color: #f87171;
+    -fx-effect: dropshadow(gaussian, rgba(220, 38, 38, 0.15), 6, 0, 0, 2);
+}
+
+/* ===== SMOOTH TRANSITIONS ===== */
+.modern-goal-card {
+    -fx-transition: all 0.2s ease-out;
+}
+
+.new-goal-button, .calendar-button, .apply-button {
+    -fx-transition: all 0.15s ease-out;
+}
+
+.modern-action-button-primary, .modern-action-button-secondary, .modern-action-button-danger {
+    -fx-transition: all 0.15s ease-out;
+}
+
+.stat-item {
+    -fx-transition: all 0.2s ease-out;
+}
+
+/* ===== LEGACY COMPATIBILITY (for existing functionality) ===== */
+.goals-root, .dashboard-root {
+    -fx-background-color: linear-gradient(to bottom right, #f0f9ff 0%, #fef3f9 50%, #fef3c7 100%);
+    -fx-font-family: "Segoe UI", "Inter", "Arial", sans-serif;
+}
+
+/* Keep existing form styles for compatibility */
+.form-container {
+    -fx-background-color: linear-gradient(to bottom, #ffffff 0%, #fefcff 100%);
+    -fx-background-radius: 24;
+    -fx-padding: 32;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.1), 20, 0, 0, 8);
+    -fx-border-color: rgba(255, 255, 255, 0.8);
+    -fx-border-width: 2;
+    -fx-border-radius: 24;
 }
 
 .form-title {
-    -fx-font-size: 20px;
+    -fx-font-size: 24px;
     -fx-font-weight: 700;
-    -fx-text-fill: #1e293b;
+    -fx-text-fill: #0f172a;
+    -fx-letter-spacing: -0.3px;
 }
 
 .form-label {
-    -fx-font-size: 13px;
+    -fx-font-size: 14px;
     -fx-font-weight: 600;
     -fx-text-fill: #475569;
+    -fx-letter-spacing: 0.2px;
 }
 
 .form-field {
-    -fx-background-color: #f8fafc;
-    -fx-background-radius: 8;
-    -fx-border-color: #e2e8f0;
-    -fx-border-radius: 8;
-    -fx-border-width: 1;
-    -fx-padding: 8 12 8 12;
+    -fx-background-color: #fafbfc;
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(226, 232, 240, 0.8);
+    -fx-border-radius: 12;
+    -fx-border-width: 2;
+    -fx-padding: 14 16;
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
 }
 
 .form-field:focused {
     -fx-border-color: #6366f1;
+    -fx-background-color: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.15), 8, 0, 0, 2);
 }
 
 .primary-button {
-    -fx-background-color: #6366f1;
+    -fx-background-color: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     -fx-text-fill: white;
-    -fx-background-radius: 8;
+    -fx-background-radius: 12;
     -fx-font-size: 14px;
     -fx-font-weight: 600;
+    -fx-padding: 14 24;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.25), 8, 0, 0, 2);
 }
 
 .primary-button:hover {
-    -fx-background-color: #5558e3;
+    -fx-background-color: linear-gradient(135deg, #5558e3 0%, #7c3aed 100%);
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.35), 12, 0, 0, 4);
 }
 
 .secondary-button {
-    -fx-background-color: #f1f5f9;
+    -fx-background-color: rgba(248, 250, 252, 0.9);
     -fx-text-fill: #64748b;
-    -fx-background-radius: 8;
+    -fx-background-radius: 12;
     -fx-font-size: 14px;
     -fx-font-weight: 600;
+    -fx-padding: 14 24;
     -fx-cursor: hand;
+    -fx-border-color: rgba(226, 232, 240, 0.8);
+    -fx-border-width: 2;
+    -fx-border-radius: 12;
 }
 
 .secondary-button:hover {
     -fx-background-color: #e2e8f0;
+    -fx-text-fill: #475569;
+    -fx-border-color: #cbd5e1;
 }
 
-/* Additional Status Badges */
-.status-badge-draft {
-    -fx-background-color: #f3f4f6;
-    -fx-text-fill: #6b7280;
-    -fx-background-radius: 6;
-    -fx-padding: 4 10 4 10;
-    -fx-font-size: 11px;
-    -fx-font-weight: 700;
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1200px) {
+    .objectives-title {
+        -fx-font-size: 36px;
+    }
+    
+    .section-title {
+        -fx-font-size: 20px;
+    }
+    
+    .modern-goal-card {
+        -fx-pref-width: 300px;
+    }
 }
 
-.status-badge-archived {
-    -fx-background-color: #e5e7eb;
-    -fx-text-fill: #4b5563;
-    -fx-background-radius: 6;
-    -fx-padding: 4 10 4 10;
-    -fx-font-size: 11px;
-    -fx-font-weight: 700;
-}
-
-.status-badge-paused {
-    -fx-background-color: #fef3c7;
-    -fx-text-fill: #d97706;
-    -fx-background-radius: 6;
-    -fx-padding: 4 10 4 10;
-    -fx-font-size: 11px;
-    -fx-font-weight: 700;
-}
-
-/* Goal Detail Header */
-.goal-detail-header {
-    -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 12, 0.1, 0, 4);
-}
-
-.goal-detail-title {
-    -fx-font-size: 28px;
-    -fx-font-weight: 700;
-    -fx-text-fill: #1e293b;
-}
-
-.goal-detail-subtitle {
-    -fx-font-size: 15px;
-    -fx-text-fill: #64748b;
-}
-
-.detail-label {
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-    -fx-text-fill: #64748b;
-    -fx-text-transform: uppercase;
-}
-
-.detail-value {
-    -fx-font-size: 16px;
-    -fx-font-weight: 600;
-    -fx-text-fill: #1e293b;
-}
-
-.section-title {
-    -fx-font-size: 22px;
-    -fx-font-weight: 700;
-    -fx-text-fill: #1e293b;
-}
-
-.section-count {
-    -fx-font-size: 18px;
-    -fx-font-weight: 600;
-    -fx-text-fill: #64748b;
-}
-
-.delete-button {
-    -fx-background-color: #fee2e2;
-    -fx-text-fill: #dc2626;
-    -fx-background-radius: 8;
-    -fx-font-size: 14px;
-    -fx-font-weight: 600;
-    -fx-cursor: hand;
-}
-
-.delete-button:hover {
-    -fx-background-color: #fecaca;
-}
-
-/* Routine Card Styles */
-.routine-card {
-    -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 12, 0.1, 0, 4);
-    -fx-cursor: hand;
-}
-
-.routine-card:hover {
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 15, 0.15, 0, 6);
-}
-
-/* Activity Card Styles */
-.activity-card {
-    -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 12, 0.1, 0, 4);
-}
-
-.activity-timer {
-    -fx-font-size: 24px;
-    -fx-font-weight: 700;
-    -fx-text-fill: #6366f1;
-}
-
-.activity-status-pending {
-    -fx-background-color: #fef3c7;
-    -fx-text-fill: #d97706;
-    -fx-background-radius: 6;
-    -fx-padding: 4 10 4 10;
-    -fx-font-size: 11px;
-    -fx-font-weight: 700;
-}
-
-.activity-status-in_progress {
-    -fx-background-color: #dbeafe;
-    -fx-text-fill: #2563eb;
-    -fx-background-radius: 6;
-    -fx-padding: 4 10 4 10;
-    -fx-font-size: 11px;
-    -fx-font-weight: 700;
-}
-
-.activity-status-completed {
-    -fx-background-color: #d1fae5;
-    -fx-text-fill: #059669;
-    -fx-background-radius: 6;
-    -fx-padding: 4 10 4 10;
-    -fx-font-size: 11px;
-    -fx-font-weight: 700;
-}
-
-/* Favorite Button */
-.favorite-button {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-    -fx-font-size: 20px;
-    -fx-cursor: hand;
-    -fx-padding: 0;
-    -fx-min-width: 30px;
-    -fx-min-height: 30px;
-}
-
-.favorite-button:hover {
-    -fx-scale-x: 1.2;
-    -fx-scale-y: 1.2;
-}
-
-/* Validation Styles */
-.form-field:focused {
-    -fx-border-color: #6366f1;
-    -fx-border-width: 2;
-}
-
-.text-field:error, .text-area:error, .date-picker:error, .choice-box:error {
-    -fx-border-color: #dc2626;
-    -fx-border-width: 2;
-    -fx-background-color: #fef2f2;
-}
-
-.text-field:success, .text-area:success, .date-picker:success {
-    -fx-border-color: #059669;
-    -fx-border-width: 2;
-}
-
-/* Tooltip Error */
-.tooltip {
-    -fx-background-color: #fee2e2;
-    -fx-text-fill: #dc2626;
-    -fx-font-size: 12px;
-    -fx-padding: 8;
-    -fx-background-radius: 6;
-}
-
-/* Disabled Button */
-.primary-button:disabled {
-    -fx-opacity: 0.5;
-    -fx-cursor: default;
-}
-
-.secondary-button:disabled {
-    -fx-opacity: 0.5;
-    -fx-cursor: default;
+@media (max-width: 800px) {
+    .objectives-inner {
+        -fx-padding: 24 32 80 32;
+    }
+    
+    .objectives-hero {
+        -fx-padding: 32 32 36 32;
+    }
+    
+    .objectives-title {
+        -fx-font-size: 32px;
+    }
+    
+    .modern-goal-card {
+        -fx-pref-width: 280px;
+    }
 }

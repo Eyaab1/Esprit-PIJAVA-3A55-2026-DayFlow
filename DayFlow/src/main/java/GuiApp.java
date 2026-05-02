@@ -11,6 +11,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import services.deadline.DeadlineScheduler;
+import services.deadline.DeadlineReminderScheduler;
 import services.analytics.AnalyticsScheduler;
 
 import java.io.IOException;
@@ -36,6 +37,9 @@ public class GuiApp extends Application {
             
             // Start the analytics scheduler
             AnalyticsScheduler.getInstance().start();
+
+            // Start goal deadline email reminder scheduler
+            DeadlineReminderScheduler.getInstance().start();
             
             FXMLLoader shellLoader = new FXMLLoader(GuiApp.class.getResource("/user/account/app_root.fxml"));
             Parent shellRoot = shellLoader.load();
@@ -72,6 +76,13 @@ public class GuiApp extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    @Override
+    public void stop() {
+        DeadlineScheduler.getInstance().stop();
+        AnalyticsScheduler.getInstance().stop();
+        DeadlineReminderScheduler.getInstance().stop();
     }
 
     private static String extractTokenFromArgs(List<String> args) {

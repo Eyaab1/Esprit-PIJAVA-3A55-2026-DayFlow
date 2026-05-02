@@ -159,12 +159,20 @@ public class UserDashboardController {
 
     @FXML
     private void onQuickCalendar(MouseEvent event) {
-        toastSoon("Calendrier");
+        try {
+            NavigationManager.show("/user/goals_routines/goals_calendar.fxml", "DayFlow — Calendrier objectifs");
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+        }
     }
 
     @FXML
     private void onQuickNewGoal(MouseEvent event) {
-        toastSoon("Nouvel objectif");
+        try {
+            NavigationManager.show("/user/goals_routines/goals_dashboard.fxml", "DayFlow — Mes objectifs");
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+        }
     }
 
     @FXML

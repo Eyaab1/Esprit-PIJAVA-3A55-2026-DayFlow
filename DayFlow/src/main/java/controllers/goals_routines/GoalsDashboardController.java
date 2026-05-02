@@ -6,9 +6,11 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
 import model.goals_activity_management.Goal;
 import model.user.User;
 import services.goals_routines.GoalService;
@@ -27,6 +29,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 public class GoalsDashboardController {
 
@@ -36,6 +39,8 @@ public class GoalsDashboardController {
     private final GoalChatroomLifecycleService lifecycle = new GoalChatroomLifecycleService();
 
     private List<GoalListRow> allRows = new ArrayList<>();
+    private Integer editingGoalId;
+    private boolean gridView;
 
     @FXML
     private Label statActiveLabel;
@@ -54,7 +59,45 @@ public class GoalsDashboardController {
     @FXML
     private VBox goalsListBox;
     @FXML
+    private FlowPane goalsGridPane;
+    @FXML
     private Button createGoalBtn;
+    @FXML
+    private Button listViewBtn;
+    @FXML
+    private Button gridViewBtn;
+    @FXML
+    private VBox goalFormPanel;
+    @FXML
+    private Label goalFormTitle;
+    @FXML
+    private TextField titleField;
+    @FXML
+    private TextArea descriptionField;
+    @FXML
+    private DatePicker startDatePicker;
+    @FXML
+    private DatePicker endDatePicker;
+    @FXML
+    private DatePicker deadlineDatePicker;
+    @FXML
+    private Spinner<Integer> deadlineHourSpinner;
+    @FXML
+    private Spinner<Integer> deadlineMinuteSpinner;
+    @FXML
+    private Spinner<Integer> deadlineSecondSpinner;
+    @FXML
+    private CheckBox emailReminderCheck;
+    @FXML
+    private DatePicker reminderDatePicker;
+    @FXML
+    private Spinner<Integer> reminderHourSpinner;
+    @FXML
+    private Spinner<Integer> reminderMinuteSpinner;
+    @FXML
+    private Spinner<Integer> reminderSecondSpinner;
+    @FXML
+    private ComboBox<String> statusCombo;
 
     @FXML
     private void initialize() {
@@ -69,6 +112,8 @@ public class GoalsDashboardController {
                 "Plus récent", "Titre (A-Z)"));
         sortCombo.getSelectionModel().selectFirst();
 
+        setupForm();
+        setViewMode(false);
         refreshAll();
     }
 
@@ -98,6 +143,7 @@ public class GoalsDashboardController {
 
     private void applyFilters() {
         goalsListBox.getChildren().clear();
+        goalsGridPane.getChildren().clear();
         String q = searchField.getText() != null ? searchField.getText().trim().toLowerCase(Locale.ROOT) : "";
         String st = statusFilterCombo.getSelectionModel().getSelectedItem();
         String sort = sortCombo.getSelectionModel().getSelectedItem();
@@ -137,10 +183,19 @@ public class GoalsDashboardController {
         rows.sort(cmp);
 
         for (GoalListRow row : rows) {
-            goalsListBox.getChildren().add(buildGoalCard(row));
+            if (gridView) {
+                goalsGridPane.getChildren().add(buildGoalGridCard(row));
+            } else {
+                goalsListBox.getChildren().add(buildGoalCard(row));
+            }
         }
         if (rows.isEmpty()) {
-            goalsListBox.getChildren().add(new Label("Aucun objectif ne correspond à ces critères."));
+            Label empty = new Label("Aucun objectif ne correspond à ces critères.");
+            if (gridView) {
+                goalsGridPane.getChildren().add(empty);
+            } else {
+                goalsListBox.getChildren().add(empty);
+            }
         }
     }
 
@@ -330,80 +385,13 @@ public class GoalsDashboardController {
             alert(Alert.AlertType.WARNING, "Connectez-vous pour créer un objectif.");
             return;
         }
-
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Nouvel objectif");
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        TextField titleF = new TextField();
-        titleF.setPromptText("Titre");
-        TextArea descF = new TextArea();
-        descF.setPromptText("Description");
-        descF.setPrefRowCount(4);
-        descF.setWrapText(true);
-        DatePicker start = new DatePicker();
-        DatePicker end = new DatePicker();
-        DatePicker deadlineDate = new DatePicker();
-        Spinner<Integer> deadlineHour = new Spinner<>(0, 23, 12);
-        Spinner<Integer> deadlineMinute = new Spinner<>(0, 59, 0);
-        ComboBox<String> status = new ComboBox<>();
-        status.getItems().addAll("active", "draft");
-        status.getSelectionModel().select("active");
-
-        javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(10));
-        int r = 0;
-        grid.add(new Label("Titre *"), 0, r);
-        grid.add(titleF, 1, r++);
-        grid.add(new Label("Description"), 0, r);
-        grid.add(descF, 1, r++);
-        grid.add(new Label("Début *"), 0, r);
-        grid.add(start, 1, r++);
-        grid.add(new Label("Fin *"), 0, r);
-        grid.add(end, 1, r++);
-        grid.add(new Label("Deadline (optionnel)"), 0, r);
-        javafx.scene.layout.HBox deadlineBox = new javafx.scene.layout.HBox(5);
-        deadlineBox.getChildren().addAll(deadlineDate, new Label("à"), deadlineHour, new Label("h"), deadlineMinute);
-        grid.add(deadlineBox, 1, r++);
-        grid.add(new Label("Statut"), 0, r);
-        grid.add(status, 1, r);
-        dialog.getDialogPane().setContent(grid);
-
-        Optional<ButtonType> res = dialog.showAndWait();
-        if (res.isEmpty() || res.get() != ButtonType.OK) {
-            return;
-        }
-        try {
-            Goal g = new Goal();
-            g.setTitle(titleF.getText() != null ? titleF.getText().trim() : "");
-            g.setDescription(descF.getText() != null ? descF.getText().trim() : null);
-            g.setStartDate(start.getValue());
-            g.setEndDate(end.getValue());
-            
-            // Set deadline if provided
-            if (deadlineDate.getValue() != null) {
-                java.time.LocalDateTime deadline = java.time.LocalDateTime.of(
-                    deadlineDate.getValue(),
-                    java.time.LocalTime.of(deadlineHour.getValue(), deadlineMinute.getValue())
-                );
-                g.setDeadline(deadline);
-            }
-            
-            g.setStatus(status.getValue());
-            User owner = new User();
-            owner.setId(uid.get());
-            g.setUser(owner);
-            g.onUpdate();
-            g.validate();
-            goalService.insert(g);
-            lifecycle.ensureChatroomAndOwner(g.getId(), uid.get());
-            alert(Alert.AlertType.INFORMATION, "Objectif créé. Vous êtes administrateur du chatroom associé.");
-            refreshAll();
-        } catch (Exception ex) {
-            alert(Alert.AlertType.ERROR, ex.getMessage());
-        }
+        editingGoalId = null;
+        clearForm();
+        goalFormTitle.setText("Créer un objectif");
+        statusCombo.getItems().setAll("active", "draft");
+        statusCombo.getSelectionModel().select("active");
+        goalFormPanel.setVisible(true);
+        goalFormPanel.setManaged(true);
     }
 
     private static void alert(Alert.AlertType t, String m) {
@@ -422,53 +410,40 @@ public class GoalsDashboardController {
             }
             
             Goal g = goalOpt.get().goal();
-            
-            Dialog<ButtonType> dialog = new Dialog<>();
-            dialog.setTitle("Modifier l'objectif");
-            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-            TextField titleF = new TextField(g.getTitle());
-            TextArea descF = new TextArea(g.getDescription() != null ? g.getDescription() : "");
-            descF.setPrefRowCount(4);
-            descF.setWrapText(true);
-            DatePicker start = new DatePicker(g.getStartDate());
-            DatePicker end = new DatePicker(g.getEndDate());
-            ComboBox<String> status = new ComboBox<>();
-            status.getItems().addAll("active", "draft", "paused", "completed", "failed", "archived");
-            status.getSelectionModel().select(g.getStatus());
-
-            javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
-            grid.setHgap(10);
-            grid.setVgap(10);
-            grid.setPadding(new Insets(10));
-            int r = 0;
-            grid.add(new Label("Titre *"), 0, r);
-            grid.add(titleF, 1, r++);
-            grid.add(new Label("Description"), 0, r);
-            grid.add(descF, 1, r++);
-            grid.add(new Label("Début *"), 0, r);
-            grid.add(start, 1, r++);
-            grid.add(new Label("Fin *"), 0, r);
-            grid.add(end, 1, r++);
-            grid.add(new Label("Statut"), 0, r);
-            grid.add(status, 1, r);
-            dialog.getDialogPane().setContent(grid);
-
-            Optional<ButtonType> res = dialog.showAndWait();
-            if (res.isEmpty() || res.get() != ButtonType.OK) {
-                return;
+            editingGoalId = goalId;
+            goalFormTitle.setText("Modifier l'objectif");
+            titleField.setText(g.getTitle() != null ? g.getTitle() : "");
+            descriptionField.setText(g.getDescription() != null ? g.getDescription() : "");
+            startDatePicker.setValue(g.getStartDate());
+            endDatePicker.setValue(g.getEndDate());
+            if (g.getDeadline() != null) {
+                deadlineDatePicker.setValue(g.getDeadline().toLocalDate());
+                deadlineHourSpinner.getValueFactory().setValue(g.getDeadline().getHour());
+                deadlineMinuteSpinner.getValueFactory().setValue(g.getDeadline().getMinute());
+                deadlineSecondSpinner.getValueFactory().setValue(g.getDeadline().getSecond());
+            } else {
+                deadlineDatePicker.setValue(null);
+                deadlineHourSpinner.getValueFactory().setValue(12);
+                deadlineMinuteSpinner.getValueFactory().setValue(0);
+                deadlineSecondSpinner.getValueFactory().setValue(0);
             }
-            
-            g.setTitle(titleF.getText() != null ? titleF.getText().trim() : "");
-            g.setDescription(descF.getText() != null ? descF.getText().trim() : null);
-            g.setStartDate(start.getValue());
-            g.setEndDate(end.getValue());
-            g.setStatus(status.getValue());
-            g.onUpdate();
-            g.validate();
-            goalService.update(g);
-            alert(Alert.AlertType.INFORMATION, "Objectif modifié avec succès.");
-            refreshAll();
+            emailReminderCheck.setSelected(g.isEmailReminderEnabled());
+            if (g.getEmailReminderAt() != null) {
+                reminderDatePicker.setValue(g.getEmailReminderAt().toLocalDate());
+                reminderHourSpinner.getValueFactory().setValue(g.getEmailReminderAt().getHour());
+                reminderMinuteSpinner.getValueFactory().setValue(g.getEmailReminderAt().getMinute());
+                reminderSecondSpinner.getValueFactory().setValue(g.getEmailReminderAt().getSecond());
+            } else {
+                reminderDatePicker.setValue(null);
+                reminderHourSpinner.getValueFactory().setValue(9);
+                reminderMinuteSpinner.getValueFactory().setValue(0);
+                reminderSecondSpinner.getValueFactory().setValue(0);
+            }
+            statusCombo.getItems().setAll("active", "draft", "paused", "completed", "failed", "archived");
+            statusCombo.getSelectionModel().select(g.getStatus());
+            updateReminderInputsEnabled();
+            goalFormPanel.setVisible(true);
+            goalFormPanel.setManaged(true);
         } catch (Exception ex) {
             alert(Alert.AlertType.ERROR, "Erreur: " + ex.getMessage());
         }
@@ -545,5 +520,219 @@ public class GoalsDashboardController {
         } catch (Exception ex) {
             alert(Alert.AlertType.ERROR, "Erreur: " + ex.getMessage());
         }
+    }
+
+    private static Spinner<Integer> createTimeSpinner(int min, int max, int initialValue) {
+        Spinner<Integer> spinner = new Spinner<>(min, max, initialValue);
+        spinner.setEditable(true);
+        SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory =
+                (SpinnerValueFactory.IntegerSpinnerValueFactory) spinner.getValueFactory();
+        valueFactory.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Integer value) {
+                if (value == null) {
+                    return String.format("%02d", min);
+                }
+                return String.format("%02d", value);
+            }
+
+            @Override
+            public Integer fromString(String text) {
+                if (text == null || text.isBlank()) {
+                    return min;
+                }
+                int parsed = Integer.parseInt(text.trim());
+                if (parsed < min) {
+                    return min;
+                }
+                if (parsed > max) {
+                    return max;
+                }
+                return parsed;
+            }
+        });
+        UnaryOperator<TextFormatter.Change> filter = change -> {
+            String newText = change.getControlNewText();
+            if (newText.matches("\\d{0,2}")) {
+                return change;
+            }
+            return null;
+        };
+        spinner.getEditor().setTextFormatter(new TextFormatter<>(filter));
+        spinner.focusedProperty().addListener((obs, old, focused) -> {
+            if (!focused) {
+                try {
+                    int value = Integer.parseInt(spinner.getEditor().getText());
+                    valueFactory.setValue(Math.max(min, Math.min(max, value)));
+                } catch (Exception ignored) {
+                    valueFactory.setValue(initialValue);
+                }
+                spinner.getEditor().setText(valueFactory.getConverter().toString(valueFactory.getValue()));
+            }
+        });
+        spinner.getEditor().setText(valueFactory.getConverter().toString(valueFactory.getValue()));
+        return spinner;
+    }
+
+    private VBox buildGoalGridCard(GoalListRow row) {
+        Goal g = row.goal();
+        VBox card = buildGoalCard(row);
+        card.getStyleClass().add("goal-grid-card");
+        card.setPrefWidth(340);
+        return card;
+    }
+
+    @FXML
+    private void onSaveGoal() {
+        Optional<Integer> uid = AppSession.getCurrentUser().map(User::getId);
+        if (uid.isEmpty()) {
+            alert(Alert.AlertType.WARNING, "Connectez-vous pour enregistrer un objectif.");
+            return;
+        }
+        try {
+            Goal g = editingGoalId == null ? new Goal() : goalService.findById(editingGoalId);
+            if (g == null) {
+                throw new IllegalArgumentException("Objectif non trouvé.");
+            }
+            g.setTitle(titleField.getText() != null ? titleField.getText().trim() : "");
+            g.setDescription(descriptionField.getText() != null ? descriptionField.getText().trim() : null);
+            g.setStartDate(startDatePicker.getValue());
+            g.setEndDate(endDatePicker.getValue());
+
+            if (deadlineDatePicker.getValue() != null) {
+                g.setDeadline(java.time.LocalDateTime.of(
+                        deadlineDatePicker.getValue(),
+                        java.time.LocalTime.of(
+                                deadlineHourSpinner.getValue(),
+                                deadlineMinuteSpinner.getValue(),
+                                deadlineSecondSpinner.getValue())
+                ));
+            } else {
+                g.setDeadline(null);
+            }
+            g.setEmailReminderEnabled(emailReminderCheck.isSelected());
+            if (emailReminderCheck.isSelected()) {
+                if (reminderDatePicker.getValue() == null) {
+                    throw new IllegalArgumentException("Veuillez choisir la date du rappel email.");
+                }
+                g.setEmailReminderAt(java.time.LocalDateTime.of(
+                        reminderDatePicker.getValue(),
+                        java.time.LocalTime.of(
+                                reminderHourSpinner.getValue(),
+                                reminderMinuteSpinner.getValue(),
+                                reminderSecondSpinner.getValue())
+                ));
+            } else {
+                g.setEmailReminderAt(null);
+            }
+            g.setStatus(statusCombo.getValue());
+            g.onUpdate();
+            g.validate();
+            if (editingGoalId == null) {
+                User owner = new User();
+                owner.setId(uid.get());
+                g.setUser(owner);
+                goalService.insert(g);
+                lifecycle.ensureChatroomAndOwner(g.getId(), uid.get());
+                alert(Alert.AlertType.INFORMATION, "Objectif créé.");
+            } else {
+                goalService.update(g);
+                alert(Alert.AlertType.INFORMATION, "Objectif modifié.");
+            }
+            onCancelGoal();
+            refreshAll();
+        } catch (Exception ex) {
+            alert(Alert.AlertType.ERROR, ex.getMessage());
+        }
+    }
+
+    @FXML
+    private void onCancelGoal() {
+        editingGoalId = null;
+        clearForm();
+        goalFormPanel.setVisible(false);
+        goalFormPanel.setManaged(false);
+    }
+
+    @FXML
+    private void onClearDeadline() {
+        deadlineDatePicker.setValue(null);
+    }
+
+    @FXML
+    private void onListView() {
+        setViewMode(false);
+        applyFilters();
+    }
+
+    @FXML
+    private void onGridView() {
+        setViewMode(true);
+        applyFilters();
+    }
+
+    private void setViewMode(boolean gridMode) {
+        this.gridView = gridMode;
+        goalsListBox.setVisible(!gridMode);
+        goalsListBox.setManaged(!gridMode);
+        goalsGridPane.setVisible(gridMode);
+        goalsGridPane.setManaged(gridMode);
+        listViewBtn.getStyleClass().remove("view-toggle-active");
+        gridViewBtn.getStyleClass().remove("view-toggle-active");
+        if (gridMode) {
+            gridViewBtn.getStyleClass().add("view-toggle-active");
+        } else {
+            listViewBtn.getStyleClass().add("view-toggle-active");
+        }
+    }
+
+    private void setupForm() {
+        statusCombo.setItems(FXCollections.observableArrayList("active", "draft"));
+        statusCombo.getSelectionModel().select("active");
+        emailReminderCheck.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            updateReminderInputsEnabled();
+            if (newVal && reminderDatePicker.getValue() == null) {
+                reminderDatePicker.setValue(deadlineDatePicker.getValue() != null
+                        ? deadlineDatePicker.getValue()
+                        : java.time.LocalDate.now());
+            }
+        });
+        deadlineDatePicker.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (emailReminderCheck.isSelected() && reminderDatePicker.getValue() == null && newVal != null) {
+                reminderDatePicker.setValue(newVal);
+            }
+        });
+        updateReminderInputsEnabled();
+        goalFormPanel.setVisible(false);
+        goalFormPanel.setManaged(false);
+        clearForm();
+    }
+
+    private void updateReminderInputsEnabled() {
+        boolean enabled = emailReminderCheck.isSelected();
+        reminderDatePicker.setDisable(!enabled);
+        reminderHourSpinner.setDisable(!enabled);
+        reminderMinuteSpinner.setDisable(!enabled);
+        reminderSecondSpinner.setDisable(!enabled);
+        if (!enabled) {
+            reminderDatePicker.setValue(null);
+        }
+    }
+
+    private void clearForm() {
+        titleField.clear();
+        descriptionField.clear();
+        startDatePicker.setValue(null);
+        endDatePicker.setValue(null);
+        deadlineDatePicker.setValue(null);
+        deadlineHourSpinner.setValueFactory(createTimeSpinner(0, 23, 12).getValueFactory());
+        deadlineMinuteSpinner.setValueFactory(createTimeSpinner(0, 59, 0).getValueFactory());
+        deadlineSecondSpinner.setValueFactory(createTimeSpinner(0, 59, 0).getValueFactory());
+        emailReminderCheck.setSelected(false);
+        reminderDatePicker.setValue(null);
+        reminderHourSpinner.setValueFactory(createTimeSpinner(0, 23, 9).getValueFactory());
+        reminderMinuteSpinner.setValueFactory(createTimeSpinner(0, 59, 0).getValueFactory());
+        reminderSecondSpinner.setValueFactory(createTimeSpinner(0, 59, 0).getValueFactory());
+        statusCombo.getSelectionModel().select("active");
     }
 }

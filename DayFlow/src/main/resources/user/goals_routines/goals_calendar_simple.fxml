@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.goals_routines.GoalsCalendarController"
+      spacing="20" styleClass="goal-calendar-root" stylesheets="@goals_calendar.css">
+    <padding>
+        <Insets top="24" right="24" bottom="24" left="24"/>
+    </padding>
+    
+    <!-- Simple test version -->
+    <Label text="📅 Calendrier des Objectifs - Version Test" styleClass="goal-calendar-title"/>
+    
+    <!-- Navigation -->
+    <HBox spacing="10" alignment="CENTER">
+        <Button fx:id="prevMonthBtn" text="‹" onAction="#onPreviousMonth"/>
+        <Label fx:id="monthYearLabel" text="Mai 2026"/>
+        <Button fx:id="nextMonthBtn" text="›" onAction="#onNextMonth"/>
+        <Button text="Aujourd'hui" onAction="#onToday"/>
+        <Button text="Actualiser" onAction="#onRefresh"/>
+    </HBox>
+    
+    <!-- Simple calendar grid -->
+    <GridPane fx:id="calendarGrid" styleClass="calendar-grid">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="14.28" />
+            <ColumnConstraints percentWidth="14.28" />
+            <ColumnConstraints percentWidth="14.28" />
+            <ColumnConstraints percentWidth="14.28" />
+            <ColumnConstraints percentWidth="14.28" />
+            <ColumnConstraints percentWidth="14.28" />
+            <ColumnConstraints percentWidth="14.28" />
+        </columnConstraints>
+    </GridPane>
+    
+    <!-- Details -->
+    <HBox spacing="20">
+        <VBox spacing="12" HBox.hgrow="ALWAYS">
+            <Label fx:id="selectedDateTitle" text="📋 Objectifs du jour sélectionné"/>
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="200">
+                <VBox fx:id="eventsListBox" spacing="8"/>
+            </ScrollPane>
+        </VBox>
+        
+        <VBox spacing="12" prefWidth="300">
+            <Label text="⏰ Deadlines à venir"/>
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="200">
+                <VBox fx:id="upcomingListBox" spacing="6"/>
+            </ScrollPane>
+        </VBox>
+    </HBox>
+</VBox>
