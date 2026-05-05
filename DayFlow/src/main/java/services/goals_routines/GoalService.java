@@ -7,6 +7,7 @@ import services.CRUD;
 import services.chatroom.ChatroomService;
 import services.chatroom.MessageService;
 import services.chatroom.GoalParticipationService;
+import services.deadline.DeadlineEmailReminderWorkflowService;
 import utils.DbConnexion;
 
 import java.sql.Connection;
@@ -21,27 +22,41 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDateTime;
 
 public class GoalService implements CRUD<Goal, Integer> {
 
     private Connection cnx;
+    private DeadlineEmailReminderWorkflowService deadlineEmailWorkflow;
 
     private static final String INSERT_GOAL = """
             INSERT INTO goal (
                 title, description, start_date, end_date, deadline, status, priority,
-                is_favorite, progress, required_tasks, trello_board_id, user_id, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                is_favorite, progress, required_tasks, trello_board_id,
+                email_reminder_enabled, email_reminder_at,
+                user_id, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
 
     private static final String UPDATE_GOAL = """
             UPDATE goal SET
                 title=?, description=?, start_date=?, end_date=?, deadline=?, status=?, priority=?,
-                is_favorite=?, progress=?, required_tasks=?, trello_board_id=?, updated_at=?
+                is_favorite=?, progress=?, required_tasks=?, trello_board_id=?,
+                email_reminder_enabled=?, email_reminder_at=?, updated_at=?
             WHERE id=?
             """;
 
     public GoalService() {
         cnx = DbConnexion.getInstance().getCnx();
+    }
+
+    // Lazy initialization to avoid circular dependency
+    private DeadlineEmailReminderWorkflowService getDeadlineEmailWorkflow() {
+        if (deadlineEmailWorkflow == null) {
+            deadlineEmailWorkflow = new DeadlineEmailReminderWorkflowService();
+            deadlineEmailWorkflow.setGoalService(this); // Set this instance to avoid circular dependency
+        }
+        return deadlineEmailWorkflow;
     }
 
     @Override
@@ -79,6 +94,8 @@ public class GoalService implements CRUD<Goal, Integer> {
             } else {
                 ps.setString(i++, goal.getTrelloBoardId());
             }
+            ps.setBoolean(i++, goal.isEmailReminderEnabled());
+            ps.setTimestamp(i++, goal.getEmailReminderAt() != null ? Timestamp.valueOf(goal.getEmailReminderAt()) : null);
             // Add user_id
             if (goal.getUser() != null && goal.getUser().getId() != null) {
                 ps.setInt(i++, goal.getUser().getId());
@@ -101,6 +118,7 @@ public class GoalService implements CRUD<Goal, Integer> {
         if (goal.getStartDate() != null && goal.getEndDate() != null && goal.getEndDate().isBefore(goal.getStartDate())) {
             throw new IllegalArgumentException("La date de fin ne peut pas être avant la date de début");
         }
+        Goal previousState = findById(goal.getId());
         try (PreparedStatement ps = cnx.prepareStatement(UPDATE_GOAL)) {
             int i = 1;
             ps.setString(i++, goal.getTitle());
@@ -126,9 +144,14 @@ public class GoalService implements CRUD<Goal, Integer> {
             } else {
                 ps.setString(i++, goal.getTrelloBoardId());
             }
+            ps.setBoolean(i++, goal.isEmailReminderEnabled());
+            ps.setTimestamp(i++, goal.getEmailReminderAt() != null ? Timestamp.valueOf(goal.getEmailReminderAt()) : null);
             ps.setTimestamp(i++, goal.getUpdatedAt() != null ? Timestamp.valueOf(goal.getUpdatedAt()) : null);
             ps.setInt(i, goal.getId());
             ps.executeUpdate();
+        }
+        if (previousState != null) {
+            getDeadlineEmailWorkflow().handleGoalUpdated(previousState, goal);
         }
     }
 
@@ -172,7 +195,9 @@ public class GoalService implements CRUD<Goal, Integer> {
     public Goal findById(int id) throws SQLException {
         String sql = """
                 SELECT id, title, description, start_date, end_date, deadline, status, priority,
-                       is_favorite, progress, required_tasks, trello_board_id, created_at, updated_at, user_id
+                       is_favorite, progress, required_tasks, trello_board_id,
+                       email_reminder_enabled, email_reminder_at,
+                       created_at, updated_at, user_id
                 FROM goal WHERE id = ?
                 """;
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
@@ -192,7 +217,9 @@ public class GoalService implements CRUD<Goal, Integer> {
     public List<GoalListRow> findAllForDashboard() throws SQLException {
         String sql = """
                 SELECT g.id, g.title, g.description, g.start_date, g.end_date, g.deadline, g.status, g.priority,
-                       g.is_favorite, g.progress, g.required_tasks, g.trello_board_id, g.created_at, g.updated_at,
+                       g.is_favorite, g.progress, g.required_tasks, g.trello_board_id,
+                       g.email_reminder_enabled, g.email_reminder_at,
+                       g.created_at, g.updated_at,
                        g.user_id,
                        u.first_name AS owner_fn, u.last_name AS owner_ln,
                        c.id AS chatroom_id,
@@ -243,6 +270,11 @@ public class GoalService implements CRUD<Goal, Integer> {
         int rt = rs.getInt("required_tasks");
         g.setRequiredTasks(rs.wasNull() ? null : rt);
         g.setTrelloBoardId(rs.getString("trello_board_id"));
+        g.setEmailReminderEnabled(rs.getBoolean("email_reminder_enabled"));
+        Timestamp er = rs.getTimestamp("email_reminder_at");
+        if (er != null) {
+            g.setEmailReminderAt(er.toLocalDateTime());
+        }
         Timestamp ca = rs.getTimestamp("created_at");
         if (ca != null) {
             g.setCreatedAt(ca.toLocalDateTime());
@@ -286,7 +318,9 @@ public class GoalService implements CRUD<Goal, Integer> {
     public List<GoalDiscussionRow> findGoalsForCommunityDiscussion(int userId) throws SQLException {
         String sql = """
                 SELECT g.id, g.title, g.description, g.start_date, g.end_date, g.deadline, g.status, g.priority,
-                       g.is_favorite, g.progress, g.required_tasks, g.trello_board_id, g.created_at, g.updated_at,
+                       g.is_favorite, g.progress, g.required_tasks, g.trello_board_id,
+                       g.email_reminder_enabled, g.email_reminder_at,
+                       g.created_at, g.updated_at,
                        g.user_id,
                        u.first_name AS owner_fn, u.last_name AS owner_ln,
                        owner_gp.user_id AS owner_user_id,
@@ -367,7 +401,9 @@ public class GoalService implements CRUD<Goal, Integer> {
     public List<Goal> findByUserId(int userId) throws SQLException {
         String sql = """
                 SELECT id, title, description, start_date, end_date, deadline, status, priority,
-                       is_favorite, progress, required_tasks, trello_board_id, created_at, updated_at, user_id
+                       is_favorite, progress, required_tasks, trello_board_id,
+                       email_reminder_enabled, email_reminder_at,
+                       created_at, updated_at, user_id
                 FROM goal WHERE user_id = ?
                 ORDER BY created_at DESC
                 """;
@@ -381,5 +417,71 @@ public class GoalService implements CRUD<Goal, Integer> {
             }
         }
         return goals;
+    }
+
+    /**
+     * Recalculates goal progress from all activities of linked routines and updates status accordingly.
+     * Formula: (completed activities / total activities) * 100.
+     */
+    public int recalculateGoalProgress(int goalId) throws SQLException {
+        String statsSql = """
+                SELECT
+                    COUNT(a.id)::int AS total_count,
+                    COALESCE(SUM(CASE WHEN LOWER(TRIM(a.status)) = 'completed' THEN 1 ELSE 0 END), 0)::int AS completed_count
+                FROM routine r
+                LEFT JOIN activity a ON a.routine_id = r.id
+                WHERE r.goal_id = ?
+                """;
+
+        int total = 0;
+        int completed = 0;
+        try (PreparedStatement ps = cnx.prepareStatement(statsSql)) {
+            ps.setInt(1, goalId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    total = rs.getInt("total_count");
+                    completed = rs.getInt("completed_count");
+                }
+            }
+        }
+
+        int progress = total == 0 ? 0 : Math.round((completed * 100.0f) / total);
+
+        LocalDateTime deadline = null;
+        String currentStatus = null;
+        String metaSql = "SELECT deadline, status FROM goal WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(metaSql)) {
+            ps.setInt(1, goalId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Timestamp dl = rs.getTimestamp("deadline");
+                    deadline = dl != null ? dl.toLocalDateTime() : null;
+                    currentStatus = rs.getString("status");
+                }
+            }
+        }
+
+        String newStatus = currentStatus;
+        boolean isOverdue = deadline != null && LocalDateTime.now().isAfter(deadline) && progress < 100;
+        if (progress >= 100) {
+            newStatus = "completed";
+        } else if (isOverdue) {
+            newStatus = "failed";
+        } else if (progress > 0) {
+            newStatus = "active";
+        } else {
+            newStatus = "draft";
+        }
+
+        String updateSql = "UPDATE goal SET progress = ?, status = ?, updated_at = ? WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(updateSql)) {
+            ps.setInt(1, progress);
+            ps.setString(2, newStatus);
+            ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setInt(4, goalId);
+            ps.executeUpdate();
+        }
+
+        return progress;
     }
 }

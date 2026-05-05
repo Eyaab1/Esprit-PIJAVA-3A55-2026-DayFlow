@@ -122,7 +122,7 @@ public class NavbarController {
 
     @FXML
     private void onCalendrier() {
-        toastSoon("Calendrier");
+        navigate("/user/goals_routines/goals_calendar.fxml", "DayFlow — Calendrier objectifs");
     }
 
     @FXML

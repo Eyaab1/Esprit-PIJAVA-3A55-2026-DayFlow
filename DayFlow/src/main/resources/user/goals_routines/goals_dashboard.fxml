@@ -3,9 +3,15 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -90,7 +96,63 @@
                      </children>
                   </VBox>
                   <Region prefHeight="1" prefWidth="8" />
+                  <Button fx:id="listViewBtn" mnemonicParsing="false" onAction="#onListView" styleClass="btn-view-toggle" text="Liste" />
+                  <Button fx:id="gridViewBtn" mnemonicParsing="false" onAction="#onGridView" styleClass="btn-view-toggle" text="Grille" />
                   <Button mnemonicParsing="false" onAction="#onApplyFilters" styleClass="btn-filter-apply" text="Appliquer" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+
+      <VBox fx:id="goalFormPanel" spacing="10" styleClass="goal-inline-form">
+         <children>
+            <Label fx:id="goalFormTitle" styleClass="goal-form-title" text="Créer un objectif" />
+            <GridPane hgap="10" vgap="10">
+               <children>
+                  <Label text="Titre *" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                  <TextField fx:id="titleField" promptText="Titre" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                  <Label text="Description" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                  <TextArea fx:id="descriptionField" promptText="Description" prefRowCount="3" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label text="Début *" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                  <DatePicker fx:id="startDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Label text="Fin *" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                  <DatePicker fx:id="endDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Label text="Deadline (optionnel)" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                  <HBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                     <children>
+                        <DatePicker fx:id="deadlineDatePicker" />
+                        <Label text="à" />
+                        <Spinner fx:id="deadlineHourSpinner" prefWidth="66" />
+                        <Label text="h" />
+                        <Spinner fx:id="deadlineMinuteSpinner" prefWidth="66" />
+                        <Label text="min" />
+                        <Spinner fx:id="deadlineSecondSpinner" prefWidth="66" />
+                        <Label text="s" />
+                        <Button mnemonicParsing="false" onAction="#onClearDeadline" styleClass="btn-inline-clear" text="Effacer" />
+                     </children>
+                  </HBox>
+                  <CheckBox fx:id="emailReminderCheck" text="Rappel email personnalisé" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                  <Label text="Date/heure rappel email" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                  <HBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                     <children>
+                        <DatePicker fx:id="reminderDatePicker" />
+                        <Label text="à" />
+                        <Spinner fx:id="reminderHourSpinner" prefWidth="66" />
+                        <Label text="h" />
+                        <Spinner fx:id="reminderMinuteSpinner" prefWidth="66" />
+                        <Label text="min" />
+                        <Spinner fx:id="reminderSecondSpinner" prefWidth="66" />
+                        <Label text="s" />
+                     </children>
+                  </HBox>
+                  <Label text="Statut" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+                  <ComboBox fx:id="statusCombo" prefWidth="180" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+               </children>
+            </GridPane>
+            <HBox alignment="CENTER_RIGHT" spacing="10">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#onCancelGoal" styleClass="btn-inline-cancel" text="Annuler" />
+                  <Button mnemonicParsing="false" onAction="#onSaveGoal" styleClass="btn-inline-save" text="Enregistrer" />
                </children>
             </HBox>
          </children>
@@ -98,10 +160,15 @@
 
       <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="goals-scroll" VBox.vgrow="ALWAYS">
          <content>
-            <VBox fx:id="goalsListBox" spacing="16" styleClass="goals-list-wrap">
-               <padding>
-                  <Insets bottom="24" left="4" right="4" top="8" />
-               </padding>
+            <VBox spacing="12">
+               <children>
+                  <VBox fx:id="goalsListBox" spacing="16" styleClass="goals-list-wrap">
+                     <padding>
+                        <Insets bottom="24" left="4" right="4" top="8" />
+                     </padding>
+                  </VBox>
+                  <FlowPane fx:id="goalsGridPane" hgap="16" vgap="16" styleClass="goals-grid-wrap" />
+               </children>
             </VBox>
          </content>
       </ScrollPane>
