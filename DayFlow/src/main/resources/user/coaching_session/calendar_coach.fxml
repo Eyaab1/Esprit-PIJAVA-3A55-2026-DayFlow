@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.CalendarCoachController"
+            style="-fx-background-color: #ffffff;">
+
+    <!-- TOP: Header -->
+    <top>
+        <VBox spacing="10" style="-fx-padding: 20; -fx-background-color: #f3f4f6;">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label fx:id="coachNameLabel" text="📅 Disponibilités" 
+                       style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <ComboBox fx:id="viewModeCombo" prefWidth="120"/>
+            </HBox>
+            
+            <!-- Session Counter -->
+            <HBox spacing="15" alignment="CENTER_LEFT" style="-fx-padding: 10; -fx-background-color: #eff6ff; -fx-border-color: #bfdbfe; -fx-border-radius: 6;">
+                <Label text="Sessions futures:" style="-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #1e40af;"/>
+                <Label fx:id="sessionCountLabel" text="0/3" 
+                       style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #10b981;"/>
+                <Label fx:id="remainingSlotsLabel" text="Vous pouvez réserver 3 session(s)" 
+                       style="-fx-font-size: 11; -fx-text-fill: #059669; -fx-padding: 0 0 0 10;"/>
+            </HBox>
+            
+            <HBox spacing="10" alignment="CENTER">
+                <Button fx:id="previousMonthButton" text="◀ Précédent" style="-fx-padding: 8 15;"/>
+                <Label fx:id="monthYearLabel" text="Mai 2026" 
+                       style="-fx-font-size: 14; -fx-font-weight: bold; -fx-min-width: 150; -fx-text-alignment: center;"/>
+                <Button fx:id="nextMonthButton" text="Suivant ▶" style="-fx-padding: 8 15;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- CENTER: Main Content -->
+    <center>
+        <VBox spacing="15" style="-fx-padding: 20;">
+            
+            <!-- Calendar Grid -->
+            <VBox spacing="10" style="-fx-border-color: #e5e7eb; -fx-border-radius: 8; -fx-padding: 15; -fx-background-color: #f9fafb;">
+                <GridPane fx:id="calendarGrid" hgap="5" vgap="5">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="14.28"/>
+                        <ColumnConstraints percentWidth="14.28"/>
+                        <ColumnConstraints percentWidth="14.28"/>
+                        <ColumnConstraints percentWidth="14.28"/>
+                        <ColumnConstraints percentWidth="14.28"/>
+                        <ColumnConstraints percentWidth="14.28"/>
+                        <ColumnConstraints percentWidth="14.28"/>
+                    </columnConstraints>
+                </GridPane>
+            </VBox>
+
+            <!-- Selected Date and Time -->
+            <HBox spacing="15">
+                <VBox spacing="10" style="-fx-border-color: #e5e7eb; -fx-border-radius: 8; -fx-padding: 15; -fx-background-color: #f9fafb;" HBox.hgrow="ALWAYS">
+                    <Label text="Date sélectionnée" style="-fx-font-size: 12; -fx-font-weight: bold;"/>
+                    <Label fx:id="selectedDateLabel" text="Sélectionnez une date" style="-fx-font-size: 14; -fx-text-fill: #3b82f6;"/>
+                </VBox>
+                <VBox spacing="10" style="-fx-border-color: #e5e7eb; -fx-border-radius: 8; -fx-padding: 15; -fx-background-color: #f9fafb;" HBox.hgrow="ALWAYS">
+                    <Label text="Créneau sélectionné" style="-fx-font-size: 12; -fx-font-weight: bold;"/>
+                    <Label fx:id="selectedTimeLabel" text="Sélectionnez un créneau" style="-fx-font-size: 14; -fx-text-fill: #3b82f6;"/>
+                </VBox>
+            </HBox>
+
+            <!-- Time Slots -->
+            <VBox spacing="10" style="-fx-border-color: #e5e7eb; -fx-border-radius: 8; -fx-padding: 15; -fx-background-color: #f9fafb;" VBox.vgrow="ALWAYS">
+                <Label text="Créneaux disponibles" style="-fx-font-size: 12; -fx-font-weight: bold;"/>
+                <ScrollPane fitToWidth="true" style="-fx-border-color: transparent; -fx-background-color: transparent;">
+                    <VBox fx:id="timeSlotContainer" spacing="8" style="-fx-padding: 5;">
+                        <Label text="Sélectionnez une date pour voir les créneaux disponibles" 
+                               style="-fx-font-size: 11; -fx-text-fill: #9ca3af;"/>
+                    </VBox>
+                </ScrollPane>
+            </VBox>
+
+            <!-- Message -->
+            <Label fx:id="messageLabel" text="" style="-fx-font-size: 12; -fx-text-fill: #059669;" wrapText="true"/>
+
+            <!-- Reserve Button -->
+            <HBox alignment="CENTER_RIGHT">
+                <Button fx:id="reserveButton" text="✓ Réserver session" 
+                        style="-fx-padding: 10 20; -fx-font-size: 12; -fx-background-color: #10b981; -fx-text-fill: white;"/>
+            </HBox>
+        </VBox>
+    </center>
+
+</BorderPane>

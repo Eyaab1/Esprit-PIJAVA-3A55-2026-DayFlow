@@ -1,5 +1,7 @@
 package services.coaching_session_module;
 
+import exceptions.ReservationLimitExceededException;
+import exceptions.PastSessionException;
 import model.coaching_session.Session;
 import services.CRUD;
 import utils.DbConnexion;
@@ -19,6 +21,15 @@ public class SessionService implements CRUD<Session, Integer> {
             s.id, s.coaching_request_id, s.status, s.proposed_time_by_user, s.proposed_time_by_coach,
             s.scheduled_at, s.duration, s.priority, s.objective, s.created_at, s.updated_at, s.price, s.payment_status
             """;
+    private final boolean enableProgressHooks;
+
+    public SessionService() {
+        this(true);
+    }
+
+    public SessionService(boolean enableProgressHooks) {
+        this.enableProgressHooks = enableProgressHooks;
+    }
 
     @Override
     public void create(Session s) throws SQLException {
@@ -76,11 +87,13 @@ public class SessionService implements CRUD<Session, Integer> {
                 }
             }
         }
+        triggerProgressTrackingIfCompleted(s, null);
     }
 
     @Override
     public void update(Session s) throws SQLException {
         s.setUpdatedAt(new Date());
+        Session beforeUpdate = findById(s.getId());
 
         String sql = """
                 UPDATE session SET
@@ -126,6 +139,7 @@ public class SessionService implements CRUD<Session, Integer> {
 
             ps.executeUpdate();
         }
+        triggerProgressTrackingIfCompleted(s, beforeUpdate);
     }
 
     @Override
@@ -359,4 +373,108 @@ public class SessionService implements CRUD<Session, Integer> {
     public void deleteSession(int sessionId) throws SQLException {
         delete(sessionId);
     }
+
+    private void triggerProgressTrackingIfCompleted(Session current, Session previous) {
+        if (!enableProgressHooks || current == null || current.getId() <= 0) {
+            return;
+        }
+        boolean isCompleted = Session.STATUS_COMPLETED.equals(current.getStatus());
+        boolean wasCompleted = previous != null && Session.STATUS_COMPLETED.equals(previous.getStatus());
+        if (!isCompleted || wasCompleted) {
+            return;
+        }
+        try {
+            new ProgressService().processCompletedSession(current.getId());
+            new CoachingRequestService().updateStatus(current.getCoachingRequestId(), model.coaching_session.CoachingRequest.STATUS_COMPLETED);
+        } catch (Exception e) {
+            System.out.println("[SessionService] Progress tracking warning: " + e.getMessage());
+        }
+    }
+
+    // ==================== RESERVATION LIMITATION METHODS ====================
+
+    /**
+     * Compte le nombre de sessions futures pour un utilisateur.
+     * 
+     * @param userId ID de l'utilisateur
+     * @return Nombre de sessions futures
+     * @throws SQLException En cas d'erreur de base de données
+     */
+    public int countFutureSessions(int userId) throws SQLException {
+        return SessionReservationValidator.countFutureSessions(userId);
+    }
+
+    /**
+     * Vérifie si un utilisateur peut réserver une nouvelle session.
+     * 
+     * @param userId ID de l'utilisateur
+     * @return true si l'utilisateur peut réserver, false sinon
+     * @throws SQLException En cas d'erreur de base de données
+     */
+    public boolean canBookSession(int userId) throws SQLException {
+        return SessionReservationValidator.canBookSession(userId);
+    }
+
+    /**
+     * Retourne le nombre de sessions que l'utilisateur peut encore réserver.
+     * 
+     * @param userId ID de l'utilisateur
+     * @return Nombre de réservations restantes
+     * @throws SQLException En cas d'erreur de base de données
+     */
+    public int getRemainingSlots(int userId) throws SQLException {
+        return SessionReservationValidator.getRemainingSlots(userId);
+    }
+
+    /**
+     * Réserve une session avec vérification de la limite de réservation et du temps.
+     * 
+     * Cette méthode:
+     * 1. Vérifie que la session n'est pas dans le passé
+     * 2. Vérifie que l'utilisateur n'a pas atteint la limite de 3 sessions futures
+     * 3. Si les vérifications passent, crée la session
+     * 
+     * @param session Session à réserver
+     * @param userId ID de l'utilisateur qui réserve
+     * @throws PastSessionException Si la session est dans le passé
+     * @throws ReservationLimitExceededException Si la limite est atteinte
+     * @throws SQLException En cas d'erreur de base de données
+     */
+    public void reserveSession(Session session, int userId) throws PastSessionException, ReservationLimitExceededException, SQLException {
+        System.out.println("[SessionService] Attempting to reserve session for user " + userId);
+        
+        // ✅ VÉRIFICATION 1: Vérifier que la session n'est pas dans le passé
+        try {
+            SessionTimeValidator.validateSessionNotInPast(session);
+            System.out.println("[SessionService] Session time validation passed");
+        } catch (PastSessionException e) {
+            System.err.println("[SessionService] Session time validation failed: " + e.getMessage());
+            throw e;
+        }
+        
+        // ✅ VÉRIFICATION 2: Vérifier la limite de réservation
+        try {
+            SessionReservationValidator.validateReservation(userId);
+        } catch (ReservationLimitExceededException e) {
+            System.err.println("[SessionService] Reservation blocked: " + e.getMessage());
+            SessionReservationValidator.logReservationRefusal(userId, e.getMessage());
+            throw e;
+        }
+        
+        // Créer la session
+        System.out.println("[SessionService] Reservation allowed, creating session for user " + userId);
+        create(session);
+        System.out.println("[SessionService] Session created successfully with ID " + session.getId());
+    }
+
+    /**
+     * Retourne la limite maximale de sessions futures.
+     * 
+     * @return Limite maximale (actuellement 3)
+     */
+    public int getMaxFutureSessions() {
+        return SessionReservationValidator.getMaxFutureSessions();
+    }
 }
+
+

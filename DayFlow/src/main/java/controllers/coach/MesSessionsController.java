@@ -17,6 +17,8 @@ import model.coaching_session.Session;
 import model.user.User;
 import services.UserServices.UserService;
 import services.coaching_session_module.CoachingRequestService;
+import services.coaching_session_module.EvaluationService;
+import services.coaching_session_module.ProgressService;
 import services.coaching_session_module.SessionService;
 import session.AppSession;
 
@@ -48,6 +50,8 @@ public class MesSessionsController implements Initializable {
     private final SessionService sessionService = new SessionService();
     private final CoachingRequestService requestService = new CoachingRequestService();
     private final UserService userService = new UserService();
+    private final EvaluationService evaluationService = new EvaluationService();
+    private final ProgressService progressService = new ProgressService();
     private final ObservableList<Session> sessionRows = FXCollections.observableArrayList();
 
     private Session selectedSession;
@@ -150,6 +154,52 @@ public class MesSessionsController implements Initializable {
     }
 
     @FXML
+    private void handleSubmitFeedback() {
+        if (selectedSession == null) {
+            showWarning("Sélectionnez une session.");
+            return;
+        }
+        if (!Session.STATUS_COMPLETED.equals(selectedSession.getStatus())) {
+            showWarning("Le feedback est disponible uniquement pour une session terminée.");
+            return;
+        }
+        try {
+            Optional<ProgressTrackingDialogs.UserFeedbackInput> inputOpt = ProgressTrackingDialogs.showUserFeedbackDialog();
+            if (inputOpt.isEmpty()) {
+                return;
+            }
+            ProgressTrackingDialogs.UserFeedbackInput input = inputOpt.get();
+            evaluationService.submitUserFeedback(
+                    selectedSession.getId(),
+                    input.coachRating(),
+                    input.feedback(),
+                    input.comment()
+            );
+            progressService.processCompletedSession(selectedSession.getId());
+            showSuccess("Feedback enregistré.");
+        } catch (NumberFormatException e) {
+            showWarning("La note doit être un nombre valide.");
+        } catch (Exception e) {
+            showError("Erreur feedback", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleShowProgressReport() {
+        if (selectedSession == null) {
+            showWarning("Sélectionnez une session.");
+            return;
+        }
+        try {
+            ProgressTrackingDialogs.showProgressReportDialog(
+                    progressService.generateProgressReport(selectedSession.getCoachingRequestId())
+            );
+        } catch (Exception e) {
+            showError("Erreur rapport", e.getMessage());
+        }
+    }
+
+    @FXML
     private void goToMesDemandes(ActionEvent event) { // event conservé pour compatibilité FXML
         try {
             NavigationManager.show("/user/coaching_session/mes_demandes.fxml", "Mes demandes");
@@ -191,6 +241,12 @@ public class MesSessionsController implements Initializable {
 
     private void showWarning(String message) {
         Alert alert = new Alert(Alert.AlertType.WARNING, message);
+        alert.setHeaderText(null);
+        alert.showAndWait();
+    }
+
+    private void showSuccess(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, message);
         alert.setHeaderText(null);
         alert.showAndWait();
     }
