@@ -103,6 +103,16 @@
                     <Font name="System Bold" size="15"/>
                 </font>
             </Button>
+            <Button fx:id="evaluateBtn" text="🧠 Évaluer progression" styleClass="btn-modify">
+                <font>
+                    <Font name="System Bold" size="15"/>
+                </font>
+            </Button>
+            <Button fx:id="reportBtn" text="📈 Voir rapport" styleClass="btn-refresh">
+                <font>
+                    <Font name="System Bold" size="15"/>
+                </font>
+            </Button>
         </HBox>
         
     </VBox>

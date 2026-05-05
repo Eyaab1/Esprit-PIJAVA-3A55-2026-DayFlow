@@ -1,0 +1,240 @@
+/* Google Calendar Sync Styles */
+
+/* Main Container */
+.root {
+    -fx-font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+/* Headers */
+Label {
+    -fx-font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+/* Buttons */
+Button {
+    -fx-padding: 8 15;
+    -fx-font-size: 12;
+    -fx-border-radius: 6;
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 4, 0, 0, 2);
+}
+
+Button:hover {
+    -fx-background-color: #2563eb;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 6, 0, 0, 3);
+}
+
+Button:pressed {
+    -fx-background-color: #1d4ed8;
+}
+
+/* Connect Button - Primary */
+#connectButton {
+    -fx-background-color: #10b981;
+}
+
+#connectButton:hover {
+    -fx-background-color: #059669;
+}
+
+/* Refresh Button */
+#refreshButton {
+    -fx-background-color: #6366f1;
+}
+
+#refreshButton:hover {
+    -fx-background-color: #4f46e5;
+}
+
+/* Test Sync Button */
+#testSyncButton {
+    -fx-background-color: #f59e0b;
+}
+
+#testSyncButton:hover {
+    -fx-background-color: #d97706;
+}
+
+/* Clear Cache Button */
+#clearCacheButton {
+    -fx-background-color: #ef4444;
+}
+
+#clearCacheButton:hover {
+    -fx-background-color: #dc2626;
+}
+
+/* Settings Button */
+#settingsButton {
+    -fx-background-color: #8b5cf6;
+}
+
+#settingsButton:hover {
+    -fx-background-color: #7c3aed;
+}
+
+/* Status Indicator Circle */
+Circle {
+    -fx-fill: #ef4444;
+}
+
+Circle.connected {
+    -fx-fill: #10b981;
+}
+
+Circle.syncing {
+    -fx-fill: #f59e0b;
+}
+
+/* CheckBox */
+CheckBox {
+    -fx-font-size: 12;
+    -fx-padding: 8;
+}
+
+CheckBox:selected {
+    -fx-text-fill: #059669;
+}
+
+/* ComboBox */
+ComboBox {
+    -fx-padding: 8;
+    -fx-border-color: #d1d5db;
+    -fx-border-radius: 6;
+    -fx-background-color: white;
+    -fx-font-size: 12;
+}
+
+ComboBox:focused {
+    -fx-border-color: #3b82f6;
+    -fx-border-width: 2;
+}
+
+/* TableView */
+TableView {
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 6;
+    -fx-background-color: white;
+}
+
+TableView .column-header {
+    -fx-background-color: #f3f4f6;
+    -fx-border-color: #e5e7eb;
+    -fx-font-weight: bold;
+    -fx-font-size: 12;
+}
+
+TableView .table-row-cell {
+    -fx-padding: 8;
+    -fx-border-color: #f3f4f6;
+}
+
+TableView .table-row-cell:selected {
+    -fx-background-color: #dbeafe;
+}
+
+/* ListView */
+ListView {
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 6;
+    -fx-background-color: white;
+    -fx-padding: 8;
+}
+
+ListView .list-cell {
+    -fx-padding: 10;
+    -fx-border-color: #f3f4f6;
+    -fx-background-color: white;
+}
+
+ListView .list-cell:filled:selected {
+    -fx-background-color: #dbeafe;
+    -fx-text-fill: #1f2937;
+}
+
+ListView .list-cell:filled:hover {
+    -fx-background-color: #f0f9ff;
+}
+
+/* Separator */
+Separator {
+    -fx-padding: 10 0;
+}
+
+/* Status Messages */
+#messageLabel {
+    -fx-font-size: 12;
+    -fx-padding: 10;
+    -fx-border-radius: 6;
+    -fx-background-color: #f0fdf4;
+    -fx-border-color: #86efac;
+}
+
+#messageLabel.error {
+    -fx-text-fill: #dc2626;
+    -fx-background-color: #fef2f2;
+    -fx-border-color: #fca5a5;
+}
+
+#messageLabel.warning {
+    -fx-text-fill: #d97706;
+    -fx-background-color: #fffbeb;
+    -fx-border-color: #fcd34d;
+}
+
+#messageLabel.info {
+    -fx-text-fill: #0284c7;
+    -fx-background-color: #f0f9ff;
+    -fx-border-color: #7dd3fc;
+}
+
+/* VBox Containers */
+VBox {
+    -fx-spacing: 10;
+}
+
+HBox {
+    -fx-spacing: 10;
+}
+
+/* Section Boxes */
+VBox:style-class:section {
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 8;
+    -fx-padding: 15;
+    -fx-background-color: #f9fafb;
+}
+
+/* Disabled State */
+Button:disabled {
+    -fx-opacity: 0.5;
+    -fx-cursor: default;
+}
+
+CheckBox:disabled {
+    -fx-opacity: 0.5;
+}
+
+ComboBox:disabled {
+    -fx-opacity: 0.5;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% {
+        -fx-opacity: 1;
+    }
+    50% {
+        -fx-opacity: 0.7;
+    }
+    100% {
+        -fx-opacity: 1;
+    }
+}
+
+Circle.syncing {
+    -fx-animation: pulse 1s infinite;
+}

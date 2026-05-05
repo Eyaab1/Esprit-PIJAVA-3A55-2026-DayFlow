@@ -12,9 +12,12 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import model.coaching_session.CoachingRequest;
 import model.coaching_session.Session;
+import model.coaching_session.SessionEvaluation;
 import model.user.User;
 import services.account.UserService;
 import services.coaching_session.CoachingRequestService;
+import services.coaching_session.EvaluationService;
+import services.coaching_session.ProgressService;
 import services.coaching_session.SessionService;
 import session.AppSession;
 
@@ -52,11 +55,15 @@ public class CoachSessionsController implements Initializable {
     @FXML private Button modifyBtn;
     @FXML private Button deleteBtn;
     @FXML private Button completeBtn;
+    @FXML private Button evaluateBtn;
+    @FXML private Button reportBtn;
 
     // Services
     private final SessionService sessionService;
     private final CoachingRequestService requestService;
     private final UserService userService;
+    private final EvaluationService evaluationService;
+    private final ProgressService progressService;
 
     // Données
     private final ObservableList<Session> sessionsList;
@@ -67,6 +74,8 @@ public class CoachSessionsController implements Initializable {
         this.sessionService = new SessionService();
         this.requestService = new CoachingRequestService();
         this.userService = new UserService();
+        this.evaluationService = new EvaluationService();
+        this.progressService = new ProgressService();
         this.sessionsList = FXCollections.observableArrayList();
     }
 
@@ -166,6 +175,12 @@ public class CoachSessionsController implements Initializable {
         modifyBtn.setOnAction(event -> handleModify());
         deleteBtn.setOnAction(event -> handleDelete());
         completeBtn.setOnAction(event -> handleComplete());
+        if (evaluateBtn != null) {
+            evaluateBtn.setOnAction(event -> handleEvaluate());
+        }
+        if (reportBtn != null) {
+            reportBtn.setOnAction(event -> handleShowReport());
+        }
     }
 
     private void loadSessions() {
@@ -282,6 +297,49 @@ public class CoachSessionsController implements Initializable {
             } catch (SQLException e) {
                 showError("Erreur lors de la mise à jour", e.getMessage());
             }
+        }
+    }
+
+    private void handleEvaluate() {
+        if (selectedSession == null) {
+            showWarning("Veuillez sélectionner une session");
+            return;
+        }
+        if (!Session.STATUS_COMPLETED.equals(selectedSession.getStatus())) {
+            showWarning("L'évaluation est disponible uniquement pour une session terminée.");
+            return;
+        }
+        try {
+            SessionEvaluation baseline = new SessionEvaluation();
+            baseline.setDisciplineScore(60);
+            baseline.setGoalAchievementScore(60);
+            baseline.setEvolutionScore(60);
+            String hint = evaluationService.generateRecommendationTemplate(baseline);
+            Optional<SessionEvaluation> evalOpt = ProgressTrackingDialogs.showCoachEvaluationDialog(hint);
+            if (evalOpt.isEmpty()) {
+                return;
+            }
+            evaluationService.submitCoachEvaluation(selectedSession.getId(), evalOpt.get());
+            progressService.processCompletedSession(selectedSession.getId());
+            showSuccess("Évaluation enregistrée.");
+        } catch (NumberFormatException e) {
+            showWarning("Les scores doivent être des nombres valides.");
+        } catch (Exception e) {
+            showError("Erreur évaluation", e.getMessage());
+        }
+    }
+
+    private void handleShowReport() {
+        if (selectedSession == null) {
+            showWarning("Veuillez sélectionner une session");
+            return;
+        }
+        try {
+            ProgressTrackingDialogs.showProgressReportDialog(
+                    progressService.generateProgressReport(selectedSession.getCoachingRequestId())
+            );
+        } catch (Exception e) {
+            showError("Erreur rapport", e.getMessage());
         }
     }
 

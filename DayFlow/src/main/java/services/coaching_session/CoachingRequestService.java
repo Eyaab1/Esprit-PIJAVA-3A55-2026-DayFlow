@@ -575,5 +575,44 @@ public class CoachingRequestService implements CRUD<CoachingRequest, Integer> {
         }
         return list;
     }
+
+    /**
+     * Compte le nombre de demandes futures pour un utilisateur.
+     * Les demandes futures sont celles avec le statut 'pending' ou 'accepted'.
+     * 
+     * @param userId L'ID de l'utilisateur
+     * @return Le nombre de demandes futures
+     * @throws SQLException Si une erreur de base de données se produit
+     */
+    public int countFutureRequests(int userId) throws SQLException {
+        String sql = """
+                SELECT COUNT(*) as count
+                FROM coaching_request
+                WHERE user_id = ? AND status IN ('pending', 'accepted')
+                """;
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("count");
+                }
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Récupère le nombre de créneaux restants pour un utilisateur.
+     * La limite est de 3 sessions futures.
+     * 
+     * @param userId L'ID de l'utilisateur
+     * @return Le nombre de créneaux restants (0 si limite atteinte)
+     * @throws SQLException Si une erreur de base de données se produit
+     */
+    public int getRemainingSlots(int userId) throws SQLException {
+        int futureCount = countFutureRequests(userId);
+        int remaining = 3 - futureCount;
+        return Math.max(0, remaining);
+    }
 }
 

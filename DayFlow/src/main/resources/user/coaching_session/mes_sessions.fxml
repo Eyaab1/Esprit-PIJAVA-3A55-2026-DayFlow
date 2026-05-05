@@ -54,6 +54,8 @@
                     <HBox alignment="CENTER" spacing="16">
                         <Button text="✏️ Modifier" onAction="#handleUpdate" styleClass="btn-modify"/>
                         <Button text="🗑️ Supprimer" onAction="#handleDelete" styleClass="btn-delete"/>
+                        <Button text="⭐ Feedback" onAction="#handleSubmitFeedback" styleClass="btn-modify"/>
+                        <Button text="📈 Rapport progression" onAction="#handleShowProgressReport" styleClass="btn-refresh"/>
                     </HBox>
                 </children>
             </VBox>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.GoogleCalendarSyncController"
+      spacing="15" style="-fx-padding: 20;">
+
+    <!-- Header -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="📅 Google Calendar Sync" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="refreshButton" text="🔄 Refresh" style="-fx-padding: 8 15; -fx-font-size: 12;"/>
+    </HBox>
+
+    <Separator/>
+
+    <!-- Connection Status -->
+    <VBox spacing="10" style="-fx-border-color: #e5e7eb; -fx-border-radius: 8; -fx-padding: 15; -fx-background-color: #f9fafb;">
+        <Label text="Connection Status" style="-fx-font-size: 14; -fx-font-weight: bold;"/>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Circle fx:id="statusIndicator" radius="8" fill="#ef4444"/>
+            <Label fx:id="statusLabel" text="Not Connected" style="-fx-font-size: 12;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="connectButton" text="🔗 Connect Google Account" style="-fx-padding: 8 15; -fx-font-size: 12;"/>
+        </HBox>
+    </VBox>
+
+    <!-- Sync Options -->
+    <VBox spacing="10" style="-fx-border-color: #e5e7eb; -fx-border-radius: 8; -fx-padding: 15; -fx-background-color: #f9fafb;">
+        <Label text="Sync Options" style="-fx-font-size: 14; -fx-font-weight: bold;"/>
+        
+        <CheckBox fx:id="autoSyncCheckBox" text="✓ Auto-sync sessions to Google Calendar" selected="true"/>
+        <CheckBox fx:id="syncNotificationsCheckBox" text="✓ Sync notifications from Google Calendar" selected="true"/>
+        <CheckBox fx:id="bidirectionalCheckBox" text="✓ Bidirectional sync (experimental)" selected="false"/>
+        
+        <HBox spacing="10">
+            <Label text="Sync Interval:" style="-fx-font-size: 12;"/>
+            <ComboBox fx:id="syncIntervalCombo" prefWidth="150">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Real-time"/>
+                        <String fx:value="Every 5 minutes"/>
+                        <String fx:value="Every 15 minutes"/>
+                        <String fx:value="Every hour"/>
+                        <String fx:value="Manual only"/>
+                    </FXCollections>
+                </items>
+            </ComboBox>
+        </HBox>
+    </VBox>
+
+    <!-- Sync History -->
+    <VBox spacing="10" style="-fx-border-color: #e5e7eb; -fx-border-radius: 8; -fx-padding: 15; -fx-background-color: #f9fafb;">
+        <Label text="Recent Syncs" style="-fx-font-size: 14; -fx-font-weight: bold;"/>
+        
+        <TableView fx:id="syncHistoryTable" prefHeight="200">
+            <columns>
+                <TableColumn text="Date" prefWidth="120"/>
+                <TableColumn text="Action" prefWidth="150"/>
+                <TableColumn text="Status" prefWidth="100"/>
+                <TableColumn text="Details" prefWidth="200"/>
+            </columns>
+        </TableView>
+    </VBox>
+
+    <!-- Calendar Events Preview -->
+    <VBox spacing="10" style="-fx-border-color: #e5e7eb; -fx-border-radius: 8; -fx-padding: 15; -fx-background-color: #f9fafb;">
+        <Label text="Upcoming Events" style="-fx-font-size: 14; -fx-font-weight: bold;"/>
+        
+        <ListView fx:id="eventsListView" prefHeight="200">
+            <placeholder>
+                <Label text="No events synced yet"/>
+            </placeholder>
+        </ListView>
+    </VBox>
+
+    <!-- Action Buttons -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button fx:id="testSyncButton" text="🧪 Test Sync" style="-fx-padding: 10 20; -fx-font-size: 12;"/>
+        <Button fx:id="clearCacheButton" text="🗑️ Clear Cache" style="-fx-padding: 10 20; -fx-font-size: 12;"/>
+        <Button fx:id="settingsButton" text="⚙️ Settings" style="-fx-padding: 10 20; -fx-font-size: 12;"/>
+    </HBox>
+
+    <!-- Status Messages -->
+    <Label fx:id="messageLabel" text="" style="-fx-font-size: 12; -fx-text-fill: #059669;" wrapText="true"/>
+
+</VBox>

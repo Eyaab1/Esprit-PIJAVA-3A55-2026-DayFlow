@@ -1,9 +1,13 @@
 package controllers.coaching_session;
 
 import controllers.navigation.NavigationManager;
+import controllers.CalendarCoachController;
 import dto.coaching_session.CoachingRequestAIResponse;
 import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -17,6 +21,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import model.coaching_session.CoachingRequest;
 import model.user.User;
@@ -438,7 +443,7 @@ public class FindCoachController {
 
         Button b1 = new Button("📅 Voir disponibilités");
         b1.getStyleClass().add("btn-card");
-        b1.setOnAction(e -> new Alert(Alert.AlertType.INFORMATION, "Calendrier des créneaux — bientôt disponible.").showAndWait());
+        b1.setOnAction(e -> openCoachCalendar(u));
 
         Button b2 = new Button("✈ Demande sans créneau");
         b2.getStyleClass().add("btn-card-outline");
@@ -556,6 +561,33 @@ public class FindCoachController {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
         } catch (IllegalArgumentException ex) {
             new Alert(Alert.AlertType.WARNING, ex.getMessage()).showAndWait();
+        }
+    }
+
+    /**
+     * Open coach availability calendar
+     */
+    private void openCoachCalendar(User coach) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/user/coaching_session/calendar_coach.fxml")
+            );
+            Parent root = loader.load();
+            CalendarCoachController controller = loader.getController();
+            
+            // Pass coach information
+            String coachName = coach.getFirstName() != null ? coach.getFirstName() : coach.getEmail();
+            controller.setCoachInfo(coach.getId(), coachName);
+            
+            // Create and show stage
+            Stage stage = new Stage();
+            stage.setTitle("Disponibilités - " + coachName);
+            stage.setScene(new Scene(root, 1000, 700));
+            stage.show();
+        } catch (IOException ex) {
+            System.err.println("Error loading calendar: " + ex.getMessage());
+            ex.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "Erreur lors du chargement du calendrier: " + ex.getMessage()).showAndWait();
         }
     }
 }
