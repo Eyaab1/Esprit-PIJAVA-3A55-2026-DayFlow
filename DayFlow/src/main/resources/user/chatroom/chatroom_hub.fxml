@@ -72,6 +72,12 @@
                         style="-fx-background-color:transparent; -fx-font-size:16px;
                                -fx-cursor:hand; -fx-padding:4 8;"
                         focusTraversable="false"/>
+                <Button onAction="#onStartAudioCall" text="🎤" focusTraversable="false"
+                        style="-fx-background-color:transparent; -fx-font-size:16px;
+                               -fx-cursor:hand; -fx-opacity:0.85; -fx-padding:4 8;"/>
+                <Button onAction="#onStartVideoCall" text="🎥" focusTraversable="false"
+                        style="-fx-background-color:transparent; -fx-font-size:16px;
+                               -fx-cursor:hand; -fx-opacity:0.85; -fx-padding:4 8;"/>
                 <!-- Boutons admin (cachés par défaut) -->
                 <Button fx:id="pendingBtn" managed="false" onAction="#onPendingRequests" styleClass="btn-pending" text="⏳ Demandes" visible="false" />
                 <Button fx:id="lockBtn" managed="false" onAction="#onLock" styleClass="btn-admin,btn-lock" text="🔒" visible="false" />

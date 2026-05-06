@@ -10,6 +10,8 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -1112,6 +1114,62 @@ public class ChatroomHubController {
             selectRoom(current);
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+        }
+    }
+
+    /** Appel audio Jitsi (navigateur système). */
+    @FXML
+    private void onStartAudioCall() {
+        openJitsiMeet(true);
+    }
+
+    /** Visioconférence Jitsi (navigateur système). */
+    @FXML
+    private void onStartVideoCall() {
+        openJitsiMeet(false);
+    }
+
+    private void openJitsiMeet(boolean audioOnly) {
+        if (current == null) {
+            new Alert(Alert.AlertType.WARNING, "Sélectionnez un salon de discussion d'abord.").showAndWait();
+            return;
+        }
+        String userName = AppSession.getCurrentUser()
+                .map(u -> {
+                    String a = u.getFirstName() != null ? u.getFirstName() : "";
+                    String b = u.getLastName() != null ? u.getLastName() : "";
+                    String s = (a + " " + b).trim();
+                    return s.isEmpty() ? "Utilisateur" : s;
+                })
+                .orElse("Utilisateur");
+
+        String slug = current.goalTitle()
+                .replaceAll("[^a-zA-Z0-9]", "-")
+                .replaceAll("-+", "-")
+                .toLowerCase(Locale.ROOT);
+        String roomName = "dayflow-" + slug + "-" + current.chatroomId();
+
+        String url = "https://meet.jit.si/" + roomName
+                + "#config.startWithVideoMuted=" + audioOnly
+                + "&config.startWithAudioMuted=false"
+                + "&config.prejoinPageEnabled=false"
+                + "&userInfo.displayName="
+                + java.net.URLEncoder.encode(userName, java.nio.charset.StandardCharsets.UTF_8);
+
+        try {
+            if (java.awt.Desktop.isDesktopSupported()) {
+                java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
+            }
+            new Alert(Alert.AlertType.INFORMATION,
+                    audioOnly ? "Appel audio ouvert dans le navigateur." : "Visioconférence ouverte dans le navigateur.")
+                    .showAndWait();
+        } catch (Exception e) {
+            ClipboardContent cc = new ClipboardContent();
+            cc.putString(url);
+            Clipboard.getSystemClipboard().setContent(cc);
+            new Alert(Alert.AlertType.WARNING,
+                    "Ouverture du navigateur impossible. Le lien Jitsi a été copié dans le presse-papiers.")
+                    .showAndWait();
         }
     }
 
