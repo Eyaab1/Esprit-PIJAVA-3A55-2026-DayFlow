@@ -73,10 +73,21 @@ This project was developed as part of the **PIDEV Program** at Esprit School of 
 ---
 
 ## Reclamation Module
-- Submit reclamations/complaints
-- Admin response system
-- Reclamation tracking
-- Moderation and management tools
+- Submit reclamations and complaints
+- Categorization of reclamation types
+- Detection and handling of abusive or inappropriate reports
+- Reclamation status tracking:
+   Pending
+   In Progress
+   Resolved
+   Rejected
+- Date and history tracking
+ ###  Admin Response System
+- Administrators can review submitted reclamations
+- Add official responses to complaints
+- Update reclamation status dynamically
+- AI Suggested Responses
+- Reclamation Translation System
 
 ---
 
@@ -114,6 +125,8 @@ This project was developed as part of the **PIDEV Program** at Esprit School of 
 - Perspective API (toxicity moderation)
 - Mail services / notifications
 - Real-time communication services
+- libretranslate (translation of reclamations)
+- grok API (suggested responses)
 
 ---
 
