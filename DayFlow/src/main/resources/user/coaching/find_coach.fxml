@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane styleClass="find-root" stylesheets="@find_coach.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.userdashboard.FindCoachController">
+   <fx:define>
+      <ToggleGroup fx:id="priorityGroup" />
+   </fx:define>
+   <children>
+      <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="find-scroll" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <content>
+            <VBox alignment="TOP_CENTER" styleClass="find-inner">
+               <children>
+                  <HBox alignment="CENTER_LEFT" spacing="16.0">
+                     <children>
+                        <Hyperlink onAction="#onBackDashboard" styleClass="back-link" text="← Tableau de bord" />
+                     </children>
+                  </HBox>
+                  <Label styleClass="find-intro" text="Connectez-vous avec un coach professionnel certifié pour atteindre vos objectifs de santé et de bien-être." wrapText="true" />
+                  <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="search-bar">
+                     <children>
+                        <Label text="🔍" />
+                        <TextField fx:id="searchField" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" promptText="Rechercher un coach par nom ou spécialité..." />
+                        <Button mnemonicParsing="false" onAction="#onSearch" styleClass="btn-filter" text="Rechercher" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label fx:id="coachCountChip" styleClass="chip" text="0 coach disponible" />
+                        <Label styleClass="chip" text="Certifiés et expérimentés" />
+                     </children>
+                  </HBox>
+                  <VBox spacing="12.0" styleClass="filter-card">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                           <children>
+                              <Label styleClass="filter-title" text="Filtres avancés" HBox.hgrow="ALWAYS" />
+                              <Button mnemonicParsing="false" onAction="#onResetFilters" styleClass="btn-reset-pink" text="Réinitialiser" />
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="12.0">
+                           <children>
+                              <Label minWidth="80.0" text="Spécialité" />
+                              <ComboBox fx:id="specialityCombo" prefWidth="220.0" />
+                              <Label text="Prix min (€)" />
+                              <TextField fx:id="minPriceField" prefWidth="80.0" promptText="0" />
+                              <Label text="Prix max (€)" />
+                              <TextField fx:id="maxPriceField" prefWidth="80.0" promptText="200" />
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="12.0">
+                           <children>
+                              <Label minWidth="80.0" text="Note min." />
+                              <ComboBox fx:id="ratingCombo" prefWidth="160.0" />
+                              <Label text="Disponibilité" />
+                              <ComboBox fx:id="availabilityCombo" prefWidth="200.0" />
+                              <Button mnemonicParsing="false" onAction="#onApplyFilters" styleClass="btn-filter" text="Appliquer les filtres" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+                  <VBox spacing="8.0">
+                     <children>
+                        <Label styleClass="section-title" text="👥 Nos coaches disponibles" />
+                        <Label styleClass="section-sub" text="Découvrez nos coaches certifiés et expérimentés" />
+                        <FlowPane fx:id="coachGrid" hgap="16.0" prefWrapLength="1000.0" styleClass="coach-grid" vgap="16.0" />
+                     </children>
+                  </VBox>
+                  <VBox styleClass="form-card">
+                     <children>
+                        <VBox spacing="6.0" styleClass="form-header">
+                           <children>
+                              <Label styleClass="form-header-title" text="✈ Faire une demande de coaching" />
+                              <Label styleClass="form-header-sub" text="Choisissez votre coach et décrivez vos objectifs" />
+                           </children>
+                        </VBox>
+                        <VBox spacing="14.0" styleClass="form-body">
+                           <children>
+                              <VBox spacing="4.0">
+                                 <children>
+                                    <Label styleClass="field-label" text="Sélectionnez votre coach" />
+                                    <ComboBox fx:id="coachCombo" prefWidth="1.7976931348623157E308" />
+                                    <Label styleClass="hint" text="ℹ Choisissez le coach qui correspond le mieux à vos besoins" />
+                                 </children>
+                              </VBox>
+                              <VBox spacing="4.0">
+                                 <children>
+                                    <Label styleClass="field-label" text="Votre message" />
+                                    <TextArea fx:id="messageArea" prefRowCount="5" styleClass="msg-area" wrapText="true" promptText="Décrivez vos objectifs, votre niveau actuel, vos disponibilités et toute information utile pour le coach..." />
+                                    <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                       <children>
+                                          <Label styleClass="hint" text="💬 Minimum 10 caractères, maximum 1000" HBox.hgrow="ALWAYS" />
+                                          <Label fx:id="charCountLabel" styleClass="hint" text="0 / 1000" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                              <VBox spacing="8.0">
+                                 <children>
+                                    <Label styleClass="field-label" text="Priorité de la demande" />
+                                    <HBox spacing="16.0">
+                                       <children>
+                                          <RadioButton fx:id="radioNormal" mnemonicParsing="false" selected="true" styleClass="priority-radio" text="Normal (réponse sous 48h)" toggleGroup="$priorityGroup" />
+                                          <RadioButton fx:id="radioMedium" mnemonicParsing="false" styleClass="priority-radio" text="Moyen (réponse sous 36h)" toggleGroup="$priorityGroup" />
+                                          <RadioButton fx:id="radioUrgent" mnemonicParsing="false" styleClass="priority-radio" text="Urgent (réponse sous 24h)" toggleGroup="$priorityGroup" />
+                                       </children>
+                                    </HBox>
+                                    <Label styleClass="hint" text="ℹ Les demandes urgentes sont traitées en priorité par les coaches" />
+                                 </children>
+                              </VBox>
+                              <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                 <children>
+                                    <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                       <children>
+                                          <Label styleClass="field-label" text="Objectif principal" />
+                                          <ComboBox fx:id="goalCombo" prefWidth="200.0" />
+                                       </children>
+                                    </VBox>
+                                    <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                       <children>
+                                          <Label styleClass="field-label" text="Niveau actuel" />
+                                          <ComboBox fx:id="levelCombo" prefWidth="200.0" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                 <children>
+                                    <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                       <children>
+                                          <Label styleClass="field-label" text="Fréquence souhaitée" />
+                                          <ComboBox fx:id="frequencyCombo" prefWidth="200.0" />
+                                       </children>
+                                    </VBox>
+                                    <VBox spacing="4.0">
+                                       <children>
+                                          <Label styleClass="field-label" text="Budget par séance (€)" />
+                                          <TextField fx:id="budgetField" prefWidth="140.0" promptText="Ex: 50" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+                              <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onSubmitRequest" styleClass="btn-primary-send" text="✈ Envoyer ma demande" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
+                  <Region prefHeight="16.0" />
+               </children>
+            </VBox>
+         </content>
+      </ScrollPane>
+   </children>
+</AnchorPane>

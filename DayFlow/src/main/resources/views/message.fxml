@@ -4,11 +4,50 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
+<<<<<<< HEAD
+<VBox spacing="0"
+=======
 <VBox spacing="20" alignment="TOP_CENTER"
+>>>>>>> origin/chatroom
       xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="controllers.MessageController"
       stylesheets="@/styles/style.css"
+<<<<<<< HEAD
+      prefWidth="700" prefHeight="600">
+
+    <!-- HEADER -->
+    <HBox alignment="CENTER_LEFT" spacing="12" styleClass="chat-header">
+        <padding><Insets top="14" right="20" bottom="14" left="20"/></padding>
+        <Label text="💬" style="-fx-font-size: 22px;"/>
+        <VBox spacing="2">
+            <Label fx:id="chatroomTitle" text="Chatroom" styleClass="chat-header-title"/>
+            <Label fx:id="chatroomSub"  text="en ligne"  styleClass="chat-header-sub"/>
+        </VBox>
+        <HBox HBox.hgrow="ALWAYS"/>
+        <ComboBox fx:id="chatroomSelector" promptText="Choisir chatroom"
+                  styleClass="chat-room-picker" onAction="#onChatroomSelected"/>
+    </HBox>
+
+    <!-- MESSAGES ZONE -->
+    <ScrollPane fx:id="scrollPane" fitToWidth="true" VBox.vgrow="ALWAYS"
+                styleClass="chat-scroll" hbarPolicy="NEVER">
+        <VBox fx:id="messagesBox" spacing="10" styleClass="chat-messages-area">
+            <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+        </VBox>
+    </ScrollPane>
+
+    <!-- INPUT BAR -->
+    <HBox spacing="10" alignment="CENTER" styleClass="chat-input-bar">
+        <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
+        <TextField fx:id="messageField"
+                   promptText="Écrire un message..."
+                   HBox.hgrow="ALWAYS"
+                   styleClass="chat-input"
+                   onAction="#sendMessage"/>
+        <Button text="➤" onAction="#sendMessage" styleClass="send-btn"/>
+    </HBox>
+=======
       styleClass="root"
       prefWidth="900" prefHeight="620">
     <padding><Insets top="25" right="30" bottom="25" left="30"/></padding>
@@ -64,5 +103,6 @@
             </columns>
         </TableView>
     </VBox>
+>>>>>>> origin/chatroom
 
 </VBox>

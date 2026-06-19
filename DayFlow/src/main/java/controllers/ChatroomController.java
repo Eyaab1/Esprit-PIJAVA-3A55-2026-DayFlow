@@ -4,8 +4,8 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import model.Chatroom;
-import services.ChatroomService;
+import model.chatroom.Chatroom;
+import services.chatroom_module.ChatroomService;
 
 import java.sql.SQLException;
 
@@ -35,84 +35,59 @@ public class ChatroomController {
         colState.setCellValueFactory(new PropertyValueFactory<>("state"));
         colCreatedAt.setCellValueFactory(new PropertyValueFactory<>("createdAt"));
 
-        // clic sur ligne → remplit les champs
-        tableView.getSelectionModel().selectedItemProperty().addListener((obs, old, selected) -> {
-            if (selected != null) {
-                updateIdField.setText(String.valueOf(selected.getId()));
-                goalIdField.setText(String.valueOf(selected.getGoalId()));
-                stateBox.setValue(selected.getState());
+        tableView.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
+            if (sel != null) {
+                updateIdField.setText(String.valueOf(sel.getId()));
+                goalIdField.setText(String.valueOf(sel.getGoalId()));
+                stateBox.setValue(sel.getState());
             }
         });
-
         loadAll();
     }
 
     @FXML
     public void addChatroom() {
         try {
-            int goalId = Integer.parseInt(goalIdField.getText().trim());
-            Chatroom c = new Chatroom(goalId, stateBox.getValue());
+            Chatroom c = new Chatroom(Integer.parseInt(goalIdField.getText().trim()), stateBox.getValue());
             service.create(c);
             showStatus("Chatroom ajouté ✅", true);
-            clearFields();
-            loadAll();
-        } catch (IllegalArgumentException e) {
-            showStatus("Erreur : " + e.getMessage(), false);
-        } catch (SQLException e) {
-            showStatus("Erreur BD : " + e.getMessage(), false);
-        }
+            clearFields(); loadAll();
+        } catch (Exception e) { showStatus("Erreur : " + e.getMessage(), false); }
     }
 
     @FXML
     public void updateChatroom() {
         try {
-            int id = Integer.parseInt(updateIdField.getText().trim());
-            int goalId = Integer.parseInt(goalIdField.getText().trim());
-            Chatroom c = new Chatroom(goalId, stateBox.getValue());
-            c.setId(id);
+            Chatroom c = new Chatroom(Integer.parseInt(goalIdField.getText().trim()), stateBox.getValue());
+            c.setId(Integer.parseInt(updateIdField.getText().trim()));
             service.update(c);
             showStatus("Chatroom modifié ✅", true);
-            clearFields();
-            loadAll();
-        } catch (IllegalArgumentException e) {
-            showStatus("Erreur : " + e.getMessage(), false);
-        } catch (SQLException e) {
-            showStatus("Erreur BD : " + e.getMessage(), false);
-        }
+            clearFields(); loadAll();
+        } catch (Exception e) { showStatus("Erreur : " + e.getMessage(), false); }
     }
 
     @FXML
     public void deleteChatroom() {
         try {
-            int id = Integer.parseInt(updateIdField.getText().trim());
-            service.delete(id);
+            service.delete(Integer.parseInt(updateIdField.getText().trim()));
             showStatus("Chatroom supprimé ✅", true);
-            clearFields();
-            loadAll();
-        } catch (NumberFormatException e) {
-            showStatus("ID invalide.", false);
-        } catch (SQLException e) {
-            showStatus("Erreur BD : " + e.getMessage(), false);
-        }
+            clearFields(); loadAll();
+        } catch (Exception e) { showStatus("Erreur : " + e.getMessage(), false); }
     }
 
     @FXML
     public void loadAll() {
         try {
             tableView.setItems(FXCollections.observableArrayList(service.getAll()));
-        } catch (SQLException e) {
-            showStatus("Erreur chargement : " + e.getMessage(), false);
-        }
+        } catch (SQLException e) { showStatus("Erreur : " + e.getMessage(), false); }
     }
 
-    private void showStatus(String msg, boolean success) {
+    private void showStatus(String msg, boolean ok) {
         statusLabel.setText(msg);
-        statusLabel.getStyleClass().setAll(success ? "status-ok" : "status-err");
+        statusLabel.getStyleClass().setAll(ok ? "status-ok" : "status-err");
     }
 
     private void clearFields() {
-        goalIdField.clear();
-        updateIdField.clear();
-        stateBox.setValue("active");
+        goalIdField.clear(); updateIdField.clear(); stateBox.setValue("active");
     }
 }

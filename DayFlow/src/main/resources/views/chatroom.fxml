@@ -4,11 +4,81 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
+<<<<<<< HEAD
+<VBox alignment="TOP_CENTER" spacing="0"
+=======
 <VBox spacing="20" alignment="TOP_CENTER"
+>>>>>>> origin/chatroom
       xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="controllers.ChatroomController"
       stylesheets="@/styles/style.css"
+<<<<<<< HEAD
+      styleClass="gradient-bg"
+      prefWidth="820" prefHeight="640">
+
+    <!-- TOP SECTION : form card -->
+    <VBox alignment="CENTER" VBox.vgrow="NEVER">
+        <padding><Insets top="35" right="40" bottom="20" left="40"/></padding>
+
+        <VBox spacing="18" styleClass="card" maxWidth="480">
+
+            <!-- Title -->
+            <Label text="💬  Gestion des Chatrooms" styleClass="page-title"/>
+
+            <!-- Goal ID -->
+            <VBox spacing="4">
+                <Label text="GOAL ID" styleClass="section-label"/>
+                <TextField fx:id="goalIdField" promptText="Entrer l'ID du goal"
+                           styleClass="input-field" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- État -->
+            <VBox spacing="4">
+                <Label text="ÉTAT" styleClass="section-label"/>
+                <ComboBox fx:id="stateBox" promptText="Sélectionner l'état"
+                          styleClass="combo-box" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- ID modifier/supprimer -->
+            <VBox spacing="4">
+                <Label text="ID À MODIFIER / SUPPRIMER" styleClass="section-label"/>
+                <TextField fx:id="updateIdField" promptText="Entrer l'ID existant"
+                           styleClass="input-field" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- Buttons -->
+            <HBox spacing="10" alignment="CENTER">
+                <Button text="➕  Ajouter"    onAction="#addChatroom"    styleClass="btn,btn-add"/>
+                <Button text="✏️  Modifier"   onAction="#updateChatroom" styleClass="btn,btn-edit"/>
+                <Button text="🗑  Supprimer"  onAction="#deleteChatroom" styleClass="btn,btn-delete"/>
+                <Button text="🔄  Actualiser" onAction="#loadAll"        styleClass="btn,btn-refresh"/>
+            </HBox>
+
+            <!-- Status -->
+            <Label fx:id="statusLabel" text="" alignment="CENTER" maxWidth="Infinity"/>
+
+        </VBox>
+    </VBox>
+
+    <!-- BOTTOM SECTION : table -->
+    <VBox VBox.vgrow="ALWAYS" spacing="0">
+        <padding><Insets top="0" right="40" bottom="30" left="40"/></padding>
+
+        <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="10">
+            <Label text="📋  Liste des Chatrooms" styleClass="page-title"
+                   style="-fx-font-size: 15px;"/>
+            <TableView fx:id="tableView" VBox.vgrow="ALWAYS" styleClass="table-view">
+                <columns>
+                    <TableColumn fx:id="colId"        text="ID"       prefWidth="60"/>
+                    <TableColumn fx:id="colGoalId"    text="Goal ID"  prefWidth="130"/>
+                    <TableColumn fx:id="colState"     text="État"     prefWidth="140"/>
+                    <TableColumn fx:id="colCreatedAt" text="Créé le"  prefWidth="230"/>
+                </columns>
+                <placeholder><Label text="Aucun chatroom trouvé"/></placeholder>
+            </TableView>
+        </VBox>
+=======
       styleClass="root"
       prefWidth="750" prefHeight="560">
     <padding><Insets top="25" right="30" bottom="25" left="30"/></padding>
@@ -53,6 +123,7 @@
                 <TableColumn fx:id="colCreatedAt" text="Créé le"  prefWidth="220"/>
             </columns>
         </TableView>
+>>>>>>> origin/chatroom
     </VBox>
 
 </VBox>

@@ -1,0 +1,74 @@
+/* Dialogue Nouvelle activité — en-tête violet */
+.activity-dialog-pane {
+    -fx-min-width: 440;
+}
+
+.activity-dialog-pane > .header-panel {
+    -fx-background-color: #7c3aed;
+    -fx-padding: 14 18;
+}
+
+.activity-dialog-pane > .header-panel > .label {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.activity-dialog-pane > .button-bar > .container > .details-button {
+    -fx-background-color: transparent;
+}
+
+.activity-dialog-pane > .content {
+    -fx-padding: 0;
+}
+
+.activity-form-root {
+    -fx-spacing: 14;
+    -fx-padding: 20;
+    -fx-background-color: white;
+}
+
+.activity-field-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #334155;
+}
+
+.activity-row-half {
+    -fx-spacing: 12;
+    -fx-alignment: center-left;
+}
+
+.activity-reminder-box {
+    -fx-spacing: 10;
+    -fx-padding: 12 14;
+    -fx-background-color: #f5f3ff;
+    -fx-background-radius: 10;
+    -fx-border-color: #ddd6fe;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+}
+
+.activity-btn-save {
+    -fx-background-color: #7c3aed;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10 24;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.activity-btn-save:hover {
+    -fx-background-color: #6d28d9;
+}
+
+.activity-btn-cancel {
+    -fx-background-color: white;
+    -fx-text-fill: #475569;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 10 20;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}

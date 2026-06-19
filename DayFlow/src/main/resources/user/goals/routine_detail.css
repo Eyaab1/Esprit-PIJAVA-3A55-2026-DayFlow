@@ -1,0 +1,311 @@
+.rd-root {
+    -fx-background-color: #f1f5f9;
+}
+
+.rd-root > .viewport {
+    -fx-background-color: #f1f5f9;
+}
+
+.rd-inner {
+    -fx-max-width: 920;
+    -fx-spacing: 18;
+}
+
+.rd-back {
+    -fx-text-fill: #6366f1;
+    -fx-font-size: 13px;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.rd-back:hover {
+    -fx-underline: true;
+}
+
+.rd-header-card {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.07), 16, 0, 0, 2);
+}
+
+.rd-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.rd-desc {
+    -fx-font-size: 14px;
+    -fx-text-fill: #475569;
+    -fx-wrap-text: true;
+}
+
+.rd-badge-private {
+    -fx-background-color: #fef9c3;
+    -fx-text-fill: #854d0e;
+    -fx-padding: 4 12;
+    -fx-background-radius: 999;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.rd-badge-public {
+    -fx-background-color: #dbeafe;
+    -fx-text-fill: #1e40af;
+    -fx-padding: 4 12;
+    -fx-background-radius: 999;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.btn-rd-edit {
+    -fx-background-color: transparent;
+    -fx-text-fill: #2563eb;
+    -fx-border-color: #2563eb;
+    -fx-border-radius: 10;
+    -fx-border-width: 1.5;
+    -fx-padding: 8 16;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.btn-rd-delete {
+    -fx-background-color: transparent;
+    -fx-text-fill: #dc2626;
+    -fx-border-color: #dc2626;
+    -fx-border-radius: 10;
+    -fx-border-width: 1.5;
+    -fx-padding: 8 16;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.rd-act-head {
+    -fx-padding: 8 0 0 0;
+}
+
+.rd-act-title {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4c1d95;
+}
+
+.btn-rd-new-act {
+    -fx-background-color: #7c3aed;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-padding: 10 18;
+    -fx-background-radius: 12;
+    -fx-cursor: hand;
+}
+
+.btn-rd-new-act:hover {
+    -fx-background-color: #6d28d9;
+}
+
+.rd-filters {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-padding: 14 16;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.05), 8, 0, 0, 1);
+}
+
+.rd-filter-lbl {
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #64748b;
+}
+
+.rd-empty {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-border-color: #e9d5ff;
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+}
+
+.rd-empty-icon {
+    -fx-font-size: 44px;
+    -fx-padding: 16 20;
+    -fx-background-color: #ede9fe;
+    -fx-background-radius: 16;
+}
+
+.rd-empty-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.rd-empty-sub {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+}
+
+.btn-rd-empty-cta {
+    -fx-background-color: #7c3aed;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-padding: 12 28;
+    -fx-background-radius: 14;
+    -fx-cursor: hand;
+}
+
+.rd-act-list {
+    -fx-spacing: 14;
+}
+
+/* —— Carte activité (exemple maquette) —— */
+.activity-card {
+    -fx-spacing: 12;
+    -fx-padding: 18;
+    -fx-background-color: white;
+    -fx-background-radius: 15;
+    -fx-border-color: #a855f7;
+    -fx-border-radius: 15;
+    -fx-border-width: 1.5;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.06), 12, 0, 0, 2);
+}
+
+.activity-card-title {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+    -fx-wrap-text: true;
+}
+
+.activity-prio-badge {
+    -fx-background-color: #fde68a;
+    -fx-text-fill: #92400e;
+    -fx-padding: 4 10;
+    -fx-background-radius: 8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.activity-prio-low {
+    -fx-background-color: #dbeafe;
+    -fx-text-fill: #1e40af;
+}
+
+.activity-prio-high {
+    -fx-background-color: #fecaca;
+    -fx-text-fill: #991b1b;
+}
+
+.activity-detail-line {
+    -fx-font-size: 13px;
+    -fx-text-fill: #475569;
+}
+
+.activity-timer-box {
+    -fx-spacing: 10;
+    -fx-padding: 14;
+    -fx-background-color: #f3e8ff;
+    -fx-background-radius: 10;
+}
+
+.activity-timer-kicker {
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #6b21a8;
+    -fx-letter-spacing: 0.06em;
+}
+
+.activity-timer-state {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #7c3aed;
+}
+
+.activity-timer-big {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #7c3aed;
+}
+
+.activity-timer-progress {
+    -fx-pref-height: 8;
+    -fx-accent: #7c3aed;
+}
+
+.activity-btn-start {
+    -fx-background-color: #7c3aed;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-padding: 8 18;
+    -fx-background-radius: 20;
+    -fx-cursor: hand;
+}
+
+.activity-btn-reset {
+    -fx-min-width: 36;
+    -fx-min-height: 36;
+    -fx-max-width: 36;
+    -fx-max-height: 36;
+    -fx-background-radius: 18;
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #475569;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+.activity-status-badge {
+    -fx-padding: 6 14;
+    -fx-background-radius: 8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 0.04em;
+}
+
+.activity-status-pending {
+    -fx-background-color: #fef3c7;
+    -fx-text-fill: #d97706;
+}
+
+.activity-status-progress {
+    -fx-background-color: #dbeafe;
+    -fx-text-fill: #1d4ed8;
+}
+
+.activity-status-done {
+    -fx-background-color: #dcfce7;
+    -fx-text-fill: #15803d;
+}
+
+.activity-status-skip {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #475569;
+}
+
+.activity-status-cancel {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #b91c1c;
+}
+
+.activity-card-sep {
+    -fx-padding: 4 0;
+}
+
+.activity-btn-modifier {
+    -fx-background-color: white;
+    -fx-text-fill: #3b82f6;
+    -fx-border-color: #3b82f6;
+    -fx-border-radius: 10;
+    -fx-border-width: 1.5;
+    -fx-padding: 10 16;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.activity-btn-del-icon {
+    -fx-min-width: 44;
+    -fx-min-height: 44;
+    -fx-background-color: white;
+    -fx-border-color: #ef4444;
+    -fx-border-radius: 10;
+    -fx-border-width: 1.5;
+    -fx-text-fill: #ef4444;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+}

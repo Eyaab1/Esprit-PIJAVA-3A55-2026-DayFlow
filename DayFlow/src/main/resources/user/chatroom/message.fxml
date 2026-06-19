@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="350" prefWidth="400" spacing="15" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MessageController">
+    <padding><Insets bottom="20" left="20" right="20" top="20" /></padding>
+
+    <Label style="-fx-font-size: 18; -fx-font-weight: bold;" text="Gestion des Messages" />
+
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <Label prefWidth="100" text="Contenu :" />
+        <TextField fx:id="contentField" prefWidth="250" promptText="Votre message..." text="v" />
+    </HBox>
+
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <Label prefWidth="100" text="Chatroom ID :" />
+        <TextField fx:id="chatroomIdField" prefWidth="250" promptText="ex: 1" text="b" />
+    </HBox>
+
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <Label prefWidth="100" text="Author ID :" />
+        <TextField fx:id="authorIdField" prefWidth="250" promptText="ex: 1" />
+    </HBox>
+
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <Label prefWidth="100" text="Épinglé :" />
+        <CheckBox fx:id="pinnedCheck" />
+    </HBox>
+
+    <HBox spacing="10">
+        <TextField fx:id="updateIdField" prefWidth="200" promptText="ID à modifier/supprimer" />
+    </HBox>
+
+    <HBox spacing="10">
+        <Button onAction="#addMessage" prefWidth="110" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Envoyer" />
+        <Button onAction="#updateMessage" prefWidth="110" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="Modifier" />
+        <Button onAction="#deleteMessage" prefWidth="110" style="-fx-background-color: #f44336; -fx-text-fill: white;" text="Supprimer" />
+    </HBox>
+
+    <Label fx:id="statusLabel" style="-fx-text-fill: green;" text="" />
+</VBox>

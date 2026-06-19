@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1">
+      fx:controller="controllers.ChatroomController"
+      prefWidth="400" prefHeight="300">
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+    <Label text="Gestion des Chatrooms" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Goal ID :" prefWidth="80"/>
+        <TextField fx:id="goalIdField" promptText="ex: 1" prefWidth="200"/>
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="État :" prefWidth="80"/>
+        <ComboBox fx:id="stateBox" prefWidth="200"/>
+    </HBox>
+
+    <HBox spacing="10">
+        <TextField fx:id="updateIdField" promptText="ID à modifier/supprimer" prefWidth="200"/>
+    </HBox>
+
+    <HBox spacing="10">
+        <Button fx:id="addButton" text="Ajouter" onAction="#addChatroom" prefWidth="120"
+                style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
+        <Button text="Modifier" onAction="#updateChatroom" prefWidth="120"
+                style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
+        <Button text="Supprimer" onAction="#deleteChatroom" prefWidth="120"
+                style="-fx-background-color: #f44336; -fx-text-fill: white;"/>
+    </HBox>
+
+    <Label fx:id="statusLabel" text="" style="-fx-text-fill: green;"/>
+</VBox>

@@ -4,8 +4,8 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import model.Message;
-import services.MessageService;
+import model.chatroom.Message;
+import services.chatroom_module.MessageService;
 
 import java.sql.SQLException;
 
@@ -31,7 +31,6 @@ public class MessageController {
     @FXML
     public void initialize() {
         service = new MessageService();
-
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colContent.setCellValueFactory(new PropertyValueFactory<>("content"));
         colChatroomId.setCellValueFactory(new PropertyValueFactory<>("chatroomId"));
@@ -39,92 +38,68 @@ public class MessageController {
         colPinned.setCellValueFactory(new PropertyValueFactory<>("pinned"));
         colCreatedAt.setCellValueFactory(new PropertyValueFactory<>("createdAt"));
 
-        // clic sur ligne → remplit les champs
-        tableView.getSelectionModel().selectedItemProperty().addListener((obs, old, selected) -> {
-            if (selected != null) {
-                updateIdField.setText(String.valueOf(selected.getId()));
-                contentField.setText(selected.getContent());
-                chatroomIdField.setText(String.valueOf(selected.getChatroomId()));
-                authorIdField.setText(String.valueOf(selected.getAuthorId()));
-                pinnedCheck.setSelected(selected.isPinned());
+        tableView.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
+            if (sel != null) {
+                updateIdField.setText(String.valueOf(sel.getId()));
+                contentField.setText(sel.getContent());
+                chatroomIdField.setText(String.valueOf(sel.getChatroomId()));
+                authorIdField.setText(String.valueOf(sel.getAuthorId()));
+                pinnedCheck.setSelected(sel.isPinned());
             }
         });
-
         loadAll();
     }
 
     @FXML
     public void addMessage() {
         try {
-            String content = contentField.getText();
-            int chatroomId = Integer.parseInt(chatroomIdField.getText().trim());
-            int authorId   = Integer.parseInt(authorIdField.getText().trim());
-            Message m = new Message(content, chatroomId, authorId);
+            Message m = new Message(contentField.getText(),
+                    Integer.parseInt(chatroomIdField.getText().trim()),
+                    Integer.parseInt(authorIdField.getText().trim()));
             service.create(m);
             showStatus("Message envoyé ✅", true);
-            clearFields();
-            loadAll();
-        } catch (IllegalArgumentException e) {
-            showStatus("Erreur : " + e.getMessage(), false);
-        } catch (SQLException e) {
-            showStatus("Erreur BD : " + e.getMessage(), false);
-        }
+            clearFields(); loadAll();
+        } catch (Exception e) { showStatus("Erreur : " + e.getMessage(), false); }
     }
 
     @FXML
     public void updateMessage() {
         try {
-            int id = Integer.parseInt(updateIdField.getText().trim());
             Message m = new Message();
-            m.setId(id);
+            m.setId(Integer.parseInt(updateIdField.getText().trim()));
             m.setContent(contentField.getText());
             m.setPinned(pinnedCheck.isSelected());
             m.setEdited(true);
             service.update(m);
             showStatus("Message modifié ✅", true);
-            clearFields();
-            loadAll();
-        } catch (IllegalArgumentException e) {
-            showStatus("Erreur : " + e.getMessage(), false);
-        } catch (SQLException e) {
-            showStatus("Erreur BD : " + e.getMessage(), false);
-        }
+            clearFields(); loadAll();
+        } catch (Exception e) { showStatus("Erreur : " + e.getMessage(), false); }
     }
 
     @FXML
     public void deleteMessage() {
         try {
-            int id = Integer.parseInt(updateIdField.getText().trim());
-            service.delete(id);
+            service.delete(Integer.parseInt(updateIdField.getText().trim()));
             showStatus("Message supprimé ✅", true);
-            clearFields();
-            loadAll();
-        } catch (NumberFormatException e) {
-            showStatus("ID invalide.", false);
-        } catch (SQLException e) {
-            showStatus("Erreur BD : " + e.getMessage(), false);
-        }
+            clearFields(); loadAll();
+        } catch (Exception e) { showStatus("Erreur : " + e.getMessage(), false); }
     }
 
     @FXML
     public void loadAll() {
         try {
             tableView.setItems(FXCollections.observableArrayList(service.getAll()));
-        } catch (SQLException e) {
-            showStatus("Erreur chargement : " + e.getMessage(), false);
-        }
+        } catch (SQLException e) { showStatus("Erreur : " + e.getMessage(), false); }
     }
 
-    private void showStatus(String msg, boolean success) {
+    private void showStatus(String msg, boolean ok) {
         statusLabel.setText(msg);
-        statusLabel.getStyleClass().setAll(success ? "status-ok" : "status-err");
+        statusLabel.getStyleClass().setAll(ok ? "status-ok" : "status-err");
     }
 
     private void clearFields() {
-        contentField.clear();
-        chatroomIdField.clear();
-        authorIdField.clear();
-        updateIdField.clear();
+        contentField.clear(); chatroomIdField.clear();
+        authorIdField.clear(); updateIdField.clear();
         pinnedCheck.setSelected(false);
     }
 }

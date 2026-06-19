@@ -1,0 +1,54 @@
+.community-root {
+    -fx-font-family: "Segoe UI", "Inter", "Arial", sans-serif;
+    -fx-background-color: linear-gradient(to bottom right, #f0fdf4 0%, #ecfeff 45%, #faf5ff 100%);
+}
+
+.community-inner {
+    -fx-spacing: 24;
+    -fx-padding: 40 48 64 48;
+    -fx-max-width: 720;
+    -fx-alignment: top-center;
+}
+
+.community-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.community-sub {
+    -fx-font-size: 15px;
+    -fx-text-fill: #64748b;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+.community-cards {
+    -fx-spacing: 16;
+    -fx-padding: 16 0 0 0;
+}
+
+.community-card {
+    -fx-spacing: 8;
+    -fx-padding: 22 24;
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 20, 0, 0, 2);
+    -fx-cursor: hand;
+}
+
+.community-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.2), 24, 0, 0, 4);
+}
+
+.community-card-title {
+    -fx-font-size: 17px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #059669;
+}
+
+.community-card-desc {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+    -fx-wrap-text: true;
+}

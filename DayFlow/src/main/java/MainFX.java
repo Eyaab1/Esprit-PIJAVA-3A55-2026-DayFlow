@@ -9,15 +9,16 @@ public class MainFX extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        // 1. Charger le shell (navbar + contentPane)
-        FXMLLoader shellLoader = new FXMLLoader(getClass().getResource("/user/shell/app_root.fxml"));
+
+        FXMLLoader shellLoader = new FXMLLoader(
+                getClass().getResource("/user/shell/app_root.fxml")
+        );
+
         Scene scene = new Scene(shellLoader.load(), 1200, 750);
+
         ShellController shell = shellLoader.getController();
 
-        // 2. Initialiser le NavigationManager
         NavigationManager.init(stage, shell);
-
-        // 3. Démarrer sur la landing page
         NavigationManager.show("/user/landingpage/landing.fxml", "DayFlow");
 
         stage.setTitle("DayFlow");
@@ -28,6 +29,6 @@ public class MainFX extends Application {
     }
 
     public static void main(String[] args) {
-        launch();
+        launch(args);
     }
 }

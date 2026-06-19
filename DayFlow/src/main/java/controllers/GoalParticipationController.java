@@ -4,8 +4,8 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import model.GoalParticipation;
-import services.GoalParticipationService;
+import model.goals_activity_management.GoalParticipation;
+import services.chatroom_module.GoalParticipationService;
 
 import java.sql.SQLException;
 
@@ -31,7 +31,6 @@ public class GoalParticipationController {
     @FXML
     public void initialize() {
         service = new GoalParticipationService();
-
         roleBox.getItems().addAll(GoalParticipation.ROLE_MEMBER, GoalParticipation.ROLE_ADMIN, GoalParticipation.ROLE_OWNER);
         statusBox.getItems().addAll(GoalParticipation.STATUS_PENDING, GoalParticipation.STATUS_APPROVED, GoalParticipation.STATUS_REJECTED);
         roleBox.setValue(GoalParticipation.ROLE_MEMBER);
@@ -44,91 +43,68 @@ public class GoalParticipationController {
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
         colCreatedAt.setCellValueFactory(new PropertyValueFactory<>("createdAt"));
 
-        // clic sur ligne → remplit les champs
-        tableView.getSelectionModel().selectedItemProperty().addListener((obs, old, selected) -> {
-            if (selected != null) {
-                updateIdField.setText(String.valueOf(selected.getId()));
-                userIdField.setText(String.valueOf(selected.getUserId()));
-                goalIdField.setText(String.valueOf(selected.getGoalId()));
-                roleBox.setValue(selected.getRole());
-                statusBox.setValue(selected.getStatus());
+        tableView.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
+            if (sel != null) {
+                updateIdField.setText(String.valueOf(sel.getId()));
+                userIdField.setText(String.valueOf(sel.getUserId()));
+                goalIdField.setText(String.valueOf(sel.getGoalId()));
+                roleBox.setValue(sel.getRole());
+                statusBox.setValue(sel.getStatus());
             }
         });
-
         loadAll();
     }
 
     @FXML
     public void addParticipation() {
         try {
-            int userId = Integer.parseInt(userIdField.getText().trim());
-            int goalId = Integer.parseInt(goalIdField.getText().trim());
-            GoalParticipation gp = new GoalParticipation(userId, goalId);
+            GoalParticipation gp = new GoalParticipation(
+                    Integer.parseInt(userIdField.getText().trim()),
+                    Integer.parseInt(goalIdField.getText().trim()));
             gp.setRole(roleBox.getValue());
             gp.setStatus(statusBox.getValue());
             service.create(gp);
             showStatus("Participation ajoutée ✅", true);
-            clearFields();
-            loadAll();
-        } catch (IllegalArgumentException e) {
-            showStatus("Erreur : " + e.getMessage(), false);
-        } catch (SQLException e) {
-            showStatus("Erreur BD : " + e.getMessage(), false);
-        }
+            clearFields(); loadAll();
+        } catch (Exception e) { showStatus("Erreur : " + e.getMessage(), false); }
     }
 
     @FXML
     public void updateParticipation() {
         try {
-            int id = Integer.parseInt(updateIdField.getText().trim());
             GoalParticipation gp = new GoalParticipation();
-            gp.setId(id);
+            gp.setId(Integer.parseInt(updateIdField.getText().trim()));
             gp.setRole(roleBox.getValue());
             gp.setStatus(statusBox.getValue());
             service.update(gp);
             showStatus("Participation modifiée ✅", true);
-            clearFields();
-            loadAll();
-        } catch (IllegalArgumentException e) {
-            showStatus("Erreur : " + e.getMessage(), false);
-        } catch (SQLException e) {
-            showStatus("Erreur BD : " + e.getMessage(), false);
-        }
+            clearFields(); loadAll();
+        } catch (Exception e) { showStatus("Erreur : " + e.getMessage(), false); }
     }
 
     @FXML
     public void deleteParticipation() {
         try {
-            int id = Integer.parseInt(updateIdField.getText().trim());
-            service.delete(id);
+            service.delete(Integer.parseInt(updateIdField.getText().trim()));
             showStatus("Participation supprimée ✅", true);
-            clearFields();
-            loadAll();
-        } catch (NumberFormatException e) {
-            showStatus("ID invalide.", false);
-        } catch (SQLException e) {
-            showStatus("Erreur BD : " + e.getMessage(), false);
-        }
+            clearFields(); loadAll();
+        } catch (Exception e) { showStatus("Erreur : " + e.getMessage(), false); }
     }
 
     @FXML
     public void loadAll() {
         try {
             tableView.setItems(FXCollections.observableArrayList(service.getAll()));
-        } catch (SQLException e) {
-            showStatus("Erreur chargement : " + e.getMessage(), false);
-        }
+        } catch (SQLException e) { showStatus("Erreur : " + e.getMessage(), false); }
     }
 
-    private void showStatus(String msg, boolean success) {
+    private void showStatus(String msg, boolean ok) {
         statusLabel.setText(msg);
-        statusLabel.getStyleClass().setAll(success ? "status-ok" : "status-err");
+        statusLabel.getStyleClass().setAll(ok ? "status-ok" : "status-err");
     }
 
     private void clearFields() {
-        userIdField.clear();
-        goalIdField.clear();
-        updateIdField.clear();
+        userIdField.clear(); goalIdField.clear(); updateIdField.clear();
         roleBox.setValue(GoalParticipation.ROLE_MEMBER);
         statusBox.setValue(GoalParticipation.STATUS_APPROVED);
     }
